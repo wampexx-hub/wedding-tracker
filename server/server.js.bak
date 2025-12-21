@@ -1,0 +1,789 @@
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+const sharp = require('sharp');
+const session = require('express-session');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+const app = express();
+const PORT = 3001;
+const DATA_FILE = path.join(__dirname, 'data.json');
+
+app.use(cors());
+app.use(bodyParser.json());
+
+// Session Config
+app.use(session({
+    secret: 'wedding-tracker-secret-key', // In production, use a secure env variable
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Passport Config
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
+
+const GOOGLE_CLIENT_ID = '851446958447-nicd6k583c2qkqc9c3d58o0s9jaae5c7.apps.googleusercontent.com';
+const GOOGLE_CLIENT_SECRET = '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';
+
+if (!GOOGLE_CLIENT_SECRET) {
+    console.warn('WARNING: Google Client Secret is missing. Google Auth will not work.');
+}
+
+// Helper to read data
+const readData = () => {
+    if (!fs.existsSync(DATA_FILE)) {
+        return { users: {}, expenses: [], budgets: {}, installmentPayments: {} };
+    }
+    try {
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        // Ensure installmentPayments exists
+        if (!data.installmentPayments) {
+            data.installmentPayments = {};
+        }
+        return data;
+    } catch (error) {
+        return { users: {}, expenses: [], budgets: {}, installmentPayments: {} };
+    }
+};
+
+// Helper to write data
+// Helper to write data
+const writeData = (data) => {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+};
+
+passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: "https://dugunbutcem.com/api/auth/google/callback"
+},
+    function (accessToken, refreshToken, profile, done) {
+        const data = readData();
+        let user = Object.values(data.users).find(u => u.googleId === profile.id || u.email === profile.emails[0].value);
+
+        if (!user) {
+            // Create new user
+            const username = profile.emails[0].value.split('@')[0];
+            // Ensure username is unique
+            let finalUsername = username;
+            let counter = 1;
+            while (data.users[finalUsername]) {
+                finalUsername = `${username}${counter}`;
+                counter++;
+            }
+
+            user = {
+                username: finalUsername,
+                name: profile.name.givenName,
+                surname: profile.name.familyName,
+                email: profile.emails[0].value,
+                googleId: profile.id,
+                isAdmin: false,
+                createdAt: new Date().toISOString(),
+                avatar: profile.photos[0].value
+            };
+
+            data.users[finalUsername] = user;
+            writeData(data);
+        } else {
+            // Update existing user with googleId if not present
+            if (!user.googleId) {
+                user.googleId = profile.id;
+                // Update in data object
+                const key = Object.keys(data.users).find(k => data.users[k].email === user.email);
+                if (key) {
+                    data.users[key] = user;
+                    writeData(data);
+                }
+            }
+        }
+        return done(null, user);
+    }
+));
+
+// Configure Multer
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// Log requests to uploads
+app.use('/uploads', (req, res, next) => {
+    console.log(`[${new Date().toISOString()}] Request for upload:`, req.url);
+    next();
+});
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Ensure uploads directory exists
+if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
+    fs.mkdirSync(path.join(__dirname, 'uploads'));
+}
+
+// Initialize data file if not exists
+if (!fs.existsSync(DATA_FILE)) {
+    writeData({ users: {}, expenses: [], budgets: {}, installmentPayments: {} });
+}
+
+// Ensure default admin exists
+const ensureAdmin = () => {
+    const data = readData();
+    if (!data.users['admin']) {
+        data.users['admin'] = {
+            username: 'admin',
+            password: 'admin123',
+            isAdmin: true,
+            createdAt: new Date().toISOString()
+        };
+        writeData(data);
+        console.log('Default admin user created: admin / admin123');
+    }
+};
+ensureAdmin();
+
+// --- Auth Routes ---
+
+app.get('/api/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/api/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login?error=google_auth_failed' }),
+    (req, res) => {
+        // Successful authentication, redirect home.
+        const user = req.user;
+        const userData = JSON.stringify(user);
+        res.redirect(`https://dugunbutcem.com/login?googleAuthUser=${encodeURIComponent(userData)}`);
+    }
+);
+
+app.post('/api/auth/register', (req, res) => {
+    const { password, name, surname, email } = req.body;
+    const data = readData();
+
+    // Check if email already exists
+    const existingUser = Object.values(data.users).find(u => u.email === email);
+    if (existingUser) {
+        return res.status(400).json({ success: false, message: 'Bu e-posta adresi zaten kayıtlı.' });
+    }
+
+    // Generate unique username from email
+    const baseUsername = email.split('@')[0];
+    let username = baseUsername;
+    let counter = 1;
+    while (data.users[username]) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+    }
+
+    const newUser = {
+        username,
+        password,
+        name,
+        surname,
+        email,
+        isAdmin: false,
+        createdAt: new Date().toISOString()
+    };
+
+    data.users[username] = newUser;
+    writeData(data);
+
+    const { password: _, ...userWithoutPassword } = newUser;
+    res.json({ success: true, user: userWithoutPassword });
+});
+
+app.post('/api/auth/login', (req, res) => {
+    const { email, password } = req.body;
+    const data = readData();
+
+    // Find user by email
+    const user = Object.values(data.users).find(u => u.email === email);
+
+    if (user && user.password === password) {
+        const { password: _, ...userWithoutPassword } = user;
+        res.json({ success: true, user: userWithoutPassword });
+    } else {
+        res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
+    }
+});
+
+// --- Admin Routes ---
+
+app.get('/api/admin/users', (req, res) => {
+    const data = readData();
+    const usersList = Object.values(data.users).map(u => {
+        const { password, ...rest } = u;
+        return rest;
+    });
+    res.json(usersList);
+});
+
+app.delete('/api/admin/users/:username', (req, res) => {
+    const { username } = req.params;
+    if (username === 'admin') {
+        return res.status(400).json({ error: 'Cannot delete admin user' });
+    }
+
+    const data = readData();
+    if (data.users[username]) {
+        delete data.users[username];
+        data.expenses = data.expenses.filter(e => e.username !== username);
+        delete data.budgets[username];
+
+        writeData(data);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+app.put('/api/admin/users/:username/password', (req, res) => {
+    const { username } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) return res.status(400).json({ error: 'New password required' });
+
+    const data = readData();
+    if (data.users[username]) {
+        data.users[username].password = newPassword;
+        writeData(data);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+app.put('/api/admin/users/:username/role', (req, res) => {
+    const { username } = req.params;
+    const { isAdmin } = req.body;
+
+    if (username === 'admin') {
+        return res.status(400).json({ error: 'Cannot change role of root admin' });
+    }
+
+    const data = readData();
+    if (data.users[username]) {
+        data.users[username].isAdmin = isAdmin;
+        writeData(data);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+app.get('/api/admin/stats', (req, res) => {
+    const data = readData();
+    const totalUsers = Object.keys(data.users).length;
+    const totalExpenses = data.expenses.length;
+    const totalBudgetAmount = Object.values(data.budgets).reduce((a, b) => a + b, 0);
+
+    // Calculate Top Category
+    const categoryMap = {};
+    data.expenses.forEach(e => {
+        const amount = Number(e.price || e.amount || 0);
+        categoryMap[e.category] = (categoryMap[e.category] || 0) + amount;
+    });
+    let topCategory = { name: '-', amount: 0 };
+    Object.entries(categoryMap).forEach(([name, amount]) => {
+        if (amount > topCategory.amount) {
+            topCategory = { name, amount };
+        }
+    });
+
+    // Calculate Top Vendor
+    const vendorMap = {};
+    data.expenses.forEach(e => {
+        const amount = Number(e.price || e.amount || 0);
+        const vendor = e.vendor || 'Belirtilmemiş';
+        vendorMap[vendor] = (vendorMap[vendor] || 0) + amount;
+    });
+    let topVendor = { name: '-', amount: 0 };
+    Object.entries(vendorMap).forEach(([name, amount]) => {
+        if (amount > topVendor.amount) {
+            topVendor = { name, amount };
+        }
+    });
+
+    res.json({
+        totalUsers,
+        totalExpenses,
+        totalBudgetAmount,
+        topCategory,
+        topVendor
+    });
+});
+
+// --- Data Routes ---
+
+// Get all data for a user (expenses and budget)
+app.get('/api/data', (req, res) => {
+    const { user } = req.query;
+    if (!user) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    const userExpenses = data.expenses.filter(e => e.username === user);
+    const userBudget = data.budgets[user] || 0;
+    const userData = data.users[user] || {};
+    const installmentPayments = data.installmentPayments[user] || {};
+
+    res.json({
+        expenses: userExpenses,
+        budget: userBudget,
+        weddingDate: userData.weddingDate || null,
+        assets: userData.assets || [],
+        installmentPayments: installmentPayments
+    });
+});
+
+// Add Expense
+app.post('/api/expenses', upload.single('image'), async (req, res) => {
+    try {
+        const expenseData = JSON.parse(req.body.data);
+        if (!expenseData.username) return res.status(400).json({ error: 'User required' });
+
+        let imageUrl = null;
+        if (req.file) {
+            const filename = `expense-${Date.now()}.jpeg`;
+            const filepath = path.join(__dirname, 'uploads', filename);
+
+            await sharp(req.file.buffer)
+                .resize(150, 150)
+                .toFormat('jpeg')
+                .toFile(filepath);
+
+            imageUrl = `/uploads/${filename}`;
+        }
+
+        const expense = {
+            ...expenseData,
+            imageUrl
+        };
+
+        const data = readData();
+        data.expenses.push(expense);
+        writeData(data);
+
+        res.json(expense);
+    } catch (error) {
+        console.error('Error adding expense:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Add Batch Expenses
+app.post('/api/expenses/batch', async (req, res) => {
+    try {
+        const { username, expenses } = req.body;
+        if (!username || !Array.isArray(expenses)) return res.status(400).json({ error: 'User and expenses array required' });
+
+        const data = readData();
+        const newExpenses = expenses.map(exp => ({
+            ...exp,
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // Ensure unique IDs
+            username,
+            createdAt: new Date().toISOString(),
+            imageUrl: null
+        }));
+
+        data.expenses.push(...newExpenses);
+        writeData(data);
+
+        res.json({ success: true, count: newExpenses.length, expenses: newExpenses });
+    } catch (error) {
+        console.error('Error adding batch expenses:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Serve image by filename
+app.get('/api/images/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filepath = path.join(__dirname, 'uploads', filename);
+
+    if (fs.existsSync(filepath)) {
+        res.sendFile(filepath);
+    } else {
+        res.status(404).send('Image not found');
+    }
+});
+
+// Update Expense
+app.put('/api/expenses/:id', upload.single('image'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const expenseData = JSON.parse(req.body.data);
+        const data = readData();
+
+        const index = data.expenses.findIndex(e => e.id === id);
+        if (index !== -1) {
+            let imageUrl = data.expenses[index].imageUrl;
+
+            if (req.file) {
+                const filename = `expense-${Date.now()}.jpeg`;
+                const filepath = path.join(__dirname, 'uploads', filename);
+
+                await sharp(req.file.buffer)
+                    .resize(150, 150)
+                    .toFormat('jpeg')
+                    .toFile(filepath);
+
+                imageUrl = `/uploads/${filename}`;
+            }
+
+            data.expenses[index] = { ...data.expenses[index], ...expenseData, imageUrl };
+            writeData(data);
+            res.json(data.expenses[index]);
+        } else {
+            res.status(404).json({ error: 'Expense not found' });
+        }
+    } catch (error) {
+        console.error('Error updating expense:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete Expense
+app.delete('/api/expenses/:id', (req, res) => {
+    const { id } = req.params;
+    const data = readData();
+
+    const initialLength = data.expenses.length;
+    data.expenses = data.expenses.filter(e => e.id !== id);
+
+    if (data.expenses.length < initialLength) {
+        writeData(data);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'Expense not found' });
+    }
+});
+
+// Delete All Expenses for User
+app.delete('/api/expenses', (req, res) => {
+    const { username } = req.query;
+    if (!username) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    const initialLength = data.expenses.length;
+    data.expenses = data.expenses.filter(e => e.username !== username);
+
+    if (data.expenses.length < initialLength) {
+        writeData(data);
+        res.json({ success: true, message: 'All expenses deleted' });
+    } else {
+        res.json({ success: true, message: 'No expenses to delete' });
+    }
+});
+
+// Update Budget
+app.post('/api/budget', (req, res) => {
+    const { username, budget } = req.body;
+    if (!username) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    data.budgets[username] = Number(budget);
+    writeData(data);
+
+    res.json({ success: true, budget: Number(budget) });
+});
+
+// Helper to recalculate budget based on Cash assets
+const recalculateBudget = (data, username) => {
+    const userAssets = data.users[username].assets || [];
+    const cashTotal = userAssets
+        .filter(a => a.category === 'Nakit')
+        .reduce((acc, curr) => acc + Number(curr.value), 0);
+
+    data.budgets[username] = cashTotal;
+    return cashTotal;
+};
+
+// GET /api/assets
+app.get('/api/assets', (req, res) => {
+    const { username } = req.query;
+    if (!username) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    const userData = data.users[username];
+    if (userData) {
+        res.json(userData.assets || []);
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+// POST /api/assets
+app.post('/api/assets', (req, res) => {
+    const { username, asset } = req.body;
+    if (!username || !asset) return res.status(400).json({ error: 'User and asset required' });
+
+    const data = readData();
+    if (data.users[username]) {
+        if (!Array.isArray(data.users[username].assets)) {
+            data.users[username].assets = [];
+        }
+
+        const newAsset = { ...asset, id: Date.now().toString() };
+        data.users[username].assets.push(newAsset);
+
+        // Recalculate Budget if Cash
+        let budget = data.budgets[username] || 0;
+        if (newAsset.category === 'Nakit') {
+            budget = recalculateBudget(data, username);
+        }
+
+        writeData(data);
+        res.json({ asset: newAsset, budget });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+// DELETE /api/assets/:id
+app.delete('/api/assets/:id', (req, res) => {
+    const { id } = req.params;
+    const { username } = req.query;
+
+    if (!username) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    if (data.users[username]) {
+        const initialLength = data.users[username].assets ? data.users[username].assets.length : 0;
+        const assetToDelete = data.users[username].assets.find(a => a.id === id);
+
+        data.users[username].assets = (data.users[username].assets || []).filter(a => a.id !== id);
+
+        if (data.users[username].assets.length < initialLength) {
+            // Recalculate Budget if Cash
+            let budget = data.budgets[username] || 0;
+            if (assetToDelete && assetToDelete.category === 'Nakit') {
+                budget = recalculateBudget(data, username);
+            }
+
+            writeData(data);
+            res.json({ success: true, budget });
+        } else {
+            res.status(404).json({ error: 'Asset not found' });
+        }
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+// ============================================
+// PORTFOLIO ENDPOINTS
+// ============================================
+
+// GET /api/portfolio/:username - Fetch user's portfolio
+app.get('/api/portfolio/:username', (req, res) => {
+    const { username } = req.params;
+    const data = readData();
+    const userData = data.users[username];
+
+    if (userData) {
+        res.json({
+            portfolio: userData.portfolio || [],
+            budgetIncluded: userData.portfolioBudgetIncluded || false
+        });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+// POST /api/portfolio/:username - Add asset to portfolio
+app.post('/api/portfolio/:username', (req, res) => {
+    const { username } = req.params;
+    const { asset } = req.body;
+
+    if (!asset) return res.status(400).json({ error: 'Asset required' });
+
+    const data = readData();
+    if (!data.users[username]) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!Array.isArray(data.users[username].portfolio)) {
+        data.users[username].portfolio = [];
+    }
+
+    const newAsset = {
+        ...asset,
+        id: asset.id || Date.now().toString(),
+        addedAt: asset.addedAt || new Date().toISOString()
+    };
+
+    data.users[username].portfolio.push(newAsset);
+    writeData(data);
+
+    res.json({ success: true, asset: newAsset });
+});
+
+// DELETE /api/portfolio/:username/:assetId - Delete asset from portfolio
+app.delete('/api/portfolio/:username/:assetId', (req, res) => {
+    const { username, assetId } = req.params;
+    const data = readData();
+
+    if (!data.users[username]) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    const initialLength = (data.users[username].portfolio || []).length;
+    data.users[username].portfolio = (data.users[username].portfolio || []).filter(a => a.id !== assetId);
+
+    if (data.users[username].portfolio.length < initialLength) {
+        writeData(data);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'Asset not found' });
+    }
+});
+
+// PUT /api/portfolio/:username/budget-toggle - Toggle budget inclusion
+// IMPORTANT: This must come BEFORE the generic /:assetId route
+app.put('/api/portfolio/:username/budget-toggle', (req, res) => {
+    const { username } = req.params;
+    const { included } = req.body;
+
+    if (typeof included !== 'boolean') {
+        return res.status(400).json({ error: 'Included must be a boolean' });
+    }
+
+    const data = readData();
+    if (!data.users[username]) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    data.users[username].portfolioBudgetIncluded = included;
+    writeData(data);
+
+    res.json({ success: true, included });
+});
+
+// PUT /api/portfolio/:username/:assetId - Update asset
+app.put('/api/portfolio/:username/:assetId', (req, res) => {
+    const { username, assetId } = req.params;
+    const { asset } = req.body;
+
+    if (!asset) return res.status(400).json({ error: 'Asset required' });
+
+    const data = readData();
+    if (!data.users[username]) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    const portfolio = data.users[username].portfolio || [];
+    const index = portfolio.findIndex(a => a.id === assetId);
+
+    if (index !== -1) {
+        // Update asset, preserving ID and addedAt
+        const updatedAsset = {
+            ...asset,
+            id: assetId,
+            addedAt: portfolio[index].addedAt
+        };
+        data.users[username].portfolio[index] = updatedAsset;
+        writeData(data);
+        res.json({ success: true, asset: updatedAsset });
+    } else {
+        res.status(404).json({ error: 'Asset not found' });
+    }
+});
+
+// ============================================
+// END PORTFOLIO ENDPOINTS
+// ============================================
+
+// PUT /api/assets/:id
+app.put('/api/assets/:id', (req, res) => {
+    const { id } = req.params;
+    const { username, asset } = req.body;
+
+    if (!username || !asset) return res.status(400).json({ error: 'User and asset required' });
+
+    const data = readData();
+    if (data.users[username]) {
+        const assets = data.users[username].assets || [];
+        const index = assets.findIndex(a => a.id === id);
+
+        if (index !== -1) {
+            // Update asset, preserving ID
+            const oldAsset = assets[index];
+            const newAsset = { ...asset, id };
+            data.users[username].assets[index] = newAsset;
+
+            // Recalculate Budget if Cash (either old or new was Cash)
+            let budget = data.budgets[username] || 0;
+            if (oldAsset.category === 'Nakit' || newAsset.category === 'Nakit') {
+                budget = recalculateBudget(data, username);
+            }
+
+            writeData(data);
+            res.json({ success: true, asset: newAsset, budget });
+        } else {
+            res.status(404).json({ error: 'Asset not found' });
+        }
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+// POST /api/wedding-date
+app.post('/api/wedding-date', (req, res) => {
+    const { username, date } = req.body;
+    if (!username) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    if (data.users[username]) {
+        data.users[username].weddingDate = date;
+        writeData(data);
+        res.json({ success: true, date });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+// GET /api/installment-payments - Get installment payment state for user
+app.get('/api/installment-payments', (req, res) => {
+    const { username } = req.query;
+    if (!username) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    const payments = data.installmentPayments[username] || {};
+    res.json(payments);
+});
+
+// POST /api/installment-payments - Save installment payment state for user
+app.post('/api/installment-payments', (req, res) => {
+    const { username, payments } = req.body;
+    if (!username) return res.status(400).json({ error: 'User required' });
+
+    const data = readData();
+    data.installmentPayments[username] = payments || {};
+    writeData(data);
+    res.json({ success: true, payments: data.installmentPayments[username] });
+});
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});

@@ -1,0 +1,757 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useExpenses } from '../context/ExpenseContext';
+import { TrendingUp, Plus, MoreHorizontal, Trash2, ChevronUp, ChevronDown, Check, X, Loader2, FileText, Edit2, RefreshCw } from 'lucide-react';
+import { useLiveRates } from '../hooks/useLiveRates';
+
+const CurrencyTrackerPage = () => {
+    const { user } = useAuth();
+    const { triggerRefresh } = useExpenses();
+    const { rates, loading: ratesLoading, error: ratesError, lastUpdated, refetch } = useLiveRates();
+    const [portfolio, setPortfolio] = useState([]);
+    const [rateChanges, setRateChanges] = useState({});
+    const [activeMenu, setActiveMenu] = useState(null);
+    const [includedInBudget, setIncludedInBudget] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [editingAsset, setEditingAsset] = useState(null);
+    const [editForm, setEditForm] = useState({ amount: '', note: '' });
+
+    // Asset type configurations
+    const assetConfig = {
+        TRY_CASH: { name: 'Türk Lirası (Nakit)', icon: '💵', color: 'green', symbol: '₺', type: 'cash' },
+        USD: { name: 'ABD Doları', icon: '🇺🇸', color: 'green', symbol: '$', type: 'market' },
+        EUR: { name: 'Euro', icon: '🇪🇺', color: 'blue', symbol: '€', type: 'market' },
+        GBP: { name: 'İngiliz Sterlini', icon: '🇬🇧', color: 'purple', symbol: '£', type: 'market' },
+        GRAM: { name: 'Gram Altın', icon: '🪙', color: 'yellow', symbol: 'gr', type: 'market' },
+        CEYREK: { name: 'Çeyrek Altın', icon: '🪙', color: 'yellow', symbol: 'adet', type: 'market' },
+        YARIM: { name: 'Yarım Altın', icon: '🪙', color: 'yellow', symbol: 'adet', type: 'market' },
+        TAM: { name: 'Tam Altın', icon: '🪙', color: 'yellow', symbol: 'adet', type: 'market' }
+    };
+
+    // Quick Adder state
+    const [quickAdd, setQuickAdd] = useState({
+        type: 'USD',
+        amount: '',
+        note: ''
+    });
+
+    // Load portfolio from backend API
+    useEffect(() => {
+        if (user) {
+            fetch(`/api/portfolio/${user.username}`)
+                .then(res => res.json())
+                .then(data => {
+                    setPortfolio(data.portfolio || []);
+                    setIncludedInBudget(data.budgetIncluded || false);
+                })
+                .catch(err => console.error('Failed to load portfolio:', err));
+        }
+    }, [user]);
+
+    // Save portfolio to backend
+    const savePortfolio = async (newPortfolio) => {
+        if (user) {
+            setPortfolio(newPortfolio);
+        }
+    };
+
+    // Handle budget toggle
+    const handleBudgetToggle = async () => {
+        const newState = !includedInBudget;
+        setIncludedInBudget(newState);
+
+        if (user) {
+            try {
+                await fetch(`/api/portfolio/${user.username}/budget-toggle`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ included: newState })
+                });
+
+                // Trigger context refresh to update sidebar immediately
+                if (triggerRefresh) {
+                    triggerRefresh();
+                }
+            } catch (err) {
+                console.error('Failed to update budget toggle:', err);
+            }
+        }
+
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+    };
+
+    // Quick Add Asset
+    const handleQuickAdd = async (e) => {
+        e.preventDefault();
+        if (!quickAdd.amount || parseFloat(quickAdd.amount) <= 0) return;
+
+        const asset = {
+            id: Date.now().toString(),
+            type: quickAdd.type,
+            amount: parseFloat(quickAdd.amount),
+            addedAt: new Date().toISOString(),
+            note: quickAdd.note || ''
+        };
+
+        try {
+            const res = await fetch(`/api/portfolio/${user.username}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ asset })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setPortfolio([...portfolio, data.asset]);
+                setQuickAdd({ ...quickAdd, amount: '', note: '' });
+
+                // Trigger refresh if budget is included
+                if (includedInBudget && triggerRefresh) {
+                    triggerRefresh();
+                }
+            }
+        } catch (err) {
+            console.error('Failed to add asset:', err);
+        }
+    };
+
+    // Delete asset with confirmation
+    const handleDeleteAsset = async (id) => {
+        if (window.confirm('Bu varlığı silmek istediğinizden emin misiniz?')) {
+            try {
+                const res = await fetch(`/api/portfolio/${user.username}/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    setPortfolio(portfolio.filter(a => a.id !== id));
+
+                    // Trigger refresh if budget is included
+                    if (includedInBudget && triggerRefresh) {
+                        triggerRefresh();
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to delete asset:', err);
+            }
+        }
+        setActiveMenu(null);
+    };
+
+    // Open edit modal
+    const handleEditAsset = (asset) => {
+        setEditingAsset(asset);
+        setEditForm({
+            amount: asset.amount.toString(),
+            note: asset.note || ''
+        });
+        setActiveMenu(null);
+    };
+
+    // Save edited asset
+    const handleSaveEdit = async () => {
+        if (!editForm.amount || parseFloat(editForm.amount) <= 0) return;
+
+        const updatedAsset = {
+            ...editingAsset,
+            amount: parseFloat(editForm.amount),
+            note: editForm.note
+        };
+
+        try {
+            // Update in backend
+            const res = await fetch(`/api/portfolio/${user.username}/${editingAsset.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ asset: updatedAsset })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setPortfolio(portfolio.map(a => a.id === editingAsset.id ? data.asset : a));
+                setEditingAsset(null);
+                setEditForm({ amount: '', note: '' });
+
+                // Trigger refresh if budget is included
+                if (includedInBudget && triggerRefresh) {
+                    triggerRefresh();
+                }
+            }
+        } catch (err) {
+            console.error('Failed to update asset:', err);
+        }
+    };
+
+    // Cancel edit
+    const handleCancelEdit = () => {
+        setEditingAsset(null);
+        setEditForm({ amount: '', note: '' });
+    };
+
+    // Calculate total portfolio value
+    // Calculate total portfolio value (Cash + Market assets)
+    const totalValue = portfolio.reduce((sum, asset) => {
+        // TRY_CASH has rate = 1, market assets use live rates
+        const rate = asset.type === 'TRY_CASH' ? 1 : (rates?.[asset.type] || 0);
+        return sum + (asset.amount * rate);
+    }, 0);
+
+    // Get color classes based on asset type
+    const getColorClasses = (color) => {
+        const baseColors = {
+            green: 'bg-green-50 border-green-500',
+            blue: 'bg-blue-50 border-blue-500',
+            purple: 'bg-purple-50 border-purple-500',
+            yellow: 'bg-yellow-50 border-yellow-500'
+        };
+        return baseColors[color] || 'bg-gray-50 border-gray-500';
+    };
+
+    // Calculate quick add estimated value
+    // Calculate quick add value (TRY_CASH uses rate = 1)
+    const quickAddValue = quickAdd.amount
+        ? parseFloat(quickAdd.amount) * (quickAdd.type === 'TRY_CASH' ? 1 : (rates?.[quickAdd.type] || 0))
+        : 0;
+    const isValidAmount = quickAdd.amount && parseFloat(quickAdd.amount) > 0;
+
+    // Loading skeleton
+    if (ratesLoading) {
+        return (
+            <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-2xl">
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2 size={48} className="animate-spin text-white/50" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (ratesError && !rates) {
+        return (
+            <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-8">
+                    <h3 className="text-xl font-bold text-red-900 mb-2">Veri Yüklenemedi</h3>
+                    <p className="text-red-700">Piyasa verileri alınamadı. Lütfen daha sonra tekrar deneyin.</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6 animate-in fade-in duration-500">
+
+            {/* Hero Header - Navy Card */}
+            <div className="relative bg-[#1e293b] rounded-2xl p-8 text-white shadow-2xl">
+                {/* Toast Notification - Absolute positioned inside card */}
+                {showToast && (
+                    <div className="absolute top-4 right-4 z-50 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 max-w-xs w-auto animate-in slide-in-from-top-2 fade-in duration-300">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${includedInBudget ? 'bg-green-100' : 'bg-gray-100'}`}>
+                                {includedInBudget ? (
+                                    <Check size={20} className="text-green-600" />
+                                ) : (
+                                    <X size={20} className="text-gray-600" />
+                                )}
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-900 text-sm">
+                                    {includedInBudget ? 'Bütçeye Eklendi' : 'Bütçeden Çıkarıldı'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {includedInBudget
+                                        ? 'Portföy dahil edildi'
+                                        : 'Portföy çıkarıldı'
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-start justify-between mb-6">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h2 className="text-3xl font-bold">Portföy Değeri</h2>
+                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+                                <span className="text-xs font-medium text-white/80">
+                                    Son Güncelleme: {lastUpdated || '--:--'}
+                                </span>
+                            </div>
+                        </div>
+                        <p className="text-white/60 text-sm">Toplam varlık değeriniz</p>
+                    </div>
+
+                    <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl">
+                        <TrendingUp size={32} />
+                    </div>
+                </div>
+                <div className={`text-5xl font-bold mb-2 transition-all duration-300 ${includedInBudget ? 'drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]' : ''}`}>
+                    {totalValue.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺
+                </div>
+                <div className="flex items-center justify-between">
+                    <p className="text-white/60 text-sm">{portfolio.length} farklı varlık</p>
+
+                    {/* Toggle - Bottom Right */}
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-300">Döviz ve Altınları Bütçeye Dahil Et</span>
+                        <button
+                            onClick={handleBudgetToggle}
+                            className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${includedInBudget ? 'bg-green-500' : 'bg-gray-600'}`}
+                        >
+                            <span
+                                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 ${includedInBudget ? 'translate-x-5' : 'translate-x-0'}`}
+                            />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Unified Capsule Toolbar */}
+            <form onSubmit={handleQuickAdd}>
+                <div className="w-full bg-white rounded-2xl shadow-xl flex flex-col md:flex-row items-center md:h-28 h-auto py-4 md:py-0 px-4 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                    {/* Section A: Asset Selector */}
+                    <div className="w-full md:w-[30%] px-4 py-4 md:py-0 flex items-center justify-center md:justify-start">
+                        <div className="relative flex items-center gap-3 cursor-pointer group">
+                            <span className="text-3xl">{assetConfig[quickAdd.type].icon}</span>
+                            <div className="flex flex-col">
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        value={quickAdd.type}
+                                        onChange={(e) => setQuickAdd({ ...quickAdd, type: e.target.value })}
+                                        className="font-bold text-base bg-transparent outline-none cursor-pointer appearance-none pr-6"
+                                    >
+                                        <option value="TRY_CASH">Türk Lirası (Nakit)</option>
+                                        <optgroup label="Döviz">
+                                            <option value="USD">ABD Doları</option>
+                                            <option value="EUR">Euro</option>
+                                            <option value="GBP">İngiliz Sterlini</option>
+                                        </optgroup>
+                                        <optgroup label="Altın">
+                                            <option value="GRAM">Gram Altın</option>
+                                            <option value="CEYREK">Çeyrek Altın</option>
+                                            <option value="YARIM">Yarım Altın</option>
+                                            <option value="TAM">Tam Altın</option>
+                                        </optgroup>
+                                    </select>
+                                    <ChevronDown size={16} className="text-gray-400 absolute right-0 pointer-events-none" />
+                                </div>
+                                {/* Hide rate display for TRY_CASH */}
+                                {quickAdd.type !== 'TRY_CASH' && (
+                                    <span className="text-sm text-gray-500">
+                                        Kur: {rates?.[quickAdd.type]?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'} ₺
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section B: Hero Input */}
+                    <div className="w-full md:w-[50%] px-4 py-6 md:py-0 flex flex-col items-center justify-center gap-1">
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={quickAdd.amount}
+                            onChange={(e) => setQuickAdd({ ...quickAdd, amount: e.target.value })}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    handleQuickAdd(e);
+                                }
+                            }}
+                            placeholder="0"
+                            className="w-full bg-transparent text-center text-4xl font-bold text-gray-800 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        {/* Hide calculated price for TRY_CASH */}
+                        {quickAdd.type !== 'TRY_CASH' && (
+                            <div className="text-sm font-medium text-blue-600">
+                                ≈ {quickAddValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                            </div>
+                        )}
+                        <input
+                            type="text"
+                            value={quickAdd.note}
+                            onChange={(e) => setQuickAdd({ ...quickAdd, note: e.target.value })}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleQuickAdd(e);
+                                }
+                            }}
+                            placeholder="Not ekle (Örn: Balayı parası)"
+                            className="w-3/4 bg-gray-50 text-center text-xs text-gray-500 outline-none placeholder-gray-300 mt-1 px-3 py-1 rounded-full focus:bg-white focus:ring-1 focus:ring-[#D4AF37] transition-all"
+                        />
+                    </div>
+
+                    {/* Section C: Action Button */}
+                    <div className="w-full md:w-[20%] px-4 py-4 md:py-0 flex items-center justify-center">
+                        <button
+                            type="submit"
+                            disabled={!isValidAmount}
+                            className={`w-16 h-16 rounded-2xl bg-[#D4AF37] text-white shadow-lg shadow-yellow-500/30 flex items-center justify-center transition-all duration-200 ${isValidAmount
+                                ? 'hover:scale-105 hover:shadow-xl'
+                                : 'opacity-50 cursor-not-allowed'
+                                }`}
+                        >
+                            <Plus size={32} strokeWidth={3} />
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            {/* Asset Grid - 3 Vertical Columns: TRY | Currencies | Gold */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Column 1: TRY_CASH */}
+                <div className="space-y-6">
+                    {portfolio
+                        .filter(asset => asset.type === 'TRY_CASH')
+                        .map(asset => {
+                            const config = assetConfig[asset.type];
+                            const value = asset.amount;
+
+                            return (
+                                <div
+                                    key={asset.id}
+                                    className={`bg-white rounded-xl p-6 border-2 transition-all duration-300 hover:shadow-lg relative ${getColorClasses(config.color)}`}
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-3xl">{config.icon}</div>
+                                            <div>
+                                                <h3 className="font-bold text-gray-900">{config.name}</h3>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setActiveMenu(activeMenu === asset.id ? null : asset.id)}
+                                                className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                                            >
+                                                <MoreHorizontal size={20} />
+                                            </button>
+
+                                            {activeMenu === asset.id && (
+                                                <>
+                                                    <div className="absolute right-0 top-8 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] animate-in fade-in slide-in-from-top-2 duration-200">
+                                                        <button
+                                                            onClick={() => handleEditAsset(asset)}
+                                                            className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 text-blue-600 flex items-center gap-2 transition-colors"
+                                                        >
+                                                            <Edit2 size={14} />
+                                                            Düzenle
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteAsset(asset.id)}
+                                                            className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 transition-colors"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            Sil
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        className="fixed inset-0 z-40"
+                                                        onClick={() => setActiveMenu(null)}
+                                                    ></div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <div className="text-2xl font-bold text-gray-900">
+                                            {value.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ₺
+                                        </div>
+                                        <div className="text-sm text-gray-500 mt-1">
+                                            Toplam Değer: {value.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺
+                                        </div>
+                                    </div>
+
+                                    {asset.note && (
+                                        <div className="flex items-center gap-2 text-xs text-gray-500 italic mt-3 pt-3 border-t border-gray-100">
+                                            <FileText size={14} />
+                                            <span className="truncate" title={asset.note}>{asset.note}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                </div>
+
+                {/* Column 2: Currencies (USD, EUR, GBP) */}
+                <div className="space-y-6">
+                    {portfolio
+                        .filter(asset => ['USD', 'EUR', 'GBP'].includes(asset.type))
+                        .sort((a, b) => {
+                            const order = { USD: 1, EUR: 2, GBP: 3 };
+                            return (order[a.type] || 99) - (order[b.type] || 99);
+                        })
+                        .map(asset => {
+                            const config = assetConfig[asset.type];
+                            const rate = rates?.[asset.type] || 0;
+                            const value = asset.amount * rate;
+
+                            return (
+                                <div
+                                    key={asset.id}
+                                    className={`bg-white rounded-xl p-6 border-2 transition-all duration-300 hover:shadow-lg relative ${getColorClasses(config.color)}`}
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-3xl">{config.icon}</div>
+                                            <div>
+                                                <h3 className="font-bold text-gray-900">{config.name}</h3>
+                                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                    <span>Kur: {rate.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ₺</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setActiveMenu(activeMenu === asset.id ? null : asset.id)}
+                                                className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                                            >
+                                                <MoreHorizontal size={20} />
+                                            </button>
+
+                                            {activeMenu === asset.id && (
+                                                <>
+                                                    <div className="absolute right-0 top-8 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] animate-in fade-in slide-in-from-top-2 duration-200">
+                                                        <button
+                                                            onClick={() => handleEditAsset(asset)}
+                                                            className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 text-blue-600 flex items-center gap-2 transition-colors"
+                                                        >
+                                                            <Edit2 size={14} />
+                                                            Düzenle
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteAsset(asset.id)}
+                                                            className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 transition-colors"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            Sil
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        className="fixed inset-0 z-40"
+                                                        onClick={() => setActiveMenu(null)}
+                                                    ></div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <div className="text-2xl font-bold text-gray-900">
+                                            {config.symbol === '$' || config.symbol === '€' || config.symbol === '£'
+                                                ? `${config.symbol}${asset.amount.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}`
+                                                : `${asset.amount.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ${config.symbol}`
+                                            }
+                                        </div>
+                                        <div className="text-sm text-gray-500 mt-1">
+                                            Toplam Değer: {value.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺
+                                        </div>
+                                    </div>
+
+                                    {asset.note && (
+                                        <div className="flex items-center gap-2 text-xs text-gray-500 italic mt-3 pt-3 border-t border-gray-100">
+                                            <FileText size={14} />
+                                            <span className="truncate" title={asset.note}>{asset.note}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                </div>
+
+                {/* Column 3: Gold (GRAM, CEYREK, YARIM, TAM) */}
+                <div className="space-y-6">
+                    {portfolio
+                        .filter(asset => ['GRAM', 'CEYREK', 'YARIM', 'TAM'].includes(asset.type))
+                        .sort((a, b) => {
+                            const order = { GRAM: 1, CEYREK: 2, YARIM: 3, TAM: 4 };
+                            return (order[a.type] || 99) - (order[b.type] || 99);
+                        })
+                        .map(asset => {
+                            const config = assetConfig[asset.type];
+                            const rate = rates?.[asset.type] || 0;
+                            const value = asset.amount * rate;
+
+                            return (
+                                <div
+                                    key={asset.id}
+                                    className={`bg-white rounded-xl p-6 border-2 transition-all duration-300 hover:shadow-lg relative ${getColorClasses(config.color)}`}
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-3xl">{config.icon}</div>
+                                            <div>
+                                                <h3 className="font-bold text-gray-900">{config.name}</h3>
+                                                {/* Show rate only for market assets */}
+                                                {!isCash && (
+                                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                        <span>Kur: {rate.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ₺</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setActiveMenu(activeMenu === asset.id ? null : asset.id)}
+                                                className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                                            >
+                                                <MoreHorizontal size={20} />
+                                            </button>
+
+                                            {activeMenu === asset.id && (
+                                                <>
+                                                    <div className="absolute right-0 top-8 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] animate-in fade-in slide-in-from-top-2 duration-200">
+                                                        <button
+                                                            onClick={() => handleEditAsset(asset)}
+                                                            className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 text-blue-600 flex items-center gap-2 transition-colors"
+                                                        >
+                                                            <Edit2 size={14} />
+                                                            Düzenle
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteAsset(asset.id)}
+                                                            className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 transition-colors"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            Sil
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        className="fixed inset-0 z-40"
+                                                        onClick={() => setActiveMenu(null)}
+                                                    ></div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <div className="text-2xl font-bold text-gray-900">
+                                            {config.symbol === '$' || config.symbol === '€' || config.symbol === '£'
+                                                ? `${config.symbol}${asset.amount.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}`
+                                                : `${asset.amount.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ${config.symbol}`
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-3 border-t border-gray-100">
+                                        <p className="text-xs text-gray-500 mb-1">Toplam Değer</p>
+                                        <p className="text-xl font-bold text-gray-900">
+                                            {value.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺
+                                        </p>
+                                    </div>
+
+                                    {/* Note Section */}
+                                    {asset.note && (
+                                        <div className="mt-4 pt-3 border-t border-gray-50/50">
+                                            <div className="flex items-start gap-2">
+                                                <FileText size={14} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                                <p
+                                                    className="text-xs text-gray-500 italic truncate"
+                                                    title={asset.note}
+                                                >
+                                                    {asset.note}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                    {portfolio.length === 0 && (
+                        <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+                            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <TrendingUp size={40} className="text-gray-400" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Henüz varlık eklemediniz</h3>
+                            <p className="text-gray-500 mb-6">Yukarıdaki formu kullanarak ilk varlığınızı ekleyin</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Edit Asset Modal */}
+                {
+                    editingAsset && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200">
+                                {/* Header */}
+                                <div className="px-6 py-4 border-b border-gray-100">
+                                    <h2 className="text-xl font-bold text-gray-900">Varlığı Düzenle</h2>
+                                </div>
+
+                                {/* Body */}
+                                <div className="px-6 py-6 space-y-5">
+                                    {/* Asset Type (Read-only) */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Varlık Tipi</label>
+                                        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg">
+                                            <span className="text-2xl">{assetConfig[editingAsset.type]?.icon}</span>
+                                            <span className="text-base font-medium text-gray-900">{assetConfig[editingAsset.type]?.name}</span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">Varlık tipini değiştirmek için silip yeniden ekleyin</p>
+                                    </div>
+
+                                    {/* Amount Input */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Miktar</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            value={editForm.amount}
+                                            onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
+                                            className="w-full px-4 py-3 text-2xl font-bold text-gray-900 border-2 border-gray-200 rounded-lg focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 outline-none transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            placeholder="0"
+                                        />
+                                    </div>
+
+                                    {/* Note Input */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Notunuz</label>
+                                        <textarea
+                                            value={editForm.note}
+                                            onChange={(e) => setEditForm({ ...editForm, note: e.target.value })}
+                                            rows="3"
+                                            className="w-full px-4 py-3 text-sm text-gray-700 border-2 border-gray-200 rounded-lg focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 outline-none transition-all resize-none"
+                                            placeholder="Örn: Balayı parası, Acil durum fonu..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+                                    <button
+                                        onClick={handleCancelEdit}
+                                        className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                    >
+                                        İptal
+                                    </button>
+                                    <button
+                                        onClick={handleSaveEdit}
+                                        disabled={!editForm.amount || parseFloat(editForm.amount) <= 0}
+                                        className={`flex-1 px-4 py-3 text-sm font-medium text-white rounded-lg transition-all ${editForm.amount && parseFloat(editForm.amount) > 0
+                                            ? 'bg-[#D4AF37] hover:bg-[#C4A037] shadow-lg shadow-yellow-500/30'
+                                            : 'bg-gray-300 cursor-not-allowed'
+                                            }`}
+                                    >
+                                        Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+            </div >
+            );
+};
+
+            export default CurrencyTrackerPage;
