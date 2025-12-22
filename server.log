@@ -1,4 +1,6 @@
 nohup: ignoring input
+[dotenv@17.2.3] injecting env (10) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
 node:events:502
       throw er; // Unhandled 'error' event
       ^
@@ -8,7 +10,7 @@ Error: listen EADDRINUSE: address already in use :::3001
     at listenInCluster (node:net:1965:12)
     at Server.listen (node:net:2067:7)
     at Function.listen (/var/www/wedding-tracker/server/node_modules/express/lib/application.js:635:24)
-    at Object.<anonymous> (/var/www/wedding-tracker/server/server.js:704:5)
+    at Object.<anonymous> (/var/www/wedding-tracker/server/server.js:736:5)
     at Module._compile (node:internal/modules/cjs/loader:1521:14)
     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
     at Module.load (node:internal/modules/cjs/loader:1266:32)

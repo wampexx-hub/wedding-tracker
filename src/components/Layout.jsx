@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, PlusCircle, List, Heart, LogOut, Edit3, Calendar, Wallet, CheckCircle, Coins, TrendingUp, HelpCircle, PlayCircle } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, List, Heart, LogOut, Edit3, Calendar, Wallet, CheckCircle, Coins, TrendingUp, HelpCircle, PlayCircle, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useExpenses } from '../context/ExpenseContext';
 import FloatingAddExpense from './FloatingAddExpense';
@@ -156,6 +156,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
     { id: 'expenses', label: 'Harcamalar', icon: List },
     { id: 'currency', label: 'Birikimler', icon: Wallet },
     { id: 'calendar', label: 'Taksit Takvimi', icon: Calendar },
+    { id: 'partner', label: 'Çift Ayarları', icon: Users },
   ];
 
   const handleBudgetSave = () => {

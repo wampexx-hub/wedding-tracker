@@ -7,8 +7,13 @@ DB_USER="wedding_user"
 DATE=$(date +%Y-%m-%d_%H-%M-%S)
 FILENAME="backup_$DATE.sql.gz"
 
+# Load credentials from .env
+if [ -f /var/www/wedding-tracker/.env ]; then
+    export $(grep -v '^#' /var/www/wedding-tracker/.env | xargs)
+fi
+
 # Export password for pg_dump
-export PGPASSWORD="wedding_pass"
+export PGPASSWORD=$DB_PASSWORD
 
 # Create backup
 echo "Starting backup for $DB_NAME..."

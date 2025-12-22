@@ -9,7 +9,9 @@ import ExpenseList from './components/ExpenseList';
 import InstallmentCalendar from './components/InstallmentCalendar';
 
 import CurrencyTrackerPage from './components/CurrencyTrackerPage';
+import PartnerManagement from './components/PartnerManagement';
 import Login from './components/Login';
+import Onboarding from './components/Onboarding';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRoute from './components/AdminRoute';
@@ -22,6 +24,10 @@ const MainApp = () => {
 
   if (!user) {
     return <Navigate to="/login" />;
+  }
+
+  if (!user.wedding_date || !user.city) {
+    return <Navigate to="/onboarding" />;
   }
 
   // If user is admin trying to access main app, maybe redirect to admin?
@@ -61,6 +67,8 @@ const MainApp = () => {
         return <CurrencyTrackerPage />;
       case 'calendar':
         return <InstallmentCalendar />;
+      case 'partner':
+        return <PartnerManagement />;
       default:
         return <Dashboard setActiveTab={setActiveTab} />;
     }
@@ -80,6 +88,7 @@ const App = () => {
         <ExpenseProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
               path="/admin"

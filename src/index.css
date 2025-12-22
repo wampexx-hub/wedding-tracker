@@ -339,3 +339,11 @@ h6 {
   background: #fee2e2;
   border-radius: 50%;
 }
+
+/* Dotted Background Pattern */
+.bg-dot-pattern {
+  background-image: radial-gradient(#D4AF37 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
