@@ -29,6 +29,7 @@ const WeddingService = {
                 weddingDate: data.weddingDate || null,
                 assets: data.assets || [],
                 portfolio: portfolioData.portfolio || [],
+                budgetIncluded: portfolioData.budgetIncluded,
                 usersMap: data.usersMap || {}
             };
         } catch (error) {
@@ -120,37 +121,19 @@ const WeddingService = {
         }
     },
 
-    // Get Exchange Rates (Restored for Modal Calculation)
-    // Get Exchange Rates (Live from finans.truncgil.com)
+    // Get Exchange Rates (from Backend - Cached)
     getExchangeRates: async () => {
         try {
-            const response = await fetch('https://finans.truncgil.com/today.json');
+            const response = await fetch(`${WeddingService.API_URL}/api/rates`);
             if (!response.ok) throw new Error('Failed to fetch exchange rates');
-            const data = await response.json();
-
-            const parseTurkishNumber = (val) => {
-                if (!val) return 0;
-                // Remove dots (thousands separator) and replace comma with dot (decimal separator)
-                return parseFloat(val.replace(/\./g, '').replace(',', '.'));
-            };
-
-            // Map API keys to internal keys
-            // We use "Satış" (Selling) rate
-            return {
-                USD: parseTurkishNumber(data.USD.Satış),
-                EUR: parseTurkishNumber(data.EUR.Satış),
-                GRAM_GOLD: parseTurkishNumber(data['gram-altin'].Satış),
-                CEYREK: parseTurkishNumber(data['ceyrek-altin'].Satış),
-                YARIM: parseTurkishNumber(data['yarim-altin'].Satış),
-                TAM: parseTurkishNumber(data['tam-altin'].Satış),
-                CUMHURIYET: parseTurkishNumber(data['cumhuriyet-altini'].Satış)
-            };
+            return await response.json();
         } catch (error) {
             console.error('Error fetching exchange rates:', error);
             // Fallback to defaults if API fails
             return {
                 USD: 35.80,
                 EUR: 37.50,
+                GBP: 44.00,
                 GRAM_GOLD: 3100,
                 CEYREK: 5100,
                 YARIM: 10200,

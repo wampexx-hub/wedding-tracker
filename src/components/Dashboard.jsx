@@ -13,22 +13,22 @@ import TopSpendersCard from './TopSpendersCard';
 import { useLiveRates } from '../hooks/useLiveRates';
 
 const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
-    const { expenses: contextExpenses, getSummary, updateBudget } = useExpenses();
+    const { expenses: contextExpenses, getSummary, updateBudget, weddingDate: contextWeddingDate, refreshAssets } = useExpenses();
     const { user } = useAuth();
     const { rates } = useLiveRates();
 
-    // Get summary data from context to ensure consistency (especially for budget)
+    // Get summary data from context to ensure consistency
     const summary = getSummary();
-    const contextTotalBudget = summary.budget;
+    const contextTotalBudget = summary.budget; // Effective Budget (Base + Portfolio)
 
     // State
     const [isLoading, setIsLoading] = useState(true);
     const [dashboardData, setDashboardData] = useState({
-        expenses: [],
-        budget: 0,
-        weddingDate: null,
-        assets: { gold: 0, usd: 0, tl: 0 },
-        portfolio: [],
+        // expenses: [], // Use Context
+        // budget: 0, // Use Context
+        // weddingDate: null, // Use Context
+        // assets: { gold: 0, usd: 0, tl: 0 },
+        // portfolio: [],
         usersMap: {}
     });
 
@@ -37,35 +37,34 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [tempDate, setTempDate] = useState('');
 
-
-    // Fetch Data on Mount
+    // Fetch Data on Mount (Only for Metadata like usersMap, or ensure Context is ready)
+    // Actually Context handles data. We just need usersMap?
+    // WeddingService.getDashboardData returns usersMap.
     useEffect(() => {
         const fetchData = async () => {
+            // We can rely on Context for data, but usersMap is only in getDashboardData.
+            // Let's fetch it or add it to Context. Context has data.usersMap.
+            // Check ExpenseContext: getDashboardData returns usersMap.
+            // ExpenseContext DOES NOT expose usersMap.
+            // We should probably expose usersMap in Context too to avoid double fetch.
+            // For now, let's just fetch for usersMap and ignore the rest to avoid overwrite sync issues.
             if (!user) return;
             setIsLoading(true);
             try {
                 const data = await WeddingService.getDashboardData(user.username);
-                setDashboardData(data);
-                updateBudget(data.budget);
+                setDashboardData(prev => ({ ...prev, usersMap: data.usersMap }));
+                // updateBudget(data.budget); // REMOVED: Don't overwrite backend with backend data blindly
             } catch (error) {
                 console.error("Failed to load dashboard data", error);
             } finally {
                 setIsLoading(false);
             }
         };
-
         fetchData();
-    }, [user]);
+        // Set temp date from context
+        if (contextWeddingDate) setTempDate(contextWeddingDate);
+    }, [user, contextWeddingDate]);
 
-    // Sync expenses from context for real-time updates
-    useEffect(() => {
-        if (contextExpenses && contextExpenses.length >= 0) {
-            setDashboardData(prev => ({
-                ...prev,
-                expenses: contextExpenses
-            }));
-        }
-    }, [contextExpenses]);
 
     // Handle Date Save
     const handleSaveDate = async () => {
@@ -73,7 +72,8 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
             setIsLoading(true);
             try {
                 await WeddingService.setWeddingDate(user.username, tempDate);
-                setDashboardData(prev => ({ ...prev, weddingDate: tempDate }));
+                // Trigger refresh in context
+                refreshAssets();
                 setIsDateModalOpen(false);
             } catch (error) {
                 console.error("Failed to save date", error);
@@ -84,29 +84,23 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
     };
 
     // Derived Data
-    const { expenses, budget, weddingDate, assets, portfolio } = dashboardData;
+    // Use Context Values
+    const expenses = contextExpenses;
+    const weddingDate = contextWeddingDate;
+    const totalSpent = summary.totalSpent;
+    const remainingBudget = summary.remainingBudget; // Uses Effective Budget - Spent
+    const totalAssetsValue = summary.totalPortfolioValue; // Always shows Total (Matches User Request)
 
-    const totalSpent = expenses
-        .filter(e => e.status === 'purchased')
-        .reduce((acc, curr) => acc + Number(curr.price), 0);
-    const remainingBudget = budget - totalSpent;
+    // Helper counts
     const totalInstallments = expenses
         .filter(e => e.status === 'purchased')
         .reduce((acc, curr) => acc + (curr.isInstallment ? Number(curr.monthlyPayment) : 0), 0);
     const totalCount = expenses.length;
-
-    // Calculate Total Assets Value (Portfolio based)
-    const totalAssetsValue = (portfolio || []).reduce((acc, asset) => {
-        const rate = asset.type === 'TRY_CASH' ? 1 : (rates?.[asset.type] || 0);
-        return acc + (asset.amount * rate);
-    }, 0);
-
-    // New Metrics for Refactor
+    const plannedCount = expenses.filter(e => e.status === 'planned').length;
+    const spentCount = expenses.filter(e => e.status === 'purchased').length;
     const totalPlanned = expenses
         .filter(e => e.status === 'planned')
         .reduce((acc, curr) => acc + Number(curr.price), 0);
-    const plannedCount = expenses.filter(e => e.status === 'planned').length;
-    const spentCount = expenses.filter(e => e.status === 'purchased').length;
 
     // Chart Logic
     const COLORS = [

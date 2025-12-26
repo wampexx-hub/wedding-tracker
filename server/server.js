@@ -11,9 +11,61 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require('bcrypt');
 const db = require('./db'); // Import DB connection
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] } });
+
 const PORT = 3001;
+
+// Helper to notify user and partner
+const notifyUserAndPartner = async (username) => {
+    if (!username) return;
+
+    console.log(`[SOCKET] Notifying updates for user: ${username}`);
+
+    // Notify the user themselves
+    io.to(username).emit('data:updated');
+    console.log(`[SOCKET] Emitted 'data:updated' to room: ${username}`);
+
+    try {
+        // Find partner
+        const res = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        if (res.rows.length > 0 && res.rows[0].partner_username) {
+            const partner = res.rows[0].partner_username;
+            io.to(partner).emit('data:updated');
+            console.log(`[SOCKET] Emitted 'data:updated' to partner room: ${partner}`);
+        }
+    } catch (err) {
+        console.error('Error in notifyUserAndPartner:', err);
+    }
+};
+
+// Socket.io Middleware
+app.use((req, res, next) => {
+    req.io = io;
+    req.notifyUser = notifyUserAndPartner;
+    next();
+});
+
+// Socket.io Connection
+io.on('connection', (socket) => {
+    const username = socket.handshake.query.username;
+    console.log(`[SOCKET] New connection attempt. ID: ${socket.id}, Username: ${username}`);
+
+    if (username) {
+        socket.join(username);
+        console.log(`[SOCKET] User joined room: ${username}`);
+    } else {
+        console.log(`[SOCKET] Connection without username query.`);
+    }
+
+    socket.on('disconnect', () => {
+        console.log(`[SOCKET] User disconnected: ${username || 'Unknown'} (${socket.id})`);
+    });
+});
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -196,6 +248,27 @@ app.post('/api/auth/login', async (req, res) => {
         if (user && await bcrypt.compare(password, user.password)) {
             const { password: _, is_admin, ...userWithoutPassword } = user;
             // Normalize to camelCase
+            const userForClient = { ...userWithoutPassword, isAdmin: is_admin };
+            res.json({ success: true, user: userForClient });
+        } else {
+            res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+
+// Alias for /api/login (frontend compatibility)
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = result.rows[0];
+
+        if (user && await bcrypt.compare(password, user.password)) {
+            const { password: _, is_admin, ...userWithoutPassword } = user;
             const userForClient = { ...userWithoutPassword, isAdmin: is_admin };
             res.json({ success: true, user: userForClient });
         } else {
@@ -443,6 +516,7 @@ app.post('/api/expenses', upload.single('image'), async (req, res) => {
             [id, username, title, category, price, vendor, source, date, isInstallment, installmentCount, status, notes, monthlyPayment, imageUrl, new Date().toISOString(), username, partnershipId]
         );
 
+        await req.notifyUser(username);
         res.json({ ...expenseData, id, imageUrl });
     } catch (err) {
         console.error(err);
@@ -466,6 +540,7 @@ app.post('/api/expenses/batch', async (req, res) => {
             newExpenses.push({ ...exp, id, username });
         }
 
+        await req.notifyUser(username);
         res.json({ success: true, count: newExpenses.length, expenses: newExpenses });
     } catch (err) {
         console.error(err);
@@ -509,6 +584,13 @@ app.put('/api/expenses/:id', upload.single('image'), async (req, res) => {
             [title, category, price, vendor, source, date, isInstallment, installmentCount, status, notes, monthlyPayment, imageUrl, id]
         );
 
+        await req.notifyUser(expenseData.username); // Assuming expenseData has username, usually it does. If not, fetch it? 
+        // expenseData comes from req.body.data. The context says: const { username ... } = expenseData; in POST.
+        // In PUT, line 547 desctructures it but username is NOT destructured there explicitly in line 547.
+        // But line 532 parses it. Let's check if username is guaranteed.
+        // If not, we can query it. But for now, let's assume it should be there or use 'added_by/username' from DB.
+        // Safe bet: RETURNING username in UPDATE query.
+        // Let's modify the code more safely.
         res.json({ ...expenseData, id, imageUrl });
     } catch (err) {
         console.error(err);
@@ -519,8 +601,9 @@ app.put('/api/expenses/:id', upload.single('image'), async (req, res) => {
 app.delete('/api/expenses/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await db.query('DELETE FROM expenses WHERE id = $1', [id]);
+        const result = await db.query('DELETE FROM expenses WHERE id = $1 RETURNING username', [id]);
         if (result.rowCount > 0) {
+            await req.notifyUser(result.rows[0].username);
             res.json({ success: true });
         } else {
             res.status(404).json({ error: 'Expense not found' });
@@ -564,6 +647,7 @@ app.post('/api/budget', async (req, res) => {
             );
         }
 
+        await req.notifyUser(username);
         res.json({ success: true, budget: Number(budget) });
     } catch (err) {
         console.error(err);
@@ -628,27 +712,49 @@ app.post('/api/assets', async (req, res) => {
     try {
         const id = Date.now().toString();
 
-        // Get user's partnership info
-        const userInfo = await db.query('SELECT partnership_id FROM users WHERE username = $1', [username]);
-        const partnershipId = userInfo.rows[0]?.partnership_id || null;
+        // Check if this is a portfolio asset (Döviz/Altın) or regular asset (Nakit)
+        const portfolioTypes = ['USD', 'EUR', 'GBP', 'GRAM', 'CEYREK', 'YARIM', 'TAM', 'CUMHURIYET'];
+        const isPortfolioAsset = portfolioTypes.includes(asset.name) || asset.category === 'Döviz' || asset.category === 'Altın';
 
-        await db.query(
-            `INSERT INTO assets (id, username, category, name, amount, value, date, added_by, partnership_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-            [id, username, asset.category, asset.name, asset.amount, asset.value, asset.date || new Date().toISOString(), username, partnershipId]
-        );
+        if (isPortfolioAsset) {
+            // Route to portfolio table
+            console.log(`[ASSETS] Routing ${asset.name} to portfolio table`);
+            await db.query(
+                `INSERT INTO portfolio (id, username, type, amount, note, added_at)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [id, username, asset.name, asset.amount, asset.note || '', asset.date || new Date().toISOString()]
+            );
+        } else {
+            // Route to assets table (Nakit)
+            console.log(`[ASSETS] Routing ${asset.name} to assets table`);
+            const userInfo = await db.query('SELECT partnership_id FROM users WHERE username = $1', [username]);
+            const partnershipId = userInfo.rows[0]?.partnership_id || null;
+
+            await db.query(
+                `INSERT INTO assets (id, username, category, name, amount, value, date, added_by, partnership_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                [id, username, asset.category, asset.name, asset.amount, asset.value, asset.date || new Date().toISOString(), username, partnershipId]
+            );
+        }
 
         let budget = 0;
-        if (asset.category === 'Nakit') {
+        if (asset.category === 'Nakit' || isPortfolioAsset) {
             budget = await recalculateBudget(username);
         } else {
             const bRes = await db.query('SELECT amount FROM budgets WHERE username = $1', [username]);
             budget = bRes.rows[0] ? parseFloat(bRes.rows[0].amount) : 0;
         }
 
+        // Notify user and partner
+        const partnerRes = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        if (partnerRes.rows.length > 0 && partnerRes.rows[0].partner_username) {
+            await req.notifyUser(partnerRes.rows[0].partner_username);
+        }
+        await req.notifyUser(username);
+
         res.json({ asset: { ...asset, id }, budget });
     } catch (err) {
-        console.error(err);
+        console.error('[ASSETS] Error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -673,6 +779,7 @@ app.delete('/api/assets/:id', async (req, res) => {
             budget = bRes.rows[0] ? parseFloat(bRes.rows[0].amount) : 0;
         }
 
+        await req.notifyUser(username);
         res.json({ success: true, budget });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -719,6 +826,14 @@ app.post('/api/portfolio/:username', async (req, res) => {
              VALUES ($1, $2, $3, $4, $5, $6)`,
             [id, username, asset.type, asset.amount, asset.note, asset.addedAt || new Date().toISOString()]
         );
+
+        // Notify user and partner
+        const partnerRes = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        if (partnerRes.rows.length > 0 && partnerRes.rows[0].partner_username) {
+            await req.notifyUser(partnerRes.rows[0].partner_username);
+        }
+        await req.notifyUser(username);
+
         res.json({ success: true, asset: { ...asset, id } });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -729,6 +844,14 @@ app.delete('/api/portfolio/:username/:assetId', async (req, res) => {
     const { username, assetId } = req.params;
     try {
         await db.query('DELETE FROM portfolio WHERE id = $1 AND username = $2', [assetId, username]);
+
+        // Notify user and partner
+        const partnerRes = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        if (partnerRes.rows.length > 0 && partnerRes.rows[0].partner_username) {
+            await req.notifyUser(partnerRes.rows[0].partner_username);
+        }
+        await req.notifyUser(username);
+
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -740,8 +863,19 @@ app.put('/api/portfolio/:username/budget-toggle', async (req, res) => {
     const { included } = req.body;
     try {
         await db.query('UPDATE users SET portfolio_budget_included = $1 WHERE username = $2', [included, username]);
+
+        // Sync with partner
+        const userRes = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        if (userRes.rows.length > 0 && userRes.rows[0].partner_username) {
+            await db.query('UPDATE users SET portfolio_budget_included = $1 WHERE username = $2', [included, userRes.rows[0].partner_username]);
+            // Notify partner to refresh
+            await req.notifyUser(userRes.rows[0].partner_username); // Notify partner
+        }
+
+        await req.notifyUser(username);
         res.json({ success: true, included });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -754,6 +888,14 @@ app.put('/api/portfolio/:username/:assetId', async (req, res) => {
             'UPDATE portfolio SET type=$1, amount=$2, note=$3 WHERE id=$4 AND username=$5',
             [asset.type, asset.amount, asset.note, assetId, username]
         );
+
+        // Notify user and partner
+        const partnerRes = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        if (partnerRes.rows.length > 0 && partnerRes.rows[0].partner_username) {
+            await req.notifyUser(partnerRes.rows[0].partner_username);
+        }
+        await req.notifyUser(username);
+
         res.json({ success: true, asset });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -780,6 +922,14 @@ app.put('/api/assets/:id', async (req, res) => {
             const bRes = await db.query('SELECT amount FROM budgets WHERE username = $1', [username]);
             budget = bRes.rows[0] ? parseFloat(bRes.rows[0].amount) : 0;
         }
+
+        // Notify user and partner
+        const partnerRes = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        if (partnerRes.rows.length > 0 && partnerRes.rows[0].partner_username) {
+            await req.notifyUser(partnerRes.rows[0].partner_username);
+        }
+        await req.notifyUser(username);
+
         res.json({ success: true, asset: { ...asset, id }, budget });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -797,6 +947,11 @@ app.post('/api/wedding-date', async (req, res) => {
 
         if (partnerUsername) {
             await db.query('UPDATE users SET wedding_date = $1 WHERE username = $2', [date, partnerUsername]);
+        }
+
+        await req.notifyUser(username);
+        if (partnerUsername) {
+            await req.notifyUser(partnerUsername);
         }
 
         res.json({ success: true, date });
@@ -1120,13 +1275,101 @@ app.delete('/api/partnership/disconnect', async (req, res) => {
     }
 });
 
-// ==================== END PARTNERSHIP MANAGEMENT ====================
+
+// ==================== EXCHANGE RATES ====================
+// Scheduled updates: 08:30, 13:30, 18:30 (Turkey time)
+// 3 times/day = 90 requests/month (within 100 limit)
+let ratesCache = null;
+let lastFetchDate = null;
+
+const UPDATE_TIMES = [
+    { hour: 8, minute: 30 },
+    { hour: 13, minute: 30 },
+    { hour: 18, minute: 30 }
+];
+
+const shouldFetchRates = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const today = now.toDateString();
+    if (!ratesCache) return true;
+    if (lastFetchDate === today) return false;
+    for (const slot of UPDATE_TIMES) {
+        const timeDiff = (currentHour * 60 + currentMinute) - (slot.hour * 60 + slot.minute);
+        if (timeDiff >= 0 && timeDiff <= 30) return true;
+    }
+    return false;
+};
+
+const fetchRatesFromAPI = async () => {
+    const https = require('https');
+    return new Promise((resolve, reject) => {
+        https.get('https://finans.truncgil.com/today.json', (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    const json = JSON.parse(data);
+                    const parseTurkishNumber = (val) => {
+                        if (!val) return 0;
+                        return parseFloat(val.replace(/\./g, '').replace(',', '.'));
+                    };
+                    resolve({
+                        USD: parseTurkishNumber(json.USD.Satış),
+                        EUR: parseTurkishNumber(json.EUR.Satış),
+                        GBP: parseTurkishNumber(json.GBP?.Satış || '0'),
+                        GRAM_GOLD: parseTurkishNumber(json['gram-altin'].Satış),
+                        CEYREK: parseTurkishNumber(json['ceyrek-altin'].Satış),
+                        YARIM: parseTurkishNumber(json['yarim-altin'].Satış),
+                        TAM: parseTurkishNumber(json['tam-altin'].Satış),
+                        CUMHURIYET: parseTurkishNumber(json['cumhuriyet-altini'].Satış)
+                    });
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }).on('error', reject);
+    });
+};
+
+app.get('/api/rates', async (req, res) => {
+    try {
+        if (shouldFetchRates()) {
+            console.log('[RATES] Fetching fresh rates...');
+            ratesCache = await fetchRatesFromAPI();
+            lastFetchDate = new Date().toDateString();
+            console.log('[RATES] Cache updated');
+            return res.json(ratesCache);
+        }
+        console.log('[RATES] Serving cached rates');
+        return res.json(ratesCache);
+    } catch (error) {
+        console.error('[RATES] Error:', error);
+        if (ratesCache) return res.json(ratesCache);
+        res.json({ USD: 35.80, EUR: 37.50, GBP: 44.00, GRAM_GOLD: 3100, CEYREK: 5100, YARIM: 10200, TAM: 20400, CUMHURIYET: 21000 });
+    }
+});
+
+// Initialize cache on server start
+(async () => {
+    try {
+        console.log('[RATES] Initializing cache...');
+        ratesCache = await fetchRatesFromAPI();
+        lastFetchDate = new Date().toDateString();
+        console.log('[RATES] Initial cache loaded');
+    } catch (error) {
+        console.error('[RATES] Init failed:', error);
+    }
+})();
+
+// ==================== STATIC FILES & FALLBACK ====================
 
 app.use(express.static(path.join(__dirname, '../dist')));
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

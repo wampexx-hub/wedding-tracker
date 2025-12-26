@@ -1,6 +1,15 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useAuth } from './AuthContext';
 import WeddingService from '../services/WeddingService';
+import { io } from 'socket.io-client';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+    useDashboardData, useAssets, useExchangeRates,
+    useAddExpense, useUpdateBudget, useAddAsset,
+    useDeleteAsset, useUpdateAsset, useDeleteExpense,
+    useUpdateExpense, useBatchExpenses, useClearAllExpenses,
+    useToggleBudgetInclude
+} from '../hooks/useExpensesQuery';
 
 const ExpenseContext = createContext();
 
@@ -8,275 +17,130 @@ export const useExpenses = () => useContext(ExpenseContext);
 
 export const ExpenseProvider = ({ children }) => {
     const { user } = useAuth();
-    const [expenses, setExpenses] = useState([]);
-    const [budget, setBudget] = useState(0);
-    const [assets, setAssets] = useState([]);
-    const [rates, setRates] = useState(null);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [portfolioValue, setPortfolioValue] = useState(0);
+    const queryClient = useQueryClient();
 
-    // Load data when user changes
+    // --- SOCKET.IO INTEGRATION ---
     useEffect(() => {
-        if (user) {
-            fetch(`/api/data?user=${user.username}`)
-                .then(res => res.json())
-                .then(data => {
-                    setExpenses(data.expenses || []);
-                    setBudget(data.budget || 0);
-                    setAssets(data.assets || []);
-                })
-                .catch(err => console.error('Failed to load data', err));
-
-            // Fetch rates for calculations (Live)
-            WeddingService.getExchangeRates()
-                .then(data => setRates(data))
-                .catch(err => console.error('Failed to load rates', err));
-
-            // Fetch portfolio value
-            fetchPortfolioValue();
-        } else {
-            setExpenses([]);
-            setBudget(0);
-            setAssets([]);
-            setRates(null);
-            setPortfolioValue(0);
-        }
-    }, [user]);
-
-    const fetchPortfolioValue = async () => {
         if (!user) return;
 
-        try {
-            const res = await fetch(`/api/portfolio/${user.username}`);
-            const data = await res.json();
+        console.log('Connecting to socket at:', window.location.origin);
 
-            if (data.portfolio && data.portfolio.length > 0) {
-                const ratesCache = localStorage.getItem('live_rates_cache');
-                const rates = ratesCache ? JSON.parse(ratesCache).data : {};
+        const socket = io(window.location.origin, {
+            query: { username: user.username },
+            transports: ['websocket', 'polling']
+        });
 
-                // Calculate portfolio value:
-                // - TRY_CASH: Always included (rate = 1)
-                // - Market assets (gold/FX): Only if budgetIncluded is true
-                const value = data.portfolio.reduce((sum, asset) => {
-                    if (asset.type === 'TRY_CASH') {
-                        // TRY_CASH always included in budget
-                        return sum + asset.amount;
-                    } else if (data.budgetIncluded) {
-                        // Market assets only if toggle is ON
-                        const rate = rates?.[asset.type] || 0;
-                        return sum + (asset.amount * rate);
-                    }
-                    return sum;
-                }, 0);
+        socket.on('connect', () => {
+            console.log('Socket connected:', socket.id);
+        });
 
-                setPortfolioValue(value);
-            } else {
-                setPortfolioValue(0);
-            }
-        } catch (err) {
-            console.error('Failed to fetch portfolio value:', err);
-            setPortfolioValue(0);
-        }
-    };
+        socket.on('data:updated', () => {
+            console.log('Data updated event received, refreshing...');
+            // Debug alert to confirm receipt
+            // window.alert('DEBUG: Socket Veri Güncellemesi Geldi!'); // Commented out for now to be less annoying, unless requested.
+            // Actually user is waiting for fix. Let's use console and broad invalidation.
 
-    // Refetch portfolio when refreshTrigger changes
-    useEffect(() => {
-        if (user) {
-            fetchPortfolioValue();
-        }
-    }, [refreshTrigger, user]);
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+            queryClient.refetchQueries({ queryKey: ['dashboard'] });
+            queryClient.invalidateQueries({ queryKey: ['assets'] });
+            queryClient.invalidateQueries({ queryKey: ['rates'] }); // Sync exchange rates too
+        });
 
-    const refreshAssets = async () => {
-        if (!user) return;
-        try {
-            const res = await fetch(`/api/assets?username=${user.username}`);
-            const data = await res.json();
-            setAssets(data || []);
-        } catch (err) {
-            console.error('Failed to refresh assets', err);
-        }
-    };
-
-    const addAsset = async (assetData) => {
-        if (!user) return;
-        try {
-            const res = await fetch('/api/assets', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user.username, asset: assetData })
-            });
-            const data = await res.json();
-            setAssets(prev => [...prev, data.asset]);
-            if (data.budget !== undefined) {
-                setBudget(data.budget);
-            }
-        } catch (err) {
-            console.error('Failed to add asset', err);
-        }
-    };
-
-    const deleteAsset = async (id) => {
-        if (!user) return;
-        try {
-            const res = await fetch(`/api/assets/${id}?username=${user.username}`, { method: 'DELETE' });
-            const data = await res.json();
-            if (data.success) {
-                setAssets(prev => prev.filter(a => a.id !== id));
-                if (data.budget !== undefined) {
-                    setBudget(data.budget);
-                }
-            }
-        } catch (err) {
-            console.error('Failed to delete asset', err);
-        }
-    };
-
-    const updateAsset = async (id, assetData) => {
-        if (!user) return;
-        try {
-            const res = await fetch(`/api/assets/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user.username, asset: assetData })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setAssets(prev => prev.map(a => a.id === id ? data.asset : a));
-                if (data.budget !== undefined) {
-                    setBudget(data.budget);
-                }
-            }
-        } catch (err) {
-            console.error('Failed to update asset', err);
-        }
-    };
-
-    const addExpense = async (expenseData) => {
-        let body;
-        let headers = {};
-
-        if (!user) {
-            console.error('User not found in addExpense');
-            return;
-        }
-
-        if (expenseData instanceof FormData) {
-            // Append username and other fields if not present in FormData (but we did it in Form)
-            // Actually, we need to make sure username is there.
-            // In ExpenseForm we appended 'data' as JSON string.
-            // We need to inject username into that JSON string or append it separately.
-            // Let's modify the JSON string inside FormData.
-            const dataStr = expenseData.get('data');
-            const dataObj = JSON.parse(dataStr);
-            dataObj.id = Date.now().toString();
-            dataObj.createdAt = new Date().toISOString();
-            dataObj.status = dataObj.status || 'planned';
-            dataObj.username = user.username;
-            expenseData.set('data', JSON.stringify(dataObj));
-
-            body = expenseData;
-            // No Content-Type header for FormData, browser sets it with boundary
-        } else {
-            const newExpense = {
-                ...expenseData,
-                id: Date.now().toString(),
-                createdAt: new Date().toISOString(),
-                status: expenseData.status || 'planned',
-                username: user.username
-            };
-            body = JSON.stringify(newExpense);
-            headers['Content-Type'] = 'application/json';
-        }
-
-        try {
-            const res = await fetch('/api/expenses', {
-                method: 'POST',
-                headers,
-                body
-            });
-            const savedExpense = await res.json();
-            setExpenses(prev => [...prev, savedExpense]);
-        } catch (err) {
-            console.error('Failed to add expense', err);
-        }
-    };
-
-    const addBatchExpenses = async (expensesList) => {
-        if (!user) return;
-        try {
-            const res = await fetch('/api/expenses/batch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user.username, expenses: expensesList })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setExpenses(prev => [...prev, ...data.expenses]);
-            }
-        } catch (err) {
-            console.error('Failed to add batch expenses', err);
-        }
-    };
-
-    const deleteExpense = async (id) => {
-        try {
-            await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
-            setExpenses(prev => prev.filter(exp => exp.id !== id));
-        } catch (err) {
-            console.error('Failed to delete expense', err);
-        }
-    };
-
-    const clearAllExpenses = async () => {
-        if (!user) return;
-        if (window.confirm('TÜM harcamalarınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
-            try {
-                await fetch(`/api/expenses?username=${user.username}`, { method: 'DELETE' });
-                setExpenses([]);
-            } catch (err) {
-                console.error('Failed to clear expenses', err);
-            }
-        }
-    };
-
-    const updateExpense = async (id, expenseData) => {
-        let body;
-        let headers = {};
-
-        if (expenseData instanceof FormData) {
-            // Ensure username is preserved or added if needed, though update usually doesn't change username
-            // But we might need to ensure the structure is correct.
-            // The backend expects 'data' field.
-            body = expenseData;
-        } else {
-            body = JSON.stringify(expenseData);
-            headers['Content-Type'] = 'application/json';
-        }
-
-        try {
-            const res = await fetch(`/api/expenses/${id}`, {
-                method: 'PUT',
-                headers,
-                body
-            });
-            const savedExpense = await res.json();
-            setExpenses(prev => prev.map(exp => exp.id === id ? savedExpense : exp));
-        } catch (err) {
-            console.error('Failed to update expense', err);
-        }
-    };
-
-    const updateBudget = async (newBudget) => {
-        try {
-            await fetch('/api/budget', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user.username, budget: newBudget })
-            });
-            setBudget(Number(newBudget));
-        } catch (err) {
-            console.error('Failed to update budget', err);
+        return () => {
+            console.log('Disconnecting socket...');
+            socket.disconnect();
         };
+    }, [user, queryClient]);
+
+    // --- QUERIES ---
+    const { data: dashboardData, refetch: refetchDashboard } = useDashboardData(user?.username);
+    const { data: rates } = useExchangeRates();
+    // We can use dashboardData.assets, but if we have a separate assets query, we can use that too.
+    // The original code used /api/assets for assets management and /api/data for dashboard.
+    // Dashboard data includes expenses, budget, AND assets.
+    // Let's stick to dashboardData for the main source of truth to avoid sync issues.
+
+    // Derived State
+    const expenses = dashboardData?.expenses || [];
+    const budget = dashboardData?.budget || 0;
+    const assets = dashboardData?.assets || [];
+    const portfolio = dashboardData?.portfolio || []; // Portfolio list from backend
+    // Note: older code fetched /api/portfolio separately in fetchPortfolioValue.
+    // WeddingService.getDashboardData calls BOTH /api/data and /api/portfolio and merges them.
+    // So 'dashboardData.portfolio' is available.
+
+    // --- CALCULATE PORTFOLIO VALUE ---
+    // (Effective for Budget - Respects Toggle)
+    const calculateEffectivePortfolioValue = () => {
+        if (!portfolio || portfolio.length === 0) return 0;
+
+        // Use live rates if available, else defaults inside Service (but we fetched them via hook)
+        const currentRates = rates || {};
+
+        return portfolio.reduce((sum, asset) => {
+            if (asset.type === 'TRY_CASH') {
+                return sum + asset.amount;
+            } else if (dashboardData?.budgetIncluded) {
+                // Market assets only if toggle is ON
+                const rate = currentRates[asset.type] || 0;
+                return sum + (asset.amount * rate);
+            }
+            return sum;
+        }, 0);
+    };
+
+    // (Total for Display - All Assets)
+    const calculateTotalPortfolioValue = () => {
+        if (!portfolio || portfolio.length === 0) return 0;
+        const currentRates = rates || {};
+
+        return portfolio.reduce((sum, asset) => {
+            if (asset.type === 'TRY_CASH') {
+                return sum + asset.amount;
+            } else {
+                const rate = currentRates[asset.type] || 0;
+                return sum + (asset.amount * rate);
+            }
+        }, 0);
+    };
+
+    const portfolioValue = calculateEffectivePortfolioValue();
+    const totalPortfolioValue = calculateTotalPortfolioValue();
+
+    // --- MUTATIONS ---
+    const addExpenseMutation = useAddExpense();
+    const updateBudgetMutation = useUpdateBudget();
+    const addAssetMutation = useAddAsset();
+    const deleteAssetMutation = useDeleteAsset();
+    const updateAssetMutation = useUpdateAsset();
+    const deleteExpenseMutation = useDeleteExpense();
+    const updateExpenseMutation = useUpdateExpense();
+    const batchExpensesMutation = useBatchExpenses();
+    const clearAllExpensesMutation = useClearAllExpenses();
+    const toggleBudgetMutation = useToggleBudgetInclude();
+
+    // --- ACTIONS WRAPPERS ---
+    const addExpense = (data) => addExpenseMutation.mutate({ username: user.username, expenseData: data });
+    const updateBudget = (val) => updateBudgetMutation.mutate({ username: user.username, budget: val });
+    const addAsset = (data) => addAssetMutation.mutate({ username: user.username, asset: data });
+    const deleteAsset = (id) => deleteAssetMutation.mutate({ username: user.username, assetId: id });
+    const updateAsset = (id, data) => updateAssetMutation.mutate({ username: user.username, assetId: id, asset: data });
+    const deleteExpense = (id) => deleteExpenseMutation.mutate(id);
+    const updateExpense = (id, data) => updateExpenseMutation.mutate({ id, expenseData: data });
+    const addBatchExpenses = (list) => batchExpensesMutation.mutate({ username: user.username, expenses: list });
+    const clearAllExpenses = () => {
+        if (window.confirm('TÜM harcamalarınızı silmek istediğinize emin misiniz?')) {
+            clearAllExpensesMutation.mutate({ username: user.username });
+        }
+    };
+    const toggleBudgetInclude = (included) => toggleBudgetMutation.mutate({ username: user.username, included });
+
+    const refreshAssets = () => {
+        refetchDashboard();
+    };
+
+    const triggerRefresh = () => {
+        refetchDashboard();
     };
 
     const getSummary = () => {
@@ -284,9 +148,7 @@ export const ExpenseProvider = ({ children }) => {
             .filter(e => e.status === 'purchased')
             .reduce((acc, curr) => acc + Number(curr.price), 0);
 
-        // Budget already includes cash assets from backend
-        // portfolioValue is 0 when toggle is off (handled by fetchPortfolioValue)
-        // portfolioValue is calculated when toggle is on
+        // Budget logic same as before (Uses Effective Portfolio Value)
         const effectiveBudget = budget + portfolioValue;
         const remainingBudget = effectiveBudget - totalSpent;
 
@@ -295,13 +157,10 @@ export const ExpenseProvider = ({ children }) => {
             budget: effectiveBudget,
             remainingBudget,
             count: expenses.length,
-            portfolioValue,
-            baseBudget: budget  // Original budget without portfolio
+            portfolioValue: portfolioValue, // Effective
+            totalPortfolioValue: totalPortfolioValue, // Total (Display Only)
+            baseBudget: budget
         };
-    };
-
-    const triggerRefresh = () => {
-        setRefreshTrigger(prev => prev + 1);
     };
 
     return (
@@ -309,6 +168,7 @@ export const ExpenseProvider = ({ children }) => {
             expenses,
             budget,
             portfolioValue,
+            totalPortfolioValue,
             assets,
             rates,
             addExpense,
@@ -317,13 +177,16 @@ export const ExpenseProvider = ({ children }) => {
             updateExpense,
             updateBudget,
             getSummary,
-            refreshAssets,
+            refreshAssets, // Now just refetches dashboard
             clearAllExpenses,
             addAsset,
             deleteAsset,
             updateAsset,
-            triggerRefresh,
-            refreshTrigger
+            triggerRefresh, // Now just refetches dashboard
+            toggleBudgetInclude,
+            budgetIncluded: dashboardData?.budgetIncluded,
+            weddingDate: dashboardData?.weddingDate,
+            refreshTrigger: 0 // Mocked for compatibility
         }}>
             {children}
         </ExpenseContext.Provider>
