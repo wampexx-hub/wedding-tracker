@@ -28,7 +28,8 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
         budget: 0,
         weddingDate: null,
         assets: { gold: 0, usd: 0, tl: 0 },
-        portfolio: []
+        portfolio: [],
+        usersMap: {}
     });
 
     // Modals
@@ -136,6 +137,31 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
     };
 
     const categoryData = processCategoryData();
+
+    // Partner Breakdown Logic
+    const getPartnerBreakdown = () => {
+        if (!dashboardData.usersMap || Object.keys(dashboardData.usersMap).length === 0) return [];
+
+        const breakdown = {};
+        expenses.filter(e => e.status === 'purchased').forEach(e => {
+            // Use added_by if available (to track who actually added it), otherwise username
+            const userKey = e.added_by || e.username;
+            breakdown[userKey] = (breakdown[userKey] || 0) + Number(e.price);
+        });
+
+        return Object.entries(breakdown).map(([username, amount]) => {
+            const userDetails = dashboardData.usersMap[username] || { name: username };
+            return {
+                username,
+                name: userDetails.name + (userDetails.surname ? ' ' + userDetails.surname : ''),
+                avatar: userDetails.avatar,
+                amount,
+                percentage: totalSpent > 0 ? (amount / totalSpent) * 100 : 0
+            };
+        }).sort((a, b) => b.amount - a.amount);
+    };
+
+    const partnerBreakdown = getPartnerBreakdown();
 
     // Date Logic Helpers
     const getDaysDiff = (dateString) => {
@@ -531,6 +557,50 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
                     <TopSpendersCard expenses={expenses} />
                 </div>
             </div>
+
+            {/* Row 5: Partner Breakdown (Only if partnership exists) */}
+            {partnerBreakdown.length > 0 && (
+                <div className="mb-8">
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                                <TrendingUp size={20} />
+                            </div>
+                            <h3 className="font-serif text-xl font-bold text-gray-900">Partner Harcama Dağılımı</h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {partnerBreakdown.map((pUser) => (
+                                <div key={pUser.username} className="flex items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <div className="relative">
+                                        {pUser.avatar ? (
+                                            <img src={pUser.avatar} alt={pUser.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full bg-champagne text-white flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
+                                                {pUser.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div className="absolute -bottom-1 -right-1 bg-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-gray-100 shadow-sm text-gray-500">
+                                            %{Math.round(pUser.percentage)}
+                                        </div>
+                                    </div>
+
+                                    <div className="ml-4 flex-1">
+                                        <p className="font-medium text-gray-900">{pUser.name}</p>
+                                        <p className="text-sm text-gray-500">{pUser.username === user?.username ? '(Ben)' : ''}</p>
+                                    </div>
+
+                                    <div className="text-right">
+                                        <p className="font-bold text-gray-900 text-lg">
+                                            {pUser.amount.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 })}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
 
             {/* Category Detail Modal */}

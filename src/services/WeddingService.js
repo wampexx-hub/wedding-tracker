@@ -28,7 +28,8 @@ const WeddingService = {
                 budget: data.budget || 0,
                 weddingDate: data.weddingDate || null,
                 assets: data.assets || [],
-                portfolio: portfolioData.portfolio || []
+                portfolio: portfolioData.portfolio || [],
+                usersMap: data.usersMap || {}
             };
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
@@ -156,6 +157,19 @@ const WeddingService = {
                 TAM: 20400,
                 CUMHURIYET: 21000
             };
+        }
+    },
+
+    // Get Pending Partnerships
+    getPendingPartnerships: async (username) => {
+        try {
+            const response = await fetch(`${WeddingService.API_URL}/api/partnership/pending?username=${username}`);
+            if (!response.ok) throw new Error('Failed to fetch pending partnerships');
+            const data = await response.json();
+            return data.invitations || [];
+        } catch (error) {
+            console.error('Error fetching pending partnerships:', error);
+            return [];
         }
     }
 };

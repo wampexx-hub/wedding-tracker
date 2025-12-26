@@ -1,0 +1,57 @@
+2025-12-22T18:45:08: [dotenv@17.2.3] injecting env (9) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+2025-12-22T18:45:09: [dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2025-12-22T18:45:09: Server running on http://localhost:3001
+2025-12-22T18:49:47: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2025-12-22T18:49:47: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2025-12-22T18:49:47: Server running on http://localhost:3001
+2025-12-22T19:02:02: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2025-12-22T19:02:02: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2025-12-22T19:02:03: Server running on http://localhost:3001
+2025-12-22T19:04:44: [dotenv@17.2.3] injecting env (9) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+2025-12-22T19:04:45: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2025-12-22T19:04:45: Server running on http://localhost:3001
+2025-12-22T19:07:53: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2025-12-22T19:07:54: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2025-12-22T19:07:54: Server running on http://localhost:3001
+2025-12-22T19:16:13: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2025-12-22T19:16:14: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2025-12-22T19:16:14: Server running on http://localhost:3001
+2025-12-22T19:21:03: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2025-12-22T19:21:04: [dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2025-12-22T19:21:04: Server running on http://localhost:3001
+2025-12-22T19:24:15: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2025-12-22T19:24:15: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+2025-12-22T19:24:16: Server running on http://localhost:3001
+2025-12-22T22:37:11: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2025-12-22T22:37:12: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2025-12-22T22:37:12: Server running on http://localhost:3001
+2025-12-22T22:41:45: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2025-12-22T22:41:45: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2025-12-22T22:41:45: Server running on http://localhost:3001
+2025-12-22T22:47:33: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2025-12-22T22:47:34: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2025-12-22T22:47:34: Server running on http://localhost:3001
+2025-12-22T22:56:56: [dotenv@17.2.3] injecting env (9) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+2025-12-22T22:56:56: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2025-12-22T22:56:57: Server running on http://localhost:3001
+2025-12-22T23:09:47: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+2025-12-22T23:09:48: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2025-12-22T23:09:48: Server running on http://localhost:3001
+2025-12-26T09:32:33: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2025-12-26T09:32:34: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2025-12-26T09:32:34: Server running on http://localhost:3001
+2025-12-26T10:02:32: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2025-12-26T10:02:33: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2025-12-26T10:02:33: Server running on http://localhost:3001
+2025-12-26T10:05:58: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2025-12-26T10:05:58: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2025-12-26T10:05:59: Server running on http://localhost:3001
+2025-12-26T10:08:25: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2025-12-26T10:08:26: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2025-12-26T10:08:26: Server running on http://localhost:3001
+2025-12-26T10:14:21: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2025-12-26T10:14:21: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+2025-12-26T10:14:22: Server running on http://localhost:3001
+2025-12-26T10:28:04: [dotenv@17.2.3] injecting env (9) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2025-12-26T10:28:05: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2025-12-26T10:28:05: Server running on http://localhost:3001

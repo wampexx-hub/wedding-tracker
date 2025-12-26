@@ -1,0 +1,285 @@
+2025-12-22T18:45:09: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T18:49:47: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T19:02:03: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T19:04:45: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T19:07:54: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T19:16:14: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T19:21:04: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T19:24:16: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T22:37:12: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T22:41:45: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T22:47:34: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T22:56:57: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-22T23:09:48: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-26T09:20:31: Error: data and hash arguments required
+    at Object.compare (/var/www/wedding-tracker/server/node_modules/bcrypt/bcrypt.js:204:17)
+    at /var/www/wedding-tracker/server/node_modules/bcrypt/promises.js:26:12
+    at new Promise (<anonymous>)
+    at Object.promise (/var/www/wedding-tracker/server/node_modules/bcrypt/promises.js:17:12)
+    at Object.compare (/var/www/wedding-tracker/server/node_modules/bcrypt/bcrypt.js:200:25)
+    at /var/www/wedding-tracker/server/server.js:196:34
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-12-26T09:32:34: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-26T10:02:33: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-26T10:03:29: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy2, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:03:39: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy3, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:05:59: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-26T10:06:06: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy3, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:06:29: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy2, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:06:41: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy2, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:08:26: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-26T10:10:21: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy3, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:10:23: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy2, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:10:27: error: null value in column "added_by" of relation "budgets" violates not-null constraint
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:549:9 {
+  length: 222,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (dummy3, 0.00, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'budgets',
+  column: 'added_by',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2057',
+  routine: 'ExecConstraints'
+}
+2025-12-26T10:14:22: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2025-12-26T10:26:08: Partnership invite error: error: duplicate key value violates unique constraint "unique_partnership"
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:916:9 {
+  length: 244,
+  severity: 'ERROR',
+  code: '23505',
+  detail: 'Key (user1_username, user2_username)=(dummy2, dummy3) already exists.',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'partnerships',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'unique_partnership',
+  file: 'nbtinsert.c',
+  line: '666',
+  routine: '_bt_check_unique'
+}
+2025-12-26T10:26:19: Partnership invite error: error: duplicate key value violates unique constraint "unique_partnership"
+    at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /var/www/wedding-tracker/server/server.js:916:9 {
+  length: 244,
+  severity: 'ERROR',
+  code: '23505',
+  detail: 'Key (user1_username, user2_username)=(dummy2, dummy3) already exists.',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'partnerships',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'unique_partnership',
+  file: 'nbtinsert.c',
+  line: '666',
+  routine: '_bt_check_unique'
+}
+2025-12-26T10:28:05: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.

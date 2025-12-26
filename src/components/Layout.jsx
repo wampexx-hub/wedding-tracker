@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, PlusCircle, List, Heart, LogOut, Edit3, Calendar, Wallet, CheckCircle, Coins, TrendingUp, HelpCircle, PlayCircle, Users } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, List, Heart, LogOut, Edit3, Calendar, Wallet, CheckCircle, Coins, TrendingUp, HelpCircle, PlayCircle, Users, Bell, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useExpenses } from '../context/ExpenseContext';
 import FloatingAddExpense from './FloatingAddExpense';
+import WeddingService from '../services/WeddingService';
 import { useNavigate } from 'react-router-dom';
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -15,6 +16,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
   const [tempBudget, setTempDate] = useState(summary.budget);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState([]);
   const navigate = useNavigate();
 
   // Update summary when budget, portfolio, expenses, or refreshTrigger changes
@@ -23,6 +25,17 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
     setSummary(newSummary);
     setTempDate(newSummary.budget);
   }, [refreshTrigger, budget, portfolioValue, expenses]);
+
+  // Fetch Pending Invites
+  useEffect(() => {
+    const fetchInvites = async () => {
+      if (user?.username) {
+        const invites = await WeddingService.getPendingPartnerships(user.username);
+        setPendingInvites(invites || []);
+      }
+    };
+    fetchInvites();
+  }, [user]);
 
   // Tour Logic
   const startDashboardTour = (force = false) => {
@@ -198,6 +211,47 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
 
   const assetDetails = getAssetDetails();
 
+  // Notification Component (UntitledUI Style)
+  const NotificationCard = ({ invite }) => (
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+      <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button onClick={() => setPendingInvites(prev => prev.filter(i => i.id !== invite.id))} className="text-gray-400 hover:text-gray-600">
+          <X size={14} />
+        </button>
+      </div>
+      <div className="flex gap-3">
+        <div className="mt-1">
+          <div className="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 ring-4 ring-yellow-50/50">
+            <Bell size={14} />
+          </div>
+        </div>
+        <div className="flex-1">
+          <h4 className="text-sm font-semibold text-gray-900 leading-tight mb-1">Yeni Davet</h4>
+          <p className="text-xs text-gray-600 leading-relaxed mb-3">
+            <span className="font-medium text-gray-900">{invite.inviterName}</span> seni partneri olarak eklemek istiyor.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setActiveTab('partner');
+                if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+              }}
+              className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-[10px] font-medium rounded-lg transition-colors shadow-sm"
+            >
+              Görüntüle
+            </button>
+            <button
+              onClick={() => setPendingInvites(prev => prev.filter(i => i.id !== invite.id))}
+              className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 hover:text-gray-800 text-[10px] font-medium rounded-lg transition-colors"
+            >
+              Kapat
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex min-h-screen bg-[#FDFBF7]" >
       {/* Mobile Overlay */}
@@ -274,7 +328,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
             {/* Navigation */}
             <nav className="space-y-2 mb-8">
               {navItems.map(item => (
-                <div key={item.id}>
+                <div key={item.id} className="relative">
                   <button
                     id={`tour-nav-${item.id}`}
                     onClick={() => {
@@ -290,14 +344,26 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
                   >
                     <item.icon size={20} className={activeTab === item.id ? 'text-champagne' : 'text-gray-400 group-hover:text-gray-600'} />
                     {item.label}
+                    {item.id === 'partner' && pendingInvites.length > 0 && (
+                      <span className="absolute right-3 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse shadow-sm">
+                        {pendingInvites.length}
+                      </span>
+                    )}
                   </button>
                 </div>
               ))}
             </nav>
           </div>
 
-          {/* Sticky Bottom: Tour & Logout */}
+          {/* Sticky Bottom: Notification & Tour & Logout */}
           <div className="p-4 border-t border-gray-100 pb-safe space-y-2">
+            {/* Desktop Notification (Sidebar) */}
+            {pendingInvites.length > 0 && (
+              <div className="mb-4 animate-in slide-in-from-bottom-5 duration-500">
+                <NotificationCard invite={pendingInvites[0]} />
+              </div>
+            )}
+
             <button
               onClick={() => startDashboardTour(true)}
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 group"
@@ -320,6 +386,37 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
       {/* Main Content */}
       <main className="flex-1 lg:ml-0 flex flex-col h-screen overflow-hidden">
         <div id="main-content" className="flex-1 p-4 md:p-8 pb-32 md:pb-8 max-w-[1600px] mx-auto w-full overflow-y-auto">
+          {/* Mobile Notification */}
+          {pendingInvites.length > 0 && (
+            <div className="lg:hidden mb-6 animate-in slide-in-from-top-5 duration-500">
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex gap-3 items-start">
+                <div className="p-2 bg-yellow-50 rounded-full text-yellow-600 shrink-0">
+                  <Bell size={18} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-gray-900 mb-1">Davetin Var! ✨</h4>
+                  <p className="text-xs text-gray-600 mb-2">
+                    <span className="font-medium text-gray-900">{pendingInvites[0].inviterName}</span> seni düğün planına eklemek istiyor.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setActiveTab('partner')}
+                      className="px-4 py-2 bg-yellow-500 text-white text-xs font-medium rounded-lg shadow-sm w-full"
+                    >
+                      İncele
+                    </button>
+                    <button
+                      onClick={() => setPendingInvites(prev => prev.filter(i => i.id !== pendingInvites[0].id))}
+                      className="px-4 py-2 bg-gray-50 text-gray-600 text-xs font-medium rounded-lg w-full"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Mobile Header */}
           <div className="lg:hidden flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
@@ -387,6 +484,9 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
           >
             <item.icon size={24} />
             <span className="text-[10px] font-medium">{item.label}</span>
+            {item.id === 'partner' && pendingInvites.length > 0 && (
+              <span className="absolute top-2 right-4 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+            )}
           </button>
         ))}
 
@@ -431,6 +531,9 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
           >
             <item.icon size={24} />
             <span className="text-[10px] font-medium">{item.label}</span>
+            {item.id === 'partner' && pendingInvites.length > 0 && (
+              <span className="absolute top-2 right-4 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+            )}
           </button>
         ))}
       </div>

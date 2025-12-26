@@ -194,8 +194,10 @@ app.post('/api/auth/login', async (req, res) => {
         const user = result.rows[0];
 
         if (user && await bcrypt.compare(password, user.password)) {
-            const { password: _, ...userWithoutPassword } = user;
-            res.json({ success: true, user: userWithoutPassword });
+            const { password: _, is_admin, ...userWithoutPassword } = user;
+            // Normalize to camelCase
+            const userForClient = { ...userWithoutPassword, isAdmin: is_admin };
+            res.json({ success: true, user: userForClient });
         } else {
             res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
         }
@@ -210,7 +212,11 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/admin/users', async (req, res) => {
     try {
         const result = await db.query('SELECT username, name, surname, email, is_admin, created_at, google_id, avatar, wedding_date FROM users');
-        res.json(result.rows);
+        const users = result.rows.map(user => {
+            const { is_admin, ...rest } = user;
+            return { ...rest, isAdmin: is_admin };
+        });
+        res.json(users);
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -329,10 +335,33 @@ app.get('/api/data', async (req, res) => {
     if (!user) return res.status(400).json({ error: 'User required' });
 
     try {
-        // Get user's partner info
-        const userInfo = await db.query('SELECT partner_username, partnership_id FROM users WHERE username = $1', [user]);
-        const partnerUsername = userInfo.rows[0]?.partner_username;
-        const partnershipId = userInfo.rows[0]?.partnership_id;
+        // Get user's partner info and details
+        const userInfo = await db.query('SELECT partner_username, partnership_id, name, surname, avatar FROM users WHERE username = $1', [user]);
+        const currentUser = userInfo.rows[0];
+        const partnerUsername = currentUser?.partner_username;
+        const partnershipId = currentUser?.partnership_id;
+
+        // Build Users Map for Frontend Display
+        const usersMap = {};
+        if (currentUser) {
+            usersMap[user] = {
+                name: currentUser.name || user,
+                surname: currentUser.surname || '',
+                avatar: currentUser.avatar
+            };
+        }
+
+        if (partnerUsername) {
+            const partnerRes = await db.query('SELECT username, name, surname, avatar FROM users WHERE username = $1', [partnerUsername]);
+            const partner = partnerRes.rows[0];
+            if (partner) {
+                usersMap[partnerUsername] = {
+                    name: partner.name || partnerUsername,
+                    surname: partner.surname || '',
+                    avatar: partner.avatar
+                };
+            }
+        }
 
         // Query expenses - include partner's if partnership exists
         let expensesQuery = 'SELECT * FROM expenses WHERE username = $1';
@@ -345,15 +374,9 @@ app.get('/api/data', async (req, res) => {
 
         const expenses = await db.query(expensesQuery, expensesParams);
 
-        // Query budget
-        let budgetQuery = 'SELECT amount FROM budgets WHERE username = $1';
-        let budgetParams = [user];
-
-        if (partnerUsername && partnershipId) {
-            budgetQuery = 'SELECT amount FROM budgets WHERE partnership_id = $1';
-            budgetParams = [partnershipId];
-        }
-
+        // Query budget - Always use username, assuming 'Sync on Write' logic
+        const budgetQuery = 'SELECT amount FROM budgets WHERE username = $1';
+        const budgetParams = [user];
         const budget = await db.query(budgetQuery, budgetParams);
 
         // Query assets
@@ -367,9 +390,8 @@ app.get('/api/data', async (req, res) => {
 
         const assets = await db.query(assetsQuery, assetsParams);
 
-        const userData = await db.query('SELECT wedding_date, portfolio_budget_included, assets FROM users LEFT JOIN (SELECT username as u_name, json_agg(assets.*) as assets FROM assets GROUP BY username) a ON users.username = a.u_name WHERE username = $1', [user]);
         const installments = await db.query('SELECT data FROM installment_states WHERE username = $1', [user]);
-        const userRec = await db.query('SELECT wedding_date, portfolio_budget_included, partner_username FROM users WHERE username = $1', [user]);
+        const userRec = await db.query('SELECT wedding_date FROM users WHERE username = $1', [user]);
 
         res.json({
             expenses: expenses.rows.map(e => ({
@@ -386,7 +408,8 @@ app.get('/api/data', async (req, res) => {
                 value: parseFloat(a.value),
                 amount: parseFloat(a.amount)
             })),
-            installmentPayments: installments.rows[0]?.data || {}
+            installmentPayments: installments.rows[0]?.data || {},
+            usersMap // Return map of username -> {name, surname}
         });
     } catch (err) {
         console.error(err);
@@ -522,27 +545,68 @@ app.post('/api/budget', async (req, res) => {
     const { username, budget } = req.body;
     if (!username) return res.status(400).json({ error: 'User required' });
     try {
+        // Update user's budget
         await db.query(
-            `INSERT INTO budgets (username, amount) VALUES ($1, $2)
+            `INSERT INTO budgets (username, amount, added_by) VALUES ($1, $2, $1)
              ON CONFLICT (username) DO UPDATE SET amount = $2`,
             [username, budget]
         );
+
+        // Sync with partner if exists
+        const userInfo = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        const partnerUsername = userInfo.rows[0]?.partner_username;
+
+        if (partnerUsername) {
+            await db.query(
+                `INSERT INTO budgets (username, amount, added_by) VALUES ($1, $2, $1)
+                 ON CONFLICT (username) DO UPDATE SET amount = $2`,
+                [partnerUsername, budget]
+            );
+        }
+
         res.json({ success: true, budget: Number(budget) });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
 // Helper to recalculate budget based on Cash assets
 const recalculateBudget = async (username) => {
-    const res = await db.query("SELECT SUM(value) as total FROM assets WHERE username = $1 AND category = 'Nakit'", [username]);
-    const cashTotal = parseFloat(res.rows[0].total || 0);
+    // Get partnership info
+    const userRes = await db.query('SELECT partner_username, partnership_id FROM users WHERE username = $1', [username]);
+    const partnerUsername = userRes.rows[0]?.partner_username;
+    const partnershipId = userRes.rows[0]?.partnership_id;
 
+    // Calculate total cash assets (Personal + Partner's if exists)
+    let cashTotal = 0;
+    if (partnerUsername && partnershipId) {
+        const res = await db.query(
+            "SELECT SUM(value) as total FROM assets WHERE (username = $1 OR partnership_id = $2) AND category = 'Nakit'",
+            [username, partnershipId]
+        );
+        cashTotal = parseFloat(res.rows[0].total || 0);
+    } else {
+        const res = await db.query("SELECT SUM(value) as total FROM assets WHERE username = $1 AND category = 'Nakit'", [username]);
+        cashTotal = parseFloat(res.rows[0].total || 0);
+    }
+
+    // Update user's budget
     await db.query(
-        `INSERT INTO budgets (username, amount) VALUES ($1, $2)
+        `INSERT INTO budgets (username, amount, added_by) VALUES ($1, $2, $1)
          ON CONFLICT (username) DO UPDATE SET amount = $2`,
         [username, cashTotal]
     );
+
+    // Sync with partner
+    if (partnerUsername) {
+        await db.query(
+            `INSERT INTO budgets (username, amount, added_by) VALUES ($1, $2, $1)
+             ON CONFLICT (username) DO UPDATE SET amount = $2`,
+            [partnerUsername, cashTotal]
+        );
+    }
+
     return cashTotal;
 };
 
@@ -619,14 +683,26 @@ app.delete('/api/assets/:id', async (req, res) => {
 app.get('/api/portfolio/:username', async (req, res) => {
     const { username } = req.params;
     try {
-        const pRes = await db.query('SELECT * FROM portfolio WHERE username = $1', [username]);
-        const uRes = await db.query('SELECT portfolio_budget_included FROM users WHERE username = $1', [username]);
+        // Get user info and partner
+        const userRes = await db.query('SELECT portfolio_budget_included, partner_username FROM users WHERE username = $1', [username]);
+        if (userRes.rowCount === 0) return res.status(404).json({ error: 'User not found' });
 
-        if (uRes.rowCount === 0) return res.status(404).json({ error: 'User not found' });
+        const { portfolio_budget_included, partner_username } = userRes.rows[0];
+
+        // Fetch portfolio items for user AND partner
+        let query = 'SELECT * FROM portfolio WHERE username = $1';
+        let params = [username];
+
+        if (partner_username) {
+            query = 'SELECT * FROM portfolio WHERE username = $1 OR username = $2';
+            params = [username, partner_username];
+        }
+
+        const pRes = await db.query(query, params);
 
         res.json({
             portfolio: pRes.rows.map(p => ({ ...p, amount: parseFloat(p.amount), addedAt: p.added_at })),
-            budgetIncluded: uRes.rows[0].portfolio_budget_included
+            budgetIncluded: portfolio_budget_included
         });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -714,6 +790,15 @@ app.post('/api/wedding-date', async (req, res) => {
     const { username, date } = req.body;
     try {
         await db.query('UPDATE users SET wedding_date = $1 WHERE username = $2', [date, username]);
+
+        // Sync with partner
+        const userInfo = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
+        const partnerUsername = userInfo.rows[0]?.partner_username;
+
+        if (partnerUsername) {
+            await db.query('UPDATE users SET wedding_date = $1 WHERE username = $2', [date, partnerUsername]);
+        }
+
         res.json({ success: true, date });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -735,6 +820,12 @@ app.put('/api/user/complete-profile', async (req, res) => {
         if (result.rowCount > 0) {
             const user = result.rows[0];
             const { password: _, ...userWithoutPassword } = user;
+
+            // Sync with partner
+            if (user.partner_username) {
+                await db.query('UPDATE users SET wedding_date = $1 WHERE username = $2', [weddingDate, user.partner_username]);
+            }
+
             res.json({ success: true, user: userWithoutPassword });
         } else {
             res.status(404).json({ error: 'User not found' });
@@ -818,6 +909,18 @@ app.post('/api/partnership/invite', async (req, res) => {
                 return res.status(400).json({ error: 'Bu kullanıcıya zaten bir davet gönderilmiş.' });
             } else if (status === 'active') {
                 return res.status(400).json({ error: 'Bu kullanıcıyla zaten ortaksınız.' });
+            } else {
+                // Status is 'declined' or other (cancelled etc.) -> Re-invite (Update existing row)
+                await db.query(
+                    'UPDATE partnerships SET status = $1, invited_by = $2, created_at = NOW() WHERE id = $3',
+                    ['pending', username, existingInvite.rows[0].id]
+                );
+
+                return res.json({
+                    success: true,
+                    message: `${partnerRes.rows[0].name} ${partnerRes.rows[0].surname} kullanıcısına (tekrar) davet gönderildi.`,
+                    partnerName: `${partnerRes.rows[0].name} ${partnerRes.rows[0].surname}`
+                });
             }
         }
 
