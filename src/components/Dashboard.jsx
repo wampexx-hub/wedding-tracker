@@ -452,7 +452,7 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
             {/* Charts Area */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Donut Chart - Categories */}
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+                <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center relative">
                     <div className="w-full flex justify-between items-center mb-8">
                         <h3 className="font-serif text-xl font-bold text-gray-900">Kategori Dağılımı</h3>
                         <button

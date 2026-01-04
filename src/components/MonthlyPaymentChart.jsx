@@ -4,17 +4,6 @@ import { Calendar } from 'lucide-react';
 
 const MonthlyPaymentChart = ({ expenses }) => {
     const [activeIndex, setActiveIndex] = useState(null);
-    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
-
-    React.useEffect(() => {
-        const handleResize = () => {
-            setIsDesktop(window.innerWidth >= 768);
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
     // Helper to get next 6 months
     const getNext6Months = () => {
         const months = [];
@@ -33,7 +22,7 @@ const MonthlyPaymentChart = ({ expenses }) => {
         const monthName = monthDate.toLocaleString('tr-TR', { month: 'long' });
 
         const totalAmount = expenses
-            .filter(e => e.status === 'purchased') // Only purchased expenses
+            .filter(e => e.status === 'purchased')
             .reduce((acc, expense) => {
                 if (!expense.isInstallment || !expense.installmentCount) return acc;
 
@@ -75,7 +64,7 @@ const MonthlyPaymentChart = ({ expenses }) => {
                 </div>
             </div>
 
-            {/* Mobile View: Wallet Style List */}
+            {/* Mobile View: List */}
             <div className="block md:hidden space-y-0 divide-y divide-gray-100">
                 {data.map((item, index) => (
                     <div key={index} className="flex items-center justify-between py-3">
@@ -95,78 +84,77 @@ const MonthlyPaymentChart = ({ expenses }) => {
                         </div>
                     </div>
                 ))}
-                {data.every(d => d.amount === 0) && (
-                    <p className="text-center text-gray-400 text-sm py-4">Gelecek ödeme bulunmuyor.</p>
-                )}
             </div>
 
             {/* Desktop View: Bar Chart */}
-            {isDesktop && (
-                <div className="w-full relative z-10">
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart
-                            data={data}
-                            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                            onMouseMove={(state) => {
-                                if (state.isTooltipActive) {
-                                    setActiveIndex(state.activeTooltipIndex);
-                                } else {
-                                    setActiveIndex(null);
+            <div className="hidden md:block w-full">
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                        data={data}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                        onMouseMove={(state) => {
+                            if (state.isTooltipActive) {
+                                setActiveIndex(state.activeTooltipIndex);
+                            } else {
+                                setActiveIndex(null);
+                            }
+                        }}
+                        onMouseLeave={() => setActiveIndex(null)}
+                    >
+                        <defs>
+                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#D4AF37" stopOpacity={1} />
+                                <stop offset="100%" stopColor="#f4d03f" stopOpacity={0.8} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                        <XAxis
+                            dataKey="name"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#9ca3af', fontSize: 12 }}
+                            dy={10}
+                        />
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#9ca3af', fontSize: 12 }}
+                            tickFormatter={(value) => `₺${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`}
+                        />
+                        <Tooltip
+                            wrapperStyle={{ zIndex: 1000 }}
+                            cursor={false}
+                            content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                    return (
+                                        <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-100 text-sm relative z-50">
+                                            <p className="font-medium text-gray-900">{payload[0].payload.name}</p>
+                                            <p className="text-[#D4AF37] font-bold">
+                                                {payload[0].value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 })}
+                                            </p>
+                                        </div>
+                                    );
                                 }
+                                return null;
                             }}
-                            onMouseLeave={() => setActiveIndex(null)}
+                        />
+                        <Bar
+                            dataKey="amount"
+                            radius={[8, 8, 0, 0]}
+                            maxBarSize={50}
                         >
-                            <defs>
-                                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={1} />
-                                    <stop offset="100%" stopColor="#f4d03f" stopOpacity={0.8} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                            <XAxis
-                                dataKey="name"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#9ca3af', fontSize: 12 }}
-                                dy={10}
-                            />
-                            <YAxis
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: '#9ca3af', fontSize: 12 }}
-                                tickFormatter={(value) => `₺${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`}
-                            />
-                            <Tooltip
-                                wrapperStyle={{ zIndex: 1000 }}
-                                cursor={{ fill: '#f9fafb' }}
-                                content={({ active, payload }) => {
-                                    if (active && payload && payload.length) {
-                                        return (
-                                            <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-100 text-sm relative z-50">
-                                                <p className="font-medium text-gray-900">{payload[0].payload.name}</p>
-                                                <p className="text-[#D4AF37] font-bold">
-                                                    {payload[0].value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 })}
-                                                </p>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                }}
-                            />
-                            <Bar dataKey="amount" radius={[8, 8, 0, 0]} maxBarSize={50}>
-                                {data.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={activeIndex === null || activeIndex === index ? "url(#barGradient)" : "#e5e7eb"}
-                                        opacity={activeIndex === null || activeIndex === index ? 1 : 0.3}
-                                        style={{ transition: 'all 0.3s ease' }}
-                                    />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            )}
+                            {data.map((entry, index) => (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={activeIndex === null || activeIndex === index ? "url(#barGradient)" : "#e5e7eb"}
+                                    opacity={activeIndex === null || activeIndex === index ? 1 : 0.3}
+                                    style={{ transition: 'all 0.3s ease' }}
+                                />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
 
             {peakMonth.amount > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-50 text-center">

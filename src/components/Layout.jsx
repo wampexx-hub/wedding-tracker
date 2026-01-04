@@ -418,70 +418,72 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
 
       {/* Main Content */}
       <main className="flex-1 lg:ml-0 flex flex-col h-screen overflow-hidden">
-        <div id="main-content" className="flex-1 p-4 md:p-8 pb-32 md:pb-8 max-w-[1600px] mx-auto w-full overflow-y-auto">
-          {/* Mobile Notification */}
-          {pendingInvites.length > 0 && (
-            <div className="lg:hidden mb-6 animate-in slide-in-from-top-5 duration-500">
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex gap-3 items-start">
-                <div className="p-2 bg-yellow-50 rounded-full text-yellow-600 shrink-0">
-                  <Bell size={18} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-bold text-gray-900 mb-1">Davetin Var! ✨</h4>
-                  <p className="text-xs text-gray-600 mb-2">
-                    <span className="font-medium text-gray-900">{pendingInvites[0].inviterName}</span> seni düğün planına eklemek istiyor.
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setActiveTab('partner')}
-                      className="px-4 py-2 bg-yellow-500 text-white text-xs font-medium rounded-lg shadow-sm w-full"
-                    >
-                      İncele
-                    </button>
-                    <button
-                      onClick={() => setPendingInvites(prev => prev.filter(i => i.id !== pendingInvites[0].id))}
-                      className="px-4 py-2 bg-gray-50 text-gray-600 text-xs font-medium rounded-lg w-full"
-                    >
-                      Kapat
-                    </button>
+        <div id="main-content" className="flex-1 w-full overflow-y-auto">
+          <div className="p-4 md:p-8 pb-32 md:pb-8 max-w-[1600px] mx-auto w-full">
+            {/* Mobile Notification */}
+            {pendingInvites.length > 0 && (
+              <div className="lg:hidden mb-6 animate-in slide-in-from-top-5 duration-500">
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex gap-3 items-start">
+                  <div className="p-2 bg-yellow-50 rounded-full text-yellow-600 shrink-0">
+                    <Bell size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-gray-900 mb-1">Davetin Var! ✨</h4>
+                    <p className="text-xs text-gray-600 mb-2">
+                      <span className="font-medium text-gray-900">{pendingInvites[0].inviterName}</span> seni düğün planına eklemek istiyor.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setActiveTab('partner')}
+                        className="px-4 py-2 bg-yellow-500 text-white text-xs font-medium rounded-lg shadow-sm w-full"
+                      >
+                        İncele
+                      </button>
+                      <button
+                        onClick={() => setPendingInvites(prev => prev.filter(i => i.id !== pendingInvites[0].id))}
+                        className="px-4 py-2 bg-gray-50 text-gray-600 text-xs font-medium rounded-lg w-full"
+                      >
+                        Kapat
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Mobile Header */}
-          <div className="lg:hidden flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-champagne to-champagne-dark rounded-lg flex items-center justify-center shadow-md">
-                <Heart className="text-white fill-white" size={16} />
+            {/* Mobile Header */}
+            <div className="lg:hidden flex justify-between items-center mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-champagne to-champagne-dark rounded-lg flex items-center justify-center shadow-md">
+                  <Heart className="text-white fill-white" size={16} />
+                </div>
+                <span className="font-serif text-lg font-bold text-gray-900">Düğün Bütçem</span>
               </div>
-              <span className="font-serif text-lg font-bold text-gray-900">Düğün Bütçem</span>
+
+              {/* Quick Actions (Mobile Only) */}
+              <div className="flex items-center gap-3">
+                {/* Restart Tour */}
+                <button
+                  onClick={() => startDashboardTour(true)}
+                  className="p-2 text-gray-400 hover:text-yellow-600 transition-colors rounded-lg hover:bg-yellow-50"
+                  title="Turu Yeniden Başlat"
+                >
+                  <PlayCircle size={20} />
+                </button>
+
+                {/* Logout */}
+                <button
+                  onClick={logout}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                  title="Çıkış Yap"
+                >
+                  <LogOut size={20} />
+                </button>
+              </div>
             </div>
 
-            {/* Quick Actions (Mobile Only) */}
-            <div className="flex items-center gap-3">
-              {/* Restart Tour */}
-              <button
-                onClick={() => startDashboardTour(true)}
-                className="p-2 text-gray-400 hover:text-yellow-600 transition-colors rounded-lg hover:bg-yellow-50"
-                title="Turu Yeniden Başlat"
-              >
-                <PlayCircle size={20} />
-              </button>
-
-              {/* Logout */}
-              <button
-                onClick={logout}
-                className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
-                title="Çıkış Yap"
-              >
-                <LogOut size={20} />
-              </button>
-            </div>
+            {children}
           </div>
-
-          {children}
         </div>
       </main>
 
