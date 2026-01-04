@@ -884,16 +884,9 @@ app.put('/api/portfolio/:username/budget-toggle', async (req, res) => {
     try {
         await db.query('UPDATE users SET portfolio_budget_included = $1 WHERE username = $2', [included, username]);
 
-        // Sync with partner
-        const userRes = await db.query('SELECT partner_username FROM users WHERE username = $1', [username]);
-        if (userRes.rows.length > 0 && userRes.rows[0].partner_username) {
-            await db.query('UPDATE users SET portfolio_budget_included = $1 WHERE username = $2', [included, userRes.rows[0].partner_username]);
-            // Notify partner to refresh
-            await req.notifyUser(userRes.rows[0].partner_username); // Notify partner
-        }
-
+        // Notify only the user who made the change
         await req.notifyUser(username);
-        res.json({ success: true, included });
+        res.json({ success: true });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });

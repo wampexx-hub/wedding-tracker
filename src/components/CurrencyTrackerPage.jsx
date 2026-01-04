@@ -91,6 +91,27 @@ const CurrencyTrackerPage = () => {
         note: ''
     });
 
+    // Display amount with thousand separators
+    const [displayAmount, setDisplayAmount] = useState('');
+
+    // Helper function to format number with thousand separators
+    const formatNumber = (value) => {
+        if (!value) return '';
+        // Remove all non-digit characters except decimal point
+        const cleanValue = value.toString().replace(/[^\d.]/g, '');
+        const parts = cleanValue.split('.');
+        // Add thousand separators to integer part
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return parts.join(','); // Use comma for decimal separator
+    };
+
+    // Helper function to parse formatted number back to raw value
+    const parseFormattedNumber = (formatted) => {
+        if (!formatted) return '';
+        // Remove thousand separators (dots) and replace decimal comma with dot
+        return formatted.replace(/\./g, '').replace(/,/g, '.');
+    };
+
     // Sync with Context
     useEffect(() => {
         if (contextPortfolio) {
@@ -319,7 +340,7 @@ const CurrencyTrackerPage = () => {
     const isValidAmount = quickAdd.amount && parseFloat(quickAdd.amount) > 0;
 
     // Helper to render individual asset card
-    const renderAssetCard = (asset) => {
+    const renderAssetCard = (asset, columnAssets = portfolio) => {
         const config = assetConfig[asset.type];
         const isCash = asset.type === 'TRY_CASH';
         const rate = isCash ? 1 : (rates?.[asset.type] || 0);
@@ -463,22 +484,30 @@ const CurrencyTrackerPage = () => {
 
                             {activeMenu === asset.id && (
                                 <>
-                                    <div className="absolute right-0 top-8 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <button
-                                            onClick={() => handleEditAsset(asset)}
-                                            className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 text-blue-600 flex items-center gap-2 transition-colors"
-                                        >
-                                            <Edit2 size={14} />
-                                            Düzenle
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteAsset(asset.id)}
-                                            className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 transition-colors"
-                                        >
-                                            <Trash2 size={14} />
-                                            Sil
-                                        </button>
-                                    </div>
+                                    {/* Dynamic positioning: last 2 cards open upward, others downward */}
+                                    {(() => {
+                                        const assetIndex = columnAssets.findIndex(a => a.id === asset.id);
+                                        const isNearBottom = assetIndex >= columnAssets.length - 2;
+
+                                        return (
+                                            <div className={`absolute right-0 ${isNearBottom ? 'bottom-8' : 'top-8'} z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] animate-in fade-in ${isNearBottom ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'} duration-200`}>
+                                                <button
+                                                    onClick={() => handleEditAsset(asset)}
+                                                    className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 text-blue-600 flex items-center gap-2 transition-colors"
+                                                >
+                                                    <Edit2 size={14} />
+                                                    Düzenle
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteAsset(asset.id)}
+                                                    className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 transition-colors"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Sil
+                                                </button>
+                                            </div>
+                                        );
+                                    })()}
                                     <div
                                         className="fixed inset-0 z-40"
                                         onClick={() => setActiveMenu(null)}
@@ -813,12 +842,20 @@ const CurrencyTrackerPage = () => {
                     {/* 2. Stacked Input Zone (Amount & Note) */}
                     < div className="flex-1 flex flex-col items-end justify-center gap-0" >
                         {/* Amount Input */}
-                        < input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={quickAdd.amount}
-                            onChange={(e) => setQuickAdd({ ...quickAdd, amount: e.target.value })}
+                        <input
+                            type="text"
+                            value={displayAmount}
+                            onChange={(e) => {
+                                const formatted = e.target.value;
+                                setDisplayAmount(formatted);
+                                const rawValue = parseFormattedNumber(formatted);
+                                setQuickAdd({ ...quickAdd, amount: rawValue });
+                            }}
+                            onBlur={(e) => {
+                                // Format on blur
+                                const formatted = formatNumber(quickAdd.amount);
+                                setDisplayAmount(formatted);
+                            }}
                             onKeyPress={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     handleQuickAdd(e);
@@ -888,29 +925,37 @@ const CurrencyTrackerPage = () => {
                         </div >
 
                         {/* Center: Amount Input */}
-                        < div className="flex-1" >
+                        <div className="flex-1 flex items-center">
                             <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={quickAdd.amount}
-                                onChange={(e) => setQuickAdd({ ...quickAdd, amount: e.target.value })}
+                                type="text"
+                                value={displayAmount}
+                                onChange={(e) => {
+                                    const formatted = e.target.value;
+                                    setDisplayAmount(formatted);
+                                    const rawValue = parseFormattedNumber(formatted);
+                                    setQuickAdd({ ...quickAdd, amount: rawValue });
+                                }}
+                                onBlur={(e) => {
+                                    // Format on blur
+                                    const formatted = formatNumber(quickAdd.amount);
+                                    setDisplayAmount(formatted);
+                                }}
                                 placeholder="0"
                                 className="w-full bg-transparent border-none text-center text-xl font-bold text-gray-900 placeholder-gray-300 focus:ring-0 p-0"
                             />
                         </div >
 
-                        {/* Right: Add Button (Square) */}
-                        < button
+                        {/* Right: Action Button */}
+                        <button
                             type="submit"
                             disabled={!isValidAmount}
-                            className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-md flex items-center justify-center transition-all duration-200 ${isValidAmount
-                                ? 'active:scale-95'
-                                : 'opacity-50 cursor-not-allowed'
+                            className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center transition-all ${isValidAmount
+                                ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-md active:scale-95'
+                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
-                            <Plus size={20} strokeWidth={3} />
-                        </button >
+                            <Plus size={20} strokeWidth={2.5} />
+                        </button>
                     </div >
 
                     {/* Bottom Row: Note Input (Gray Bg) */}
@@ -940,10 +985,12 @@ const CurrencyTrackerPage = () => {
                         Nakit Varlıklar
                     </h3>
                     <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-100 overflow-hidden md:bg-transparent md:shadow-none md:divide-y-0 md:space-y-4">
-                        {portfolio
-                            .filter(a => a.type === 'TRY_CASH')
-                            .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt))
-                            .map(asset => renderAssetCard(asset))}
+                        {(() => {
+                            const cashAssets = portfolio
+                                .filter(a => a.type === 'TRY_CASH')
+                                .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+                            return cashAssets.map(asset => renderAssetCard(asset, cashAssets));
+                        })()}
                     </div>
                     {
                         portfolio.filter(a => a.type === 'TRY_CASH').length === 0 && (
@@ -961,10 +1008,12 @@ const CurrencyTrackerPage = () => {
                         Döviz Varlıkları
                     </h3>
                     <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-100 overflow-hidden md:bg-transparent md:shadow-none md:divide-y-0 md:space-y-4">
-                        {portfolio
-                            .filter(a => ['USD', 'EUR', 'GBP'].includes(a.type))
-                            .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt))
-                            .map(asset => renderAssetCard(asset))}
+                        {(() => {
+                            const forexAssets = portfolio
+                                .filter(a => ['USD', 'EUR', 'GBP'].includes(a.type))
+                                .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+                            return forexAssets.map(asset => renderAssetCard(asset, forexAssets));
+                        })()}
                     </div>
                     {
                         portfolio.filter(a => ['USD', 'EUR', 'GBP'].includes(a.type)).length === 0 && (
@@ -982,10 +1031,12 @@ const CurrencyTrackerPage = () => {
                         Altın Varlıkları
                     </h3>
                     <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-100 overflow-hidden md:bg-transparent md:shadow-none md:divide-y-0 md:space-y-4">
-                        {portfolio
-                            .filter(a => ['GRAM', 'CEYREK', 'YARIM', 'TAM'].includes(a.type))
-                            .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt))
-                            .map(asset => renderAssetCard(asset))}
+                        {(() => {
+                            const goldAssets = portfolio
+                                .filter(a => ['GRAM', 'CEYREK', 'YARIM', 'TAM'].includes(a.type))
+                                .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+                            return goldAssets.map(asset => renderAssetCard(asset, goldAssets));
+                        })()}
                     </div>
                     {
                         portfolio.filter(a => ['GRAM', 'CEYREK', 'YARIM', 'TAM'].includes(a.type)).length === 0 && (
