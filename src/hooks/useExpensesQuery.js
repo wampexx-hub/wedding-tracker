@@ -23,7 +23,7 @@ export const useExchangeRates = () => {
     return useQuery({
         queryKey: ['rates'],
         queryFn: () => WeddingService.getExchangeRates(),
-        staleTime: 1000 * 60 * 60, // 1 hour for rates is enough usually
+        staleTime: 1000 * 60 * 60 * 6, // 6 hours to match backend cache schedule
     });
 };
 

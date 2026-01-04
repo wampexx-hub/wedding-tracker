@@ -436,13 +436,18 @@ app.get('/api/data', async (req, res) => {
             }
         }
 
-        // Query expenses - include partner's if partnership exists
+        // Query expenses - Include partner's expenses
         let expensesQuery = 'SELECT * FROM expenses WHERE username = $1';
         let expensesParams = [user];
 
-        if (partnerUsername && partnershipId) {
-            expensesQuery = 'SELECT * FROM expenses WHERE partnership_id = $1';
-            expensesParams = [partnershipId];
+        if (partnerUsername) {
+            // Fetch everything belonging to either user, regardless of partnership_id being set on old records
+            expensesQuery = 'SELECT * FROM expenses WHERE username IN ($1, $2)';
+            expensesParams = [user, partnerUsername];
+        } else if (partnershipId) {
+            // Fallback to partnership ID if we only have that
+            expensesQuery = 'SELECT * FROM expenses WHERE partnership_id = $1 OR username = $2';
+            expensesParams = [partnershipId, user];
         }
 
         const expenses = await db.query(expensesQuery, expensesParams);
@@ -463,6 +468,17 @@ app.get('/api/data', async (req, res) => {
 
         const assets = await db.query(assetsQuery, assetsParams);
 
+        // Query portfolio (Döviz & Altın)
+        let portfolioQuery = 'SELECT * FROM portfolio WHERE username = $1';
+        let portfolioParams = [user];
+
+        if (partnerUsername) {
+            portfolioQuery = 'SELECT * FROM portfolio WHERE username IN ($1, $2)';
+            portfolioParams = [user, partnerUsername];
+        }
+
+        const portfolio = await db.query(portfolioQuery, portfolioParams);
+
         const installments = await db.query('SELECT data FROM installment_states WHERE username = $1', [user]);
         const userRec = await db.query('SELECT wedding_date FROM users WHERE username = $1', [user]);
 
@@ -480,6 +496,10 @@ app.get('/api/data', async (req, res) => {
                 ...a,
                 value: parseFloat(a.value),
                 amount: parseFloat(a.amount)
+            })),
+            portfolio: portfolio.rows.map(p => ({
+                ...p,
+                amount: parseFloat(p.amount)
             })),
             installmentPayments: installments.rows[0]?.data || {},
             usersMap // Return map of username -> {name, surname}
@@ -1090,6 +1110,14 @@ app.post('/api/partnership/invite', async (req, res) => {
             message: `${partnerRes.rows[0].name} ${partnerRes.rows[0].surname} kullanıcısına davet gönderildi.`,
             partnerName: `${partnerRes.rows[0].name} ${partnerRes.rows[0].surname}`
         });
+
+        // Real-time Notification for Invitation
+        if (req.io) {
+            req.io.to(`user:${partnerUsername}`).emit('partnership:invited', {
+                inviterName: `${username}`, // Could fetch name if needed, but username is available
+                message: 'Yeni bir ortaklık davetiniz var.'
+            });
+        }
     } catch (err) {
         console.error('Partnership invite error:', err);
         res.status(500).json({ error: 'Sunucu hatası' });
@@ -1265,6 +1293,20 @@ app.delete('/api/partnership/disconnect', async (req, res) => {
         // Delete partnership record
         await db.query('DELETE FROM partnerships WHERE id = $1', [partnershipId]);
 
+        // Notify both users in real-time
+        await req.notifyUser(username);
+        if (partnerUsername) {
+            await req.notifyUser(partnerUsername);
+
+            // Send specific event for notification
+            if (req.io) {
+                req.io.to(`user:${partnerUsername}`).emit('partnership:ended', {
+                    message: 'Partneriniz ortaklığı sonlandırdı.',
+                    endedBy: username
+                });
+            }
+        }
+
         res.json({
             success: true,
             message: 'Ortaklık sonlandırıldı. Verileriniz artık ayrı olarak görünecek.'
@@ -1277,29 +1319,19 @@ app.delete('/api/partnership/disconnect', async (req, res) => {
 
 
 // ==================== EXCHANGE RATES ====================
-// Scheduled updates: 08:30, 13:30, 18:30 (Turkey time)
-// 3 times/day = 90 requests/month (within 100 limit)
+// Updated: Fetches every 30 minutes for near real-time data
 let ratesCache = null;
-let lastFetchDate = null;
-
-const UPDATE_TIMES = [
-    { hour: 8, minute: 30 },
-    { hour: 13, minute: 30 },
-    { hour: 18, minute: 30 }
-];
+let lastFetchTime = 0; // Timestamp of last successful fetch
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 
 const shouldFetchRates = () => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const today = now.toDateString();
-    if (!ratesCache) return true;
-    if (lastFetchDate === today) return false;
-    for (const slot of UPDATE_TIMES) {
-        const timeDiff = (currentHour * 60 + currentMinute) - (slot.hour * 60 + slot.minute);
-        if (timeDiff >= 0 && timeDiff <= 30) return true;
-    }
-    return false;
+    if (!ratesCache) return true; // Always fetch if no cache
+
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastFetchTime;
+
+    // Fetch if cache is older than 30 minutes
+    return timeSinceLastFetch > CACHE_DURATION;
 };
 
 const fetchRatesFromAPI = async () => {
@@ -1338,8 +1370,8 @@ app.get('/api/rates', async (req, res) => {
         if (shouldFetchRates()) {
             console.log('[RATES] Fetching fresh rates...');
             ratesCache = await fetchRatesFromAPI();
-            lastFetchDate = new Date().toDateString();
-            console.log('[RATES] Cache updated');
+            lastFetchTime = Date.now();
+            console.log(`[RATES] Cache updated at ${new Date().toLocaleTimeString()}`);
             return res.json(ratesCache);
         }
         console.log('[RATES] Serving cached rates');

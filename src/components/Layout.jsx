@@ -37,6 +37,39 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
     fetchInvites();
   }, [user]);
 
+  // Socket Listeners for Partnership
+  const { socket } = useExpenses();
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRequest = (data) => {
+      // Refresh pending invites
+      const fetchInvites = async () => {
+        if (user?.username) {
+          const invites = await WeddingService.getPendingPartnerships(user.username);
+          setPendingInvites(invites || []);
+        }
+      };
+      fetchInvites();
+
+      // Show toast if possible, otherwise rely on the NotificationCard appearing
+      // For now, we rely on the bell icon/notification area update
+    };
+
+    const handleEnded = (data) => {
+      alert(data.message || 'Ortaklık sonlandırıldı.');
+      window.location.reload(); // Reload to refresh all data effectively and reset state
+    };
+
+    socket.on('partnership:invited', handleRequest);
+    socket.on('partnership:ended', handleEnded);
+
+    return () => {
+      socket.off('partnership:invited', handleRequest);
+      socket.off('partnership:ended', handleEnded);
+    };
+  }, [socket, user]);
+
   // Tour Logic
   const startDashboardTour = (force = false) => {
     const hasSeenTour = localStorage.getItem('hasSeenTour');
@@ -45,7 +78,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
       const driverObj = driver({
         showProgress: true,
         animate: true,
-        allowClose: false,
+        allowClose: true,
         doneBtnText: "Tamamla",
         nextBtnText: "İleri",
         prevBtnText: "Geri",

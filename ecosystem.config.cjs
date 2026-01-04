@@ -3,6 +3,7 @@ module.exports = {
         name: 'wedding-tracker-server',
         script: './server/server.js',
         cwd: '/var/www/wedding-tracker',
+        exec_mode: 'fork',
         instances: 1,
         autorestart: true,
         watch: false,

@@ -340,3 +340,538 @@ memory, and will not scale past a single process.
 designed for a production environment, as it will leak
 memory, and will not scale past a single process.
 2025-12-26T10:28:05: Server running on http://localhost:3001
+2026-01-04T10:14:32: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:14:33: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2026-01-04T10:14:33: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:33: [RATES] Initializing cache...
+2026-01-04T10:14:33: [dotenv@17.2.3] injecting env (9) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-04T10:14:33: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2026-01-04T10:14:34: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:34: [RATES] Initializing cache...
+2026-01-04T10:14:34: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2026-01-04T10:14:34: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+2026-01-04T10:14:34: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:34: [RATES] Initializing cache...
+Error: bind EADDRINUSE null:3001
+    at listenOnPrimaryHandle (node:net:1989:18)
+    at rr (node:internal/cluster/child:163:12)
+    at Worker.<anonymous> (node:internal/cluster/child:113:7)
+    at process.onInternalMessage (node:internal/cluster/utils:49:5)
+    at process.emit (node:events:536:35)
+    at emit (node:internal/child_process:950:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+2026-01-04T10:14:35: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2026-01-04T10:14:35: [dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+2026-01-04T10:14:35: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:35: [RATES] Initializing cache...
+2026-01-04T10:14:36: [dotenv@17.2.3] injecting env (9) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-04T10:14:36: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:36: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:36: [RATES] Initializing cache...
+2026-01-04T10:14:37: [dotenv@17.2.3] injecting env (9) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+2026-01-04T10:14:37: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:14:37: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:37: [RATES] Initializing cache...
+2026-01-04T10:14:38: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:14:38: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2026-01-04T10:14:38: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:38: [RATES] Initializing cache...
+2026-01-04T10:14:39: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2026-01-04T10:14:39: [dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+2026-01-04T10:14:39: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:39: [RATES] Initializing cache...
+2026-01-04T10:14:39: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2026-01-04T10:14:40: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:40: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:40: [RATES] Initializing cache...
+2026-01-04T10:14:40: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+2026-01-04T10:14:41: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2026-01-04T10:14:41: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:41: [RATES] Initializing cache...
+2026-01-04T10:14:41: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2026-01-04T10:14:42: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+2026-01-04T10:14:42: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:42: [RATES] Initializing cache...
+Error: bind EADDRINUSE null:3001
+    at listenOnPrimaryHandle (node:net:1989:18)
+    at rr (node:internal/cluster/child:163:12)
+    at Worker.<anonymous> (node:internal/cluster/child:113:7)
+    at process.onInternalMessage (node:internal/cluster/utils:49:5)
+    at process.emit (node:events:536:35)
+    at emit (node:internal/child_process:950:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+2026-01-04T10:14:42: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2026-01-04T10:14:43: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2026-01-04T10:14:43: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:43: [RATES] Initializing cache...
+2026-01-04T10:14:43: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+2026-01-04T10:14:44: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:44: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:44: [RATES] Initializing cache...
+2026-01-04T10:14:44: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2026-01-04T10:14:44: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2026-01-04T10:14:45: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:45: [RATES] Initializing cache...
+2026-01-04T10:14:45: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2026-01-04T10:14:45: [dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+2026-01-04T10:14:46: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:46: [RATES] Initializing cache...
+2026-01-04T10:14:46: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:47: [dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-04T10:14:47: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:47: [RATES] Initializing cache...
+2026-01-04T10:14:47: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2026-01-04T10:14:47: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:14:48: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:48: [RATES] Initializing cache...
+2026-01-04T10:14:48: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2026-01-04T10:14:48: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:49: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:49: [RATES] Initializing cache...
+Error: bind EADDRINUSE null:3001
+    at listenOnPrimaryHandle (node:net:1989:18)
+    at rr (node:internal/cluster/child:163:12)
+    at Worker.<anonymous> (node:internal/cluster/child:113:7)
+    at process.onInternalMessage (node:internal/cluster/utils:49:5)
+    at process.emit (node:events:536:35)
+    at emit (node:internal/child_process:950:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+2026-01-04T10:14:49: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:49: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2026-01-04T10:14:49: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:49: [RATES] Initializing cache...
+Error: bind EADDRINUSE null:3001
+    at listenOnPrimaryHandle (node:net:1989:18)
+    at rr (node:internal/cluster/child:163:12)
+    at Worker.<anonymous> (node:internal/cluster/child:113:7)
+    at process.onInternalMessage (node:internal/cluster/utils:49:5)
+    at process.emit (node:events:536:35)
+    at emit (node:internal/child_process:950:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+2026-01-04T10:14:50: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:50: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2026-01-04T10:14:50: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:50: [RATES] Initializing cache...
+2026-01-04T10:14:51: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:14:51: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+2026-01-04T10:14:51: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:51: [RATES] Initializing cache...
+2026-01-04T10:14:51: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:14:52: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+2026-01-04T10:14:52: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:52: [RATES] Initializing cache...
+2026-01-04T10:14:53: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:14:53: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2026-01-04T10:14:53: Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+2026-01-04T10:14:53: [RATES] Initializing cache...
+2026-01-04T10:14:53: Server running on http://localhost:3001
+2026-01-04T10:14:53: [RATES] Initial cache loaded
+2026-01-04T10:17:15: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2026-01-04T10:17:15: [dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+2026-01-04T10:17:16: Warning: connect.session() MemoryStore is not
+2026-01-04T10:17:16: designed for a production environment, as it will leak
+2026-01-04T10:17:16: memory, and will not scale past a single process.
+2026-01-04T10:17:16: [RATES] Initializing cache...
+2026-01-04T10:17:16: Server running on http://localhost:3001
+2026-01-04T10:17:16: [RATES] Initial cache loaded
+2026-01-04T10:18:48: [RATES] Fetching fresh rates...
+2026-01-04T10:18:49: [RATES] Cache updated at 10:18:49 AM
+2026-01-04T10:19:31: [RATES] Serving cached rates
+2026-01-04T10:19:33: [RATES] Serving cached rates
+2026-01-04T10:19:34: [SOCKET] New connection attempt. ID: 6ZomfLyP-RVu4PyCAAAB, Username: dummya
+2026-01-04T10:19:34: [SOCKET] User joined room: dummya
+2026-01-04T10:19:45: [SOCKET] User disconnected: dummya (6ZomfLyP-RVu4PyCAAAB)
+2026-01-04T10:19:45: [SOCKET] New connection attempt. ID: jS6KRwqC47aKj04rAAAD, Username: dummya
+2026-01-04T10:19:45: [SOCKET] User joined room: dummya
+2026-01-04T10:19:46: [SOCKET] User disconnected: dummya (jS6KRwqC47aKj04rAAAD)
+2026-01-04T10:19:46: [RATES] Serving cached rates
+2026-01-04T10:19:47: [SOCKET] New connection attempt. ID: sxWgrjTz7fznJ-pJAAAF, Username: dummya
+2026-01-04T10:19:47: [SOCKET] User joined room: dummya
+2026-01-04T10:20:01: [SOCKET] User disconnected: dummya (sxWgrjTz7fznJ-pJAAAF)
+2026-01-04T10:20:08: [RATES] Serving cached rates
+2026-01-04T10:20:29: [SOCKET] New connection attempt. ID: nY3ANobGXj3YGjfBAAAH, Username: wampex@admin.com
+2026-01-04T10:20:29: [SOCKET] User joined room: wampex@admin.com
+2026-01-04T10:27:00: [SOCKET] New connection attempt. ID: J-gArDc0lk7ix8MjAAAJ, Username: dummyx
+2026-01-04T10:27:00: [SOCKET] User joined room: dummyx
+2026-01-04T10:29:12: [SOCKET] User disconnected: dummyx (J-gArDc0lk7ix8MjAAAJ)
+2026-01-04T10:29:22: [RATES] Serving cached rates
+2026-01-04T10:30:23: [SOCKET] New connection attempt. ID: MoEo8l6A8BqqwJo_AAAL, Username: dummyx
+2026-01-04T10:30:23: [SOCKET] User joined room: dummyx
+2026-01-04T10:30:30: [SOCKET] User disconnected: dummyx (MoEo8l6A8BqqwJo_AAAL)
+2026-01-04T10:30:30: [RATES] Serving cached rates
+2026-01-04T10:30:30: [SOCKET] New connection attempt. ID: KCXiC8FCWL3d6HaEAAAN, Username: dummyx
+2026-01-04T10:30:30: [SOCKET] User joined room: dummyx
+2026-01-04T10:31:10: [SOCKET] User disconnected: dummyx (KCXiC8FCWL3d6HaEAAAN)
+2026-01-04T10:32:32: [RATES] Serving cached rates
+2026-01-04T10:32:32: [RATES] Serving cached rates
+2026-01-04T10:32:33: [SOCKET] New connection attempt. ID: Q0yitPYrsxKXItR2AAAP, Username: oznuranil1412
+2026-01-04T10:32:33: [SOCKET] User joined room: oznuranil1412
+2026-01-04T10:32:49: [SOCKET] User disconnected: oznuranil1412 (Q0yitPYrsxKXItR2AAAP)
+2026-01-04T10:32:50: [SOCKET] New connection attempt. ID: RirHBHHbKVUEulRgAAAR, Username: oznuranil1412
+2026-01-04T10:32:50: [SOCKET] User joined room: oznuranil1412
+2026-01-04T10:32:58: [SOCKET] User disconnected: oznuranil1412 (RirHBHHbKVUEulRgAAAR)
+2026-01-04T10:35:21: [SOCKET] New connection attempt. ID: pznk8t3plkEfk373AAAT, Username: dummyx
+2026-01-04T10:35:21: [SOCKET] User joined room: dummyx
+2026-01-04T10:35:37: [SOCKET] User disconnected: dummyx (pznk8t3plkEfk373AAAT)
+2026-01-04T10:35:44: [RATES] Serving cached rates
+2026-01-04T10:35:44: [SOCKET] New connection attempt. ID: UrYopu-bPl_VVksNAAAV, Username: dummyx
+2026-01-04T10:35:44: [SOCKET] User joined room: dummyx
+2026-01-04T10:35:46: [SOCKET] User disconnected: dummyx (UrYopu-bPl_VVksNAAAV)
+2026-01-04T10:35:57: [RATES] Serving cached rates
+2026-01-04T10:35:57: [RATES] Serving cached rates
+2026-01-04T10:35:58: [SOCKET] New connection attempt. ID: l8yNuzbsMvDz2CIhAAAY, Username: oznuranil1412
+2026-01-04T10:35:58: [SOCKET] User joined room: oznuranil1412
+2026-01-04T10:39:09: [SOCKET] User disconnected: oznuranil1412 (l8yNuzbsMvDz2CIhAAAY)
+2026-01-04T10:39:10: [RATES] Serving cached rates
+2026-01-04T10:39:10: [SOCKET] New connection attempt. ID: FQv4igFGH2lWGkFNAAAa, Username: oznuranil1412
+2026-01-04T10:39:10: [SOCKET] User joined room: oznuranil1412
+2026-01-04T10:40:55: [SOCKET] User disconnected: oznuranil1412 (FQv4igFGH2lWGkFNAAAa)
+2026-01-04T10:41:09: [SOCKET] New connection attempt. ID: WMYdLGCD9PyEGToEAAAc, Username: dummyy
+2026-01-04T10:41:09: [SOCKET] User joined room: dummyy
+2026-01-04T10:41:18: [SOCKET] User disconnected: dummyy (WMYdLGCD9PyEGToEAAAc)
+2026-01-04T10:41:18: [SOCKET] New connection attempt. ID: hIcQDLTlzp20GHs-AAAe, Username: dummyy
+2026-01-04T10:41:18: [SOCKET] User joined room: dummyy
+2026-01-04T10:41:45: [RATES] Serving cached rates
+2026-01-04T10:41:57: [RATES] Serving cached rates
+2026-01-04T10:41:58: [SOCKET] New connection attempt. ID: Ls_JDgO4hoS5Sz6MAAAg, Username: dummyx
+2026-01-04T10:41:58: [SOCKET] User joined room: dummyx
+2026-01-04T10:44:24: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T10:44:24: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T10:44:24: [RATES] Serving cached rates
+2026-01-04T10:44:39: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T10:44:39: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T10:44:39: [RATES] Serving cached rates
+2026-01-04T10:44:48: [SOCKET] User disconnected: dummyx (Ls_JDgO4hoS5Sz6MAAAg)
+2026-01-04T10:44:48: [RATES] Serving cached rates
+2026-01-04T10:44:48: [SOCKET] New connection attempt. ID: cHIdyRx_vgZCQVUmAAAi, Username: dummyx
+2026-01-04T10:44:48: [SOCKET] User joined room: dummyx
+2026-01-04T10:44:59: [SOCKET] User disconnected: dummyy (hIcQDLTlzp20GHs-AAAe)
+2026-01-04T10:44:59: [RATES] Serving cached rates
+2026-01-04T10:45:00: [SOCKET] New connection attempt. ID: RUVAabo7et8ogOANAAAk, Username: dummyy
+2026-01-04T10:45:00: [SOCKET] User joined room: dummyy
+2026-01-04T10:45:20: [SOCKET] User disconnected: dummyy (RUVAabo7et8ogOANAAAk)
+2026-01-04T10:45:20: [RATES] Serving cached rates
+2026-01-04T10:45:21: [SOCKET] New connection attempt. ID: aTFneoiOyePSA5XzAAAm, Username: dummyy
+2026-01-04T10:45:21: [SOCKET] User joined room: dummyy
+2026-01-04T10:45:23: [SOCKET] User disconnected: dummyx (cHIdyRx_vgZCQVUmAAAi)
+2026-01-04T10:45:23: [RATES] Serving cached rates
+2026-01-04T10:45:23: [SOCKET] New connection attempt. ID: PTB3DIeZXTKHDkdMAAAo, Username: dummyx
+2026-01-04T10:45:23: [SOCKET] User joined room: dummyx
+2026-01-04T10:46:28: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T10:46:28: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T10:46:28: [RATES] Serving cached rates
+2026-01-04T10:47:08: [SOCKET] User disconnected: dummyx (PTB3DIeZXTKHDkdMAAAo)
+2026-01-04T10:47:08: [RATES] Serving cached rates
+2026-01-04T10:47:08: [SOCKET] New connection attempt. ID: qOazlsVXUgxc7p0xAAAq, Username: dummyx
+2026-01-04T10:47:08: [SOCKET] User joined room: dummyx
+2026-01-04T10:47:11: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:47:11: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:47:11: [RATES] Serving cached rates
+2026-01-04T10:47:17: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:47:17: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:47:17: [RATES] Serving cached rates
+2026-01-04T10:47:22: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:47:22: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:47:23: [RATES] Serving cached rates
+2026-01-04T10:47:26: [SOCKET] User disconnected: dummyx (qOazlsVXUgxc7p0xAAAq)
+2026-01-04T10:47:26: [RATES] Serving cached rates
+2026-01-04T10:47:27: [SOCKET] New connection attempt. ID: mIU_4Yl45qQYtp1nAAAs, Username: dummyx
+2026-01-04T10:47:27: [SOCKET] User joined room: dummyx
+2026-01-04T10:47:53: [RATES] Serving cached rates
+2026-01-04T10:47:55: [SOCKET] User disconnected: dummyx (mIU_4Yl45qQYtp1nAAAs)
+2026-01-04T10:48:01: [RATES] Serving cached rates
+2026-01-04T10:48:02: [SOCKET] New connection attempt. ID: z_b_vjPxLVRh_qacAAAu, Username: dummyx
+2026-01-04T10:48:02: [SOCKET] User joined room: dummyx
+2026-01-04T10:48:17: [SOCKET] User disconnected: dummyx (z_b_vjPxLVRh_qacAAAu)
+2026-01-04T10:48:25: [SOCKET] New connection attempt. ID: u-11qcMt1wjGyJlqAAAw, Username: dummyy
+2026-01-04T10:48:25: [SOCKET] User joined room: dummyy
+2026-01-04T10:54:43: [SOCKET] User disconnected: dummyy (aTFneoiOyePSA5XzAAAm)
+2026-01-04T10:54:44: [RATES] Fetching fresh rates...
+2026-01-04T10:54:44: [SOCKET] New connection attempt. ID: t41nZcfui7xMdKr0AAAy, Username: dummyy
+2026-01-04T10:54:44: [SOCKET] User joined room: dummyy
+2026-01-04T10:54:45: [RATES] Cache updated at 10:54:45 AM
+2026-01-04T10:54:45: [SOCKET] User disconnected: dummyy (u-11qcMt1wjGyJlqAAAw)
+2026-01-04T10:54:46: [RATES] Serving cached rates
+2026-01-04T10:54:46: [SOCKET] New connection attempt. ID: zT9FbLHYiBs7_Ch6AAA0, Username: dummyy
+2026-01-04T10:54:46: [SOCKET] User joined room: dummyy
+2026-01-04T10:55:03: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:55:03: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:55:03: [RATES] Serving cached rates
+2026-01-04T10:55:03: [RATES] Serving cached rates
+2026-01-04T10:56:09: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:56:09: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:56:09: [RATES] Serving cached rates
+2026-01-04T10:56:09: [RATES] Serving cached rates
+2026-01-04T10:56:35: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:56:35: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:56:35: [RATES] Serving cached rates
+2026-01-04T10:56:35: [RATES] Serving cached rates
+2026-01-04T10:56:59: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:56:59: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:56:59: [RATES] Serving cached rates
+2026-01-04T10:56:59: [RATES] Serving cached rates
+2026-01-04T10:57:06: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:06: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:06: [RATES] Serving cached rates
+2026-01-04T10:57:06: [RATES] Serving cached rates
+2026-01-04T10:57:17: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:17: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:17: [RATES] Serving cached rates
+2026-01-04T10:57:17: [RATES] Serving cached rates
+2026-01-04T10:57:19: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:19: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:19: [RATES] Serving cached rates
+2026-01-04T10:57:19: [RATES] Serving cached rates
+2026-01-04T10:57:31: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:31: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:31: [RATES] Serving cached rates
+2026-01-04T10:57:31: [RATES] Serving cached rates
+2026-01-04T10:57:37: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:37: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:37: [RATES] Serving cached rates
+2026-01-04T10:57:37: [RATES] Serving cached rates
+2026-01-04T10:57:39: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:39: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:39: [RATES] Serving cached rates
+2026-01-04T10:57:39: [RATES] Serving cached rates
+2026-01-04T10:57:46: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:46: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:46: [RATES] Serving cached rates
+2026-01-04T10:57:46: [RATES] Serving cached rates
+2026-01-04T10:57:52: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:52: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:52: [RATES] Serving cached rates
+2026-01-04T10:57:52: [RATES] Serving cached rates
+2026-01-04T10:57:58: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:57:58: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:57:58: [RATES] Serving cached rates
+2026-01-04T10:57:58: [RATES] Serving cached rates
+2026-01-04T10:58:03: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:58:03: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:58:03: [RATES] Serving cached rates
+2026-01-04T10:58:03: [RATES] Serving cached rates
+2026-01-04T10:58:07: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T10:58:07: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T10:58:07: [RATES] Serving cached rates
+2026-01-04T10:58:07: [RATES] Serving cached rates
+2026-01-04T11:01:08: [SOCKET] User disconnected: dummyy (zT9FbLHYiBs7_Ch6AAA0)
+2026-01-04T11:01:09: [RATES] Serving cached rates
+2026-01-04T11:01:09: [SOCKET] New connection attempt. ID: WoS2OokMKe_KQcrnAAA2, Username: dummyy
+2026-01-04T11:01:09: [SOCKET] User joined room: dummyy
+2026-01-04T11:01:21: [SOCKET] User disconnected: dummyy (t41nZcfui7xMdKr0AAAy)
+2026-01-04T11:01:22: [RATES] Serving cached rates
+2026-01-04T11:01:22: [SOCKET] New connection attempt. ID: 2PxNezM3b-tc4IvfAAA4, Username: dummyy
+2026-01-04T11:01:22: [SOCKET] User joined room: dummyy
+2026-01-04T11:01:35: [SOCKET] User disconnected: dummyy (2PxNezM3b-tc4IvfAAA4)
+2026-01-04T11:01:35: [RATES] Serving cached rates
+2026-01-04T11:01:36: [SOCKET] New connection attempt. ID: c3hDhI2OinEnKKt-AAA6, Username: dummyy
+2026-01-04T11:01:36: [SOCKET] User joined room: dummyy
+2026-01-04T11:01:39: [SOCKET] User disconnected: dummyy (WoS2OokMKe_KQcrnAAA2)
+2026-01-04T11:01:39: [RATES] Serving cached rates
+2026-01-04T11:01:39: [SOCKET] New connection attempt. ID: CCmwja0UUuZAaqz6AAA8, Username: dummyy
+2026-01-04T11:01:39: [SOCKET] User joined room: dummyy
+2026-01-04T11:04:28: [SOCKET] User disconnected: dummyy (c3hDhI2OinEnKKt-AAA6)
+2026-01-04T11:04:29: [RATES] Serving cached rates
+2026-01-04T11:04:29: [SOCKET] New connection attempt. ID: uOblqiNlFtDHm7gGAAA-, Username: dummyy
+2026-01-04T11:04:29: [SOCKET] User joined room: dummyy
+2026-01-04T11:04:43: [SOCKET] User disconnected: dummyy (CCmwja0UUuZAaqz6AAA8)
+2026-01-04T11:04:44: [RATES] Serving cached rates
+2026-01-04T11:04:44: [SOCKET] New connection attempt. ID: uEkBmxxJk1QslvVvAABA, Username: dummyy
+2026-01-04T11:04:44: [SOCKET] User joined room: dummyy
+2026-01-04T11:06:50: [SOCKET] User disconnected: dummyy (uOblqiNlFtDHm7gGAAA-)
+2026-01-04T11:06:51: [RATES] Serving cached rates
+2026-01-04T11:06:51: [SOCKET] New connection attempt. ID: xZYepdUsBs9zSjdlAABC, Username: dummyy
+2026-01-04T11:06:51: [SOCKET] User joined room: dummyy
+2026-01-04T11:08:20: [SOCKET] User disconnected: dummyy (xZYepdUsBs9zSjdlAABC)
+2026-01-04T11:08:21: [RATES] Serving cached rates
+2026-01-04T11:08:21: [SOCKET] New connection attempt. ID: x_W4TcO36qiLCpquAABE, Username: dummyy
+2026-01-04T11:08:21: [SOCKET] User joined room: dummyy
+2026-01-04T11:08:25: [SOCKET] User disconnected: dummyy (uEkBmxxJk1QslvVvAABA)
+2026-01-04T11:08:26: [RATES] Serving cached rates
+2026-01-04T11:08:26: [SOCKET] New connection attempt. ID: ZL3FY1qHGcnSO8yCAABG, Username: dummyy
+2026-01-04T11:08:26: [SOCKET] User joined room: dummyy
+2026-01-04T11:09:10: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:09:10: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:09:10: [RATES] Serving cached rates
+2026-01-04T11:09:10: [RATES] Serving cached rates
+2026-01-04T11:09:18: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:09:18: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:09:18: [RATES] Serving cached rates
+2026-01-04T11:09:18: [RATES] Serving cached rates
+2026-01-04T11:09:48: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:09:48: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:09:48: [RATES] Serving cached rates
+2026-01-04T11:09:48: [RATES] Serving cached rates
+2026-01-04T11:10:51: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:10:52: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:10:52: [RATES] Serving cached rates
+2026-01-04T11:10:52: [RATES] Serving cached rates
+2026-01-04T11:12:05: [SOCKET] User disconnected: dummyy (x_W4TcO36qiLCpquAABE)
+2026-01-04T11:12:30: [SOCKET] New connection attempt. ID: VYLPXBqw06qEJEnGAABI, Username: dummyx
+2026-01-04T11:12:30: [SOCKET] User joined room: dummyx
+2026-01-04T11:12:42: [SOCKET] User disconnected: dummyx (VYLPXBqw06qEJEnGAABI)
+2026-01-04T11:12:42: [SOCKET] New connection attempt. ID: UqOjm0lbfuliS_c4AABK, Username: dummyx
+2026-01-04T11:12:42: [SOCKET] User joined room: dummyx
+2026-01-04T11:12:43: [SOCKET] User disconnected: dummyx (UqOjm0lbfuliS_c4AABK)
+2026-01-04T11:12:44: [RATES] Serving cached rates
+2026-01-04T11:12:44: [SOCKET] New connection attempt. ID: VJfXGzZbQc3p-5stAABM, Username: dummyx
+2026-01-04T11:12:44: [SOCKET] User joined room: dummyx
+2026-01-04T11:13:12: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:13:12: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:13:12: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T11:13:12: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T11:13:12: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T11:13:12: [SOCKET] Emitted 'data:updated' to partner room: dummyy
+2026-01-04T11:13:12: [RATES] Serving cached rates
+2026-01-04T11:13:12: [RATES] Serving cached rates
+2026-01-04T11:13:12: [RATES] Serving cached rates
+2026-01-04T11:13:12: [RATES] Serving cached rates
+2026-01-04T11:13:40: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:13:40: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:13:40: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T11:13:40: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T11:13:40: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T11:13:40: [SOCKET] Emitted 'data:updated' to partner room: dummyy
+2026-01-04T11:13:40: [RATES] Serving cached rates
+2026-01-04T11:13:40: [RATES] Serving cached rates
+2026-01-04T11:13:40: [RATES] Serving cached rates
+2026-01-04T11:13:40: [RATES] Serving cached rates
+2026-01-04T11:13:41: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:13:41: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:13:41: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T11:13:41: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T11:13:41: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T11:13:41: [SOCKET] Emitted 'data:updated' to partner room: dummyy
+2026-01-04T11:13:41: [RATES] Serving cached rates
+2026-01-04T11:13:41: [RATES] Serving cached rates
+2026-01-04T11:13:41: [RATES] Serving cached rates
+2026-01-04T11:13:41: [RATES] Serving cached rates
+2026-01-04T11:13:46: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:13:46: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:13:46: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T11:13:46: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T11:13:46: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T11:13:46: [SOCKET] Emitted 'data:updated' to partner room: dummyy
+2026-01-04T11:13:46: [RATES] Serving cached rates
+2026-01-04T11:13:46: [RATES] Serving cached rates
+2026-01-04T11:13:46: [RATES] Serving cached rates
+2026-01-04T11:13:46: [RATES] Serving cached rates
+2026-01-04T11:13:49: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:13:49: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:13:49: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T11:13:49: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T11:13:49: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T11:13:49: [SOCKET] Emitted 'data:updated' to partner room: dummyy
+2026-01-04T11:13:50: [RATES] Serving cached rates
+2026-01-04T11:13:50: [RATES] Serving cached rates
+2026-01-04T11:13:50: [RATES] Serving cached rates
+2026-01-04T11:13:50: [RATES] Serving cached rates
+2026-01-04T11:13:52: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:13:52: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:13:52: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T11:13:52: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T11:13:52: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T11:13:52: [SOCKET] Emitted 'data:updated' to partner room: dummyy
+2026-01-04T11:13:52: [RATES] Serving cached rates
+2026-01-04T11:13:52: [RATES] Serving cached rates
+2026-01-04T11:13:52: [RATES] Serving cached rates
+2026-01-04T11:13:52: [RATES] Serving cached rates
+2026-01-04T11:13:53: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T11:13:53: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T11:13:53: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T11:13:53: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T11:13:53: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T11:13:53: [SOCKET] Emitted 'data:updated' to partner room: dummyy
+2026-01-04T11:13:53: [RATES] Serving cached rates
+2026-01-04T11:13:53: [RATES] Serving cached rates
+2026-01-04T11:13:53: [RATES] Serving cached rates
+2026-01-04T11:13:53: [RATES] Serving cached rates
+2026-01-04T11:20:25: [RATES] Serving cached rates
+2026-01-04T12:38:44: [SOCKET] Notifying updates for user: dummyx
+2026-01-04T12:38:44: [SOCKET] Emitted 'data:updated' to room: dummyx
+2026-01-04T12:38:44: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T12:38:44: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T12:38:44: [RATES] Fetching fresh rates...
+2026-01-04T12:38:44: [SOCKET] User disconnected: dummyx (VJfXGzZbQc3p-5stAABM)
+2026-01-04T12:38:44: [RATES] Fetching fresh rates...
+2026-01-04T12:38:44: [SOCKET] New connection attempt. ID: 5_dCedt-BEzjAut7AABO, Username: dummyx
+2026-01-04T12:38:44: [SOCKET] User joined room: dummyx
+2026-01-04T12:38:44: [RATES] Cache updated at 12:38:44 PM
+2026-01-04T12:38:44: [RATES] Cache updated at 12:38:44 PM
+2026-01-04T12:38:45: [SOCKET] User disconnected: dummyx (5_dCedt-BEzjAut7AABO)
+2026-01-04T12:38:46: [RATES] Serving cached rates
+2026-01-04T12:38:46: [SOCKET] New connection attempt. ID: y7smpql_w5SZhtBeAABQ, Username: dummyx
+2026-01-04T12:38:46: [SOCKET] User joined room: dummyx
+2026-01-04T12:39:07: [SOCKET] User disconnected: dummyx (y7smpql_w5SZhtBeAABQ)
+2026-01-04T12:39:07: [RATES] Serving cached rates
+2026-01-04T12:39:07: [SOCKET] New connection attempt. ID: THnDvLcPUNyg3g-bAABS, Username: dummyx
+2026-01-04T12:39:07: [SOCKET] User joined room: dummyx
+2026-01-04T12:39:12: [SOCKET] User disconnected: dummyx (THnDvLcPUNyg3g-bAABS)
+2026-01-04T12:39:12: [SOCKET] New connection attempt. ID: sJniUSVrv0FtuhFcAABU, Username: dummyx
+2026-01-04T12:39:12: [SOCKET] User joined room: dummyx
+2026-01-04T12:39:14: [SOCKET] User disconnected: dummyx (sJniUSVrv0FtuhFcAABU)
+2026-01-04T12:39:14: [RATES] Serving cached rates
+2026-01-04T12:39:14: [SOCKET] New connection attempt. ID: HsIDsB3bleOtWwvsAABW, Username: dummyx
+2026-01-04T12:39:14: [SOCKET] User joined room: dummyx
+2026-01-04T12:39:31: [SOCKET] Notifying updates for user: dummyy
+2026-01-04T12:39:31: [SOCKET] Emitted 'data:updated' to room: dummyy
+2026-01-04T12:39:31: [SOCKET] Emitted 'data:updated' to partner room: dummyx
+2026-01-04T12:39:31: [RATES] Serving cached rates
+2026-01-04T12:39:31: [RATES] Serving cached rates
+2026-01-04T12:39:33: [SOCKET] User disconnected: dummyx (HsIDsB3bleOtWwvsAABW)
+2026-01-04T12:39:33: [RATES] Serving cached rates
+2026-01-04T12:39:33: [SOCKET] New connection attempt. ID: BBD6HTTiAauzuipiAABY, Username: dummyx
+2026-01-04T12:39:33: [SOCKET] User joined room: dummyx
+2026-01-04T12:45:21: [RATES] Serving cached rates
+2026-01-04T12:45:37: [SOCKET] New connection attempt. ID: jn5-V7PFD7iRJCruAABa, Username: test12
+2026-01-04T12:45:37: [SOCKET] User joined room: test12
+2026-01-04T12:45:46: [SOCKET] User disconnected: test12 (jn5-V7PFD7iRJCruAABa)
+2026-01-04T12:45:46: [RATES] Serving cached rates
+2026-01-04T12:45:46: [SOCKET] New connection attempt. ID: 2JgqOxQLRJXYDR9DAABc, Username: test12
+2026-01-04T12:45:46: [SOCKET] User joined room: test12

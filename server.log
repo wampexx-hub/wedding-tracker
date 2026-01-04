@@ -1,29 +1,66 @@
 nohup: ignoring input
-[dotenv@17.2.3] injecting env (10) from .env -- tip: ⚙️  enable debug logging with { debug: true }
-[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
-node:events:502
-      throw er; // Unhandled 'error' event
-      ^
-
-Error: listen EADDRINUSE: address already in use :::3001
-    at Server.setupListenHandle [as _listen2] (node:net:1908:16)
-    at listenInCluster (node:net:1965:12)
-    at Server.listen (node:net:2067:7)
-    at Function.listen (/var/www/wedding-tracker/server/node_modules/express/lib/application.js:635:24)
-    at Object.<anonymous> (/var/www/wedding-tracker/server/server.js:736:5)
-    at Module._compile (node:internal/modules/cjs/loader:1521:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
-    at Module.load (node:internal/modules/cjs/loader:1266:32)
-    at Module._load (node:internal/modules/cjs/loader:1091:12)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-Emitted 'error' event on Server instance at:
-    at emitErrorNT (node:net:1944:8)
-    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
-  code: 'EADDRINUSE',
-  errno: -98,
-  syscall: 'listen',
-  address: '::',
-  port: 3001
-}
-
-Node.js v20.19.6
+[dotenv@17.2.3] injecting env (10) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[RATES] Initializing cache...
+Server running on http://localhost:3001
+[RATES] Initial cache loaded
+[RATES] Fetching fresh rates...
+[RATES] Cache updated at 9:33:01 PM
+[SOCKET] New connection attempt. ID: 2ib64AaZPmeK8oxfAAAB, Username: dummya
+[SOCKET] User joined room: dummya
+[SOCKET] User disconnected: dummya (2ib64AaZPmeK8oxfAAAB)
+[RATES] Serving cached rates
+[SOCKET] New connection attempt. ID: IY7Ps3ZuxTZzpE7eAAAD, Username: dummya
+[SOCKET] User joined room: dummya
+[RATES] Serving cached rates
+[SOCKET] New connection attempt. ID: 7RpNrxbfM-skhpGJAAAF, Username: dummyb
+[SOCKET] User joined room: dummyb
+[SOCKET] User disconnected: dummya (IY7Ps3ZuxTZzpE7eAAAD)
+[RATES] Serving cached rates
+[SOCKET] New connection attempt. ID: Iez5vusZAhRjFqzHAAAH, Username: dummya
+[SOCKET] User joined room: dummya
+[SOCKET] User disconnected: dummyb (7RpNrxbfM-skhpGJAAAF)
+[RATES] Serving cached rates
+[SOCKET] New connection attempt. ID: OhG9emKugDxuUp1SAAAJ, Username: dummyb
+[SOCKET] User joined room: dummyb
+[SOCKET] User disconnected: dummyb (OhG9emKugDxuUp1SAAAJ)
+[RATES] Serving cached rates
+[SOCKET] New connection attempt. ID: v_sBMc_7Pwy_WNl1AAAL, Username: dummyb
+[SOCKET] User joined room: dummyb
+[SOCKET] User disconnected: dummya (Iez5vusZAhRjFqzHAAAH)
+[SOCKET] User disconnected: dummyb (v_sBMc_7Pwy_WNl1AAAL)
+[SOCKET] New connection attempt. ID: ehU2bKFRozDIjRmMAAAN, Username: dummyq
+[SOCKET] User joined room: dummyq
+[SOCKET] User disconnected: dummyq (ehU2bKFRozDIjRmMAAAN)
+[SOCKET] New connection attempt. ID: OWofCCKWAl5NGQhiAAAP, Username: dummyq
+[SOCKET] User joined room: dummyq
+[SOCKET] New connection attempt. ID: 0IV4ndIiK5iz0HN1AAAR, Username: dummye
+[SOCKET] User joined room: dummye
+[SOCKET] User disconnected: dummyq (OWofCCKWAl5NGQhiAAAP)
+[SOCKET] New connection attempt. ID: CXaVO2HRU1UfSWiFAAAT, Username: dummyq
+[SOCKET] User joined room: dummyq
+[SOCKET] User disconnected: dummye (0IV4ndIiK5iz0HN1AAAR)
+[SOCKET] New connection attempt. ID: Y6BArVAyhQ07ibp2AAAV, Username: dummye
+[SOCKET] User joined room: dummye
+[SOCKET] User disconnected: dummye (Y6BArVAyhQ07ibp2AAAV)
+[SOCKET] New connection attempt. ID: uRu2ShTSjZQYFTMFAAAX, Username: dummye
+[SOCKET] User joined room: dummye
+[SOCKET] User disconnected: dummye (uRu2ShTSjZQYFTMFAAAX)
+[RATES] Serving cached rates
+[SOCKET] New connection attempt. ID: 5aJhcOhWepO4QGe6AAAZ, Username: dummye
+[SOCKET] User joined room: dummye
+[SOCKET] User disconnected: dummye (5aJhcOhWepO4QGe6AAAZ)
+[SOCKET] User disconnected: dummyq (CXaVO2HRU1UfSWiFAAAT)
+[RATES] Serving cached rates
+[SOCKET] New connection attempt. ID: 4-lqzJ13yZRVAzm6AAAb, Username: wampex@admin.com
+[SOCKET] User joined room: wampex@admin.com
+[RATES] Serving cached rates
+[SOCKET] User disconnected: wampex@admin.com (4-lqzJ13yZRVAzm6AAAb)
+[RATES] Fetching fresh rates...
+[RATES] Cache updated at 11:37:37 PM
+[RATES] Serving cached rates
+[RATES] Serving cached rates
+[RATES] Serving cached rates
+[RATES] Serving cached rates
+[RATES] Serving cached rates
+[RATES] Serving cached rates

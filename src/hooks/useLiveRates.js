@@ -1,18 +1,13 @@
 import { useState, useEffect } from 'react';
 
 const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
-const CACHE_KEY = 'live_rates_cache';
+const CACHE_KEY = 'live_rates_cache_v2';
 
 export const useLiveRates = () => {
     const [rates, setRates] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
-
-    const API_HEADERS = {
-        'authorization': 'apikey 3epid0rmlyrx2GwGtde3bc:27i7tCJtDNJA0VsofnBPk1',
-        'content-type': 'application/json'
-    };
 
     // Format timestamp as HH:mm
     const formatTime = (timestamp) => {
@@ -32,15 +27,15 @@ export const useLiveRates = () => {
             const age = Date.now() - timestamp;
 
             if (age < CACHE_DURATION) {
-                console.log('Using cached rates (age: ' + Math.round(age / 1000 / 60) + ' minutes)');
+                console.log('[useLiveRates] Using cached rates (age: ' + Math.round(age / 1000 / 60) + ' minutes)');
                 setLastUpdated(formatTime(timestamp));
                 return data;
             }
 
-            console.log('Cache expired, fetching fresh data');
+            console.log('[useLiveRates] Cache expired, fetching fresh data');
             return null;
         } catch (err) {
-            console.error('Cache read error:', err);
+            console.error('[useLiveRates] Cache read error:', err);
             return null;
         }
     };
@@ -53,39 +48,11 @@ export const useLiveRates = () => {
                 timestamp: Date.now()
             }));
         } catch (err) {
-            console.error('Cache write error:', err);
+            console.error('[useLiveRates] Cache write error:', err);
         }
     };
 
-    // Normalize API response to internal format
-    const normalizeRates = (goldData, currencyData) => {
-        const normalized = {};
-
-        // Map gold prices
-        if (goldData?.result) {
-            goldData.result.forEach(item => {
-                const buying = parseFloat(item.buying);
-                if (item.name === 'Gram Altın') normalized.GRAM = buying;
-                else if (item.name === 'Çeyrek Altın') normalized.CEYREK = buying;
-                else if (item.name === 'Yarım Altın') normalized.YARIM = buying;
-                else if (item.name === 'Tam Altın') normalized.TAM = buying;
-            });
-        }
-
-        // Map currency rates
-        if (currencyData?.result) {
-            currencyData.result.forEach(item => {
-                const buying = parseFloat(item.buying);
-                if (item.code === 'USD') normalized.USD = buying;
-                else if (item.code === 'EUR') normalized.EUR = buying;
-                else if (item.code === 'GBP') normalized.GBP = buying;
-            });
-        }
-
-        return normalized;
-    };
-
-    // Fetch live rates from API
+    // Fetch rates from BACKEND /api/rates (NOT external API)
     const fetchLiveRates = async () => {
         try {
             setLoading(true);
@@ -99,44 +66,51 @@ export const useLiveRates = () => {
                 return;
             }
 
-            // Fetch from both endpoints in parallel
-            const [goldResponse, currencyResponse] = await Promise.all([
-                fetch('https://api.collectapi.com/economy/goldPrice', {
-                    method: 'GET',
-                    headers: API_HEADERS
-                }),
-                fetch('https://api.collectapi.com/economy/allCurrency', {
-                    method: 'GET',
-                    headers: API_HEADERS
-                })
-            ]);
+            console.log('[useLiveRates] Fetching from backend /api/rates');
 
-            if (!goldResponse.ok || !currencyResponse.ok) {
-                throw new Error('API request failed');
+            // Fetch from BACKEND (same source as useExchangeRates)
+            const response = await fetch('/api/rates', {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Backend API request failed');
             }
 
-            const goldData = await goldResponse.json();
-            const currencyData = await currencyResponse.json();
+            const data = await response.json();
 
-            // Normalize and combine data
-            const normalizedRates = normalizeRates(goldData, currencyData);
+            // Normalize GRAM_GOLD to GRAM for frontend compatibility
+            if (data.GRAM_GOLD && !data.GRAM) {
+                data.GRAM = data.GRAM_GOLD;
+            }
+
+            console.log('[useLiveRates] Received rates:', data);
 
             // Cache the result
             const now = Date.now();
-            setCachedData(normalizedRates);
-            setRates(normalizedRates);
+            setCachedData(data);
+            setRates(data);
             setLastUpdated(formatTime(now));
             setLoading(false);
 
         } catch (err) {
-            console.error('Failed to fetch live rates:', err);
+            console.error('[useLiveRates] Failed to fetch rates:', err);
             setError(err.message);
 
             // Try to use cached data even if expired
-            const cachedRates = getCachedData();
-            if (cachedRates) {
-                console.log('Using expired cache due to fetch error');
-                setRates(cachedRates);
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const { data } = JSON.parse(cached);
+                    console.log('[useLiveRates] Using expired cache due to fetch error');
+                    setRates(data);
+                }
+            } catch (cacheErr) {
+                console.error('[useLiveRates] Cache fallback failed:', cacheErr);
             }
 
             setLoading(false);

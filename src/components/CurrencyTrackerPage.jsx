@@ -38,11 +38,30 @@ const GoldIcon = ({ type, className }) => {
     return null;
 };
 
+// Custom Turkish Lira Icon Component
+const TurkishLiraIcon = ({ className = "w-6 h-6" }) => {
+    return (
+        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8 18V6" />
+            <path d="M4 10h8" />
+            <path d="M4 14h8" />
+            <path d="M14 8c0 2-2 4-4 6" />
+            <circle cx="16" cy="12" r="4" />
+        </svg>
+    );
+};
+
+
 
 const CurrencyTrackerPage = () => {
     const { user } = useAuth();
-    const { triggerRefresh } = useExpenses();
+    // Destructure portfolio, usersMap, and budgetIncluded from Context
+    const { triggerRefresh, portfolio: contextPortfolio, usersMap, budgetIncluded } = useExpenses();
     const { rates, loading: ratesLoading, error: ratesError, lastUpdated, refetch } = useLiveRates();
+
+    // Local state for UI manipulation (optimistic updates could be done here, but usually we rely on Context for SSOT)
+    // However, the existing code uses 'portfolio' state heavily. 
+    // To minimize refactor risk, we sync Context -> State.
     const [portfolio, setPortfolio] = useState([]);
     const [rateChanges, setRateChanges] = useState({});
     const [activeMenu, setActiveMenu] = useState(null);
@@ -52,16 +71,17 @@ const CurrencyTrackerPage = () => {
     const [expandedAssetId, setExpandedAssetId] = useState(null); // For mobile accordion
     const [editForm, setEditForm] = useState({ amount: '', note: '' });
 
+
     // Asset type configurations
     const assetConfig = {
-        TRY_CASH: { name: 'Türk Lirası', icon: <Banknote className="text-emerald-500" />, color: 'green', symbol: '₺', type: 'cash' },
-        USD: { name: 'Dolar', icon: <DollarSign className="text-green-600" />, color: 'green', symbol: '$', type: 'market' },
-        EUR: { name: 'Euro', icon: <Euro className="text-blue-600" />, color: 'blue', symbol: '€', type: 'market' },
-        GBP: { name: 'Sterlin', icon: <PoundSterling className="text-purple-600" />, color: 'purple', symbol: '£', type: 'market' },
-        GRAM: { name: 'Gram Altın', icon: <Sparkles className="text-yellow-500" />, color: 'yellow', symbol: 'gr', type: 'market' },
-        CEYREK: { name: 'Çeyrek Altın', icon: <GoldIcon type="quarter" className="text-yellow-500" />, color: 'yellow', symbol: 'adet', type: 'market' },
-        YARIM: { name: 'Yarım Altın', icon: <GoldIcon type="half" className="text-yellow-500" />, color: 'yellow', symbol: 'adet', type: 'market' },
-        TAM: { name: 'Tam Altın', icon: <GoldIcon type="full" className="text-yellow-500" />, color: 'yellow', symbol: 'adet', type: 'market' }
+        TRY_CASH: { name: 'Türk Lirası', icon: <Banknote className="w-6 h-6 text-green-600" />, color: 'green', symbol: '₺', type: 'cash' },
+        USD: { name: 'ABD Doları', icon: <DollarSign className="w-6 h-6 text-green-600" />, color: 'green', symbol: '$', type: 'market' },
+        EUR: { name: 'Euro', icon: <Euro className="w-6 h-6 text-blue-600" />, color: 'blue', symbol: '€', type: 'market' },
+        GBP: { name: 'İngiliz Sterlini', icon: <PoundSterling className="w-6 h-6 text-purple-600" />, color: 'purple', symbol: '£', type: 'market' },
+        GRAM: { name: 'Gram Altın', icon: <Sparkles className="w-6 h-6 text-yellow-600" />, color: 'yellow', symbol: 'gr', type: 'market' },
+        CEYREK: { name: 'Çeyrek Altın', icon: <Sparkles className="w-6 h-6 text-yellow-600" />, color: 'yellow', symbol: 'adet', type: 'market' },
+        YARIM: { name: 'Yarım Altın', icon: <Sparkles className="w-6 h-6 text-yellow-600" />, color: 'yellow', symbol: 'adet', type: 'market' },
+        TAM: { name: 'Tam Altın', icon: <Sparkles className="w-6 h-6 text-yellow-600" />, color: 'yellow', symbol: 'adet', type: 'market' }
     };
 
     // Quick Adder state
@@ -71,18 +91,18 @@ const CurrencyTrackerPage = () => {
         note: ''
     });
 
-    // Load portfolio from backend API
+    // Sync with Context
     useEffect(() => {
-        if (user) {
-            fetch(`/api/portfolio/${user.username}`)
-                .then(res => res.json())
-                .then(data => {
-                    setPortfolio(data.portfolio || []);
-                    setIncludedInBudget(data.budgetIncluded || false);
-                })
-                .catch(err => console.error('Failed to load portfolio:', err));
+        if (contextPortfolio) {
+            setPortfolio(contextPortfolio);
         }
-    }, [user]);
+        if (budgetIncluded !== undefined) {
+            setIncludedInBudget(budgetIncluded);
+        }
+    }, [contextPortfolio, budgetIncluded]);
+
+    // Cleanup local fetch? Yes, removing the useEffect that fetches /api/portfolio
+    // ... replaced by above sync ...
 
     // Save portfolio to backend
     const savePortfolio = async (newPortfolio) => {
@@ -242,13 +262,43 @@ const CurrencyTrackerPage = () => {
         }
     };
 
-    // Calculate total portfolio value
-    // Calculate total portfolio value (Cash + Market assets)
-    const totalValue = portfolio.reduce((sum, asset) => {
-        // TRY_CASH has rate = 1, market assets use live rates
-        const rate = asset.type === 'TRY_CASH' ? 1 : (rates?.[asset.type] || 0);
-        return sum + (asset.amount * rate);
-    }, 0);
+    // ========================================
+    // PORTFOLIO VALUE CALCULATION (REWRITTEN)
+    // ========================================
+    // Calculate TOTAL portfolio value: ALL assets in TL
+    // This should ALWAYS show the sum of:
+    // - All TRY_CASH (as-is)
+    // - All forex (USD, EUR, GBP) × current rate
+    // - All gold (GRAM, CEYREK, YARIM, TAM) × current rate
+
+    const calculateTotalPortfolioValue = () => {
+        if (!portfolio || portfolio.length === 0) return 0;
+        if (!rates) return 0;
+
+        let total = 0;
+
+        portfolio.forEach(asset => {
+            const amount = parseFloat(asset.amount) || 0;
+
+            if (asset.type === 'TRY_CASH') {
+                // Cash: 1:1
+                total += amount;
+            } else {
+                // Forex & Gold: use current rate
+                const rate = parseFloat(rates[asset.type]) || 0;
+                const value = amount * rate;
+                total += value;
+
+                // Debug log
+                console.log(`[Portfolio Calc] ${asset.type}: ${amount} × ${rate} = ${value.toFixed(2)} TL`);
+            }
+        });
+
+        console.log(`[Portfolio Calc] TOTAL: ${total.toFixed(2)} TL`);
+        return total;
+    };
+
+    const totalValue = calculateTotalPortfolioValue();
 
     // Get color classes based on asset type
     const getColorClasses = (color) => {
@@ -294,6 +344,12 @@ const CurrencyTrackerPage = () => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                     <span className="font-semibold text-gray-900">{config.name}</span>
+                                    {usersMap && asset.username && usersMap[asset.username] && (
+                                        <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">
+                                            {/* Show first name only or 'Ben' if current user */}
+                                            {asset.username === user.username ? 'Ben' : usersMap[asset.username].name.split(' ')[0]}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-gray-500">
                                     {/* Amount / USD Equivalent */}
@@ -390,6 +446,11 @@ const CurrencyTrackerPage = () => {
                         <div className="flex items-center gap-2">
                             <div className="md:text-2xl text-3xl">{config.icon}</div>
                             <h3 className="font-bold text-gray-900 md:text-sm">{config.name}</h3>
+                            {usersMap && asset.username && usersMap[asset.username] && (
+                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded whitespace-nowrap hidden md:inline-block">
+                                    {asset.username === user.username ? 'Ben' : usersMap[asset.username].name.split(' ')[0]}
+                                </span>
+                            )}
                         </div>
 
                         <div className="relative">

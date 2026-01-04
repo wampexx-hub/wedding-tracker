@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useExpenses } from '../context/ExpenseContext';
 import { Calendar, MapPin, ArrowRight, Users, BarChart3, CalendarClock } from 'lucide-react';
 import { getLocalTimeZone, today, parseDate } from '@internationalized/date';
 import Select, { components } from 'react-select';
@@ -36,6 +37,7 @@ const DropdownIndicator = (props) => {
 
 const Onboarding = () => {
     const { user, updateUser } = useAuth();
+    const { triggerRefresh } = useExpenses();
     const navigate = useNavigate();
 
     // Default date: Today
@@ -85,6 +87,12 @@ const Onboarding = () => {
 
             if (data.success) {
                 updateUser(data.user);
+                // Trigger context refresh to load wedding date
+                if (triggerRefresh) {
+                    await triggerRefresh();
+                }
+                // Small delay to ensure data is loaded
+                await new Promise(resolve => setTimeout(resolve, 300));
                 navigate('/');
             } else {
                 setError(data.error || 'Bir hata oluştu.');
@@ -118,6 +126,11 @@ const Onboarding = () => {
 
             if (data.success) {
                 updateUser(data.user);
+                // Trigger context refresh
+                if (triggerRefresh) {
+                    await triggerRefresh();
+                }
+                await new Promise(resolve => setTimeout(resolve, 300));
                 navigate('/');
             }
         } catch (err) {

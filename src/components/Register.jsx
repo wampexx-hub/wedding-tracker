@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Heart, User, Mail, Phone, Lock, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const Register = ({ onSwitchToLogin }) => {
     const { register } = useAuth();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
@@ -23,8 +25,8 @@ const Register = ({ onSwitchToLogin }) => {
 
         const result = await register(formData);
         if (result.success) {
-            alert('Kayıt başarılı! Giriş yapabilirsiniz.');
-            onSwitchToLogin();
+            // Redirect to onboarding page after successful registration
+            navigate('/onboarding');
         } else {
             setError(result.message);
         }

@@ -8,28 +8,33 @@ const WeddingService = {
 
     // Get all dashboard data
     getDashboardData: async (username) => {
-        // await WeddingService.delay(800); // Removed artificial delay
         try {
-            const [dataResponse, portfolioResponse] = await Promise.all([
-                fetch(`${WeddingService.API_URL}/api/data?user=${username}`),
-                fetch(`${WeddingService.API_URL}/api/portfolio/${username}`)
-            ]);
+            const response = await fetch(`${WeddingService.API_URL}/api/data?user=${username}`, {
+                cache: 'no-store', // Force fresh data
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
 
-            if (!dataResponse.ok) {
-                const errorText = await dataResponse.text();
+            if (!response.ok) {
+                const errorText = await response.text();
                 throw new Error(errorText || 'Failed to fetch data');
             }
 
-            const data = await dataResponse.json();
-            const portfolioData = portfolioResponse.ok ? await portfolioResponse.json() : { portfolio: [] };
+            const data = await response.json();
+
+            // Get budgetIncluded from user settings
+            const userResponse = await fetch(`${WeddingService.API_URL}/api/portfolio/${username}`);
+            const userData = userResponse.ok ? await userResponse.json() : { budgetIncluded: false };
 
             return {
                 expenses: data.expenses || [],
                 budget: data.budget || 0,
                 weddingDate: data.weddingDate || null,
                 assets: data.assets || [],
-                portfolio: portfolioData.portfolio || [],
-                budgetIncluded: portfolioData.budgetIncluded,
+                portfolio: data.portfolio || [], // Now from /api/data
+                budgetIncluded: userData.budgetIncluded,
                 usersMap: data.usersMap || {}
             };
         } catch (error) {
@@ -126,7 +131,11 @@ const WeddingService = {
         try {
             const response = await fetch(`${WeddingService.API_URL}/api/rates`);
             if (!response.ok) throw new Error('Failed to fetch exchange rates');
-            return await response.json();
+            const data = await response.json();
+            if (data.GRAM_GOLD && !data.GRAM) {
+                data.GRAM = data.GRAM_GOLD;
+            }
+            return data;
         } catch (error) {
             console.error('Error fetching exchange rates:', error);
             // Fallback to defaults if API fails

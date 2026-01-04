@@ -1,7 +1,12 @@
 import React from 'react';
-import { Trash2, Edit2, Calendar, CreditCard, CheckCircle, Clock, Image as ImageIcon } from 'lucide-react';
+import { Trash2, Edit2, Calendar, CreditCard, CheckCircle, Clock, Image as ImageIcon, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useExpenses } from '../context/ExpenseContext';
 
 const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded }) => {
+    const { user } = useAuth();
+    const { usersMap } = useExpenses();
+
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('tr-TR', {
             style: 'currency',
@@ -90,13 +95,23 @@ const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded }) => {
                 {/* Desktop Left: Details */}
                 <div className="hidden md:flex gap-4 items-center w-full md:w-auto">
                     {/* Status Icon (Desktop) */}
-                    <div className={`hidden md:flex w-12 h-12 rounded-xl items-center justify-center flex-shrink-0 text-xl font-bold ${expense.status === 'purchased' ? 'bg-green-50 text-green-500' : 'bg-champagne/10 text-champagne'}`}>
-                        {expense.status === 'purchased' ? <CheckCircle size={24} /> : <Clock size={24} />}
+                    <div className="relative">
+                        <div className={`hidden md:flex w-12 h-12 rounded-xl items-center justify-center flex-shrink-0 text-xl font-bold ${expense.status === 'purchased' ? 'bg-green-50 text-green-500' : 'bg-champagne/10 text-champagne'}`}>
+                            {expense.status === 'purchased' ? <CheckCircle size={24} /> : <Clock size={24} />}
+                        </div>
+                        {/* Owner Badge */}
+                        {usersMap && expense.username && usersMap[expense.username] && (
+                            <div className="absolute -bottom-2 -right-2 bg-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-gray-100 shadow-sm text-gray-500 flex items-center gap-0.5 whitespace-nowrap z-10">
+                                {expense.username === user?.username ? 'Ben' : usersMap[expense.username].name.split(' ')[0]}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                         {/* Title (Desktop) */}
-                        <h4 className="hidden md:block font-semibold text-gray-900 truncate">{expense.title}</h4>
+                        <div className="flex items-center gap-2">
+                            <h4 className="hidden md:block font-semibold text-gray-900 truncate">{expense.title}</h4>
+                        </div>
 
                         {/* Details Grid */}
                         <div className="flex flex-wrap gap-3 text-sm text-gray-500 mt-1">

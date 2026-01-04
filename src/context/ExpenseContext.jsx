@@ -19,36 +19,36 @@ export const ExpenseProvider = ({ children }) => {
     const { user } = useAuth();
     const queryClient = useQueryClient();
 
+    const [socket, setSocket] = useState(null);
+
     // --- SOCKET.IO INTEGRATION ---
     useEffect(() => {
         if (!user) return;
 
         console.log('Connecting to socket at:', window.location.origin);
 
-        const socket = io(window.location.origin, {
+        const newSocket = io(window.location.origin, {
             query: { username: user.username },
             transports: ['websocket', 'polling']
         });
 
-        socket.on('connect', () => {
-            console.log('Socket connected:', socket.id);
+        newSocket.on('connect', () => {
+            console.log('Socket connected:', newSocket.id);
         });
 
-        socket.on('data:updated', () => {
+        newSocket.on('data:updated', () => {
             console.log('Data updated event received, refreshing...');
-            // Debug alert to confirm receipt
-            // window.alert('DEBUG: Socket Veri Güncellemesi Geldi!'); // Commented out for now to be less annoying, unless requested.
-            // Actually user is waiting for fix. Let's use console and broad invalidation.
-
             queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             queryClient.refetchQueries({ queryKey: ['dashboard'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
-            queryClient.invalidateQueries({ queryKey: ['rates'] }); // Sync exchange rates too
+            queryClient.invalidateQueries({ queryKey: ['rates'] });
         });
+
+        setSocket(newSocket);
 
         return () => {
             console.log('Disconnecting socket...');
-            socket.disconnect();
+            newSocket.disconnect();
         };
     }, [user, queryClient]);
 
@@ -170,6 +170,7 @@ export const ExpenseProvider = ({ children }) => {
             portfolioValue,
             totalPortfolioValue,
             assets,
+            portfolio, // Add portfolio export
             rates,
             addExpense,
             addBatchExpenses,
@@ -186,7 +187,9 @@ export const ExpenseProvider = ({ children }) => {
             toggleBudgetInclude,
             budgetIncluded: dashboardData?.budgetIncluded,
             weddingDate: dashboardData?.weddingDate,
-            refreshTrigger: 0 // Mocked for compatibility
+            usersMap: dashboardData?.usersMap || {},
+            refreshTrigger: 0, // Mocked for compatibility
+            socket
         }}>
             {children}
         </ExpenseContext.Provider>

@@ -65,7 +65,10 @@ const MonthlyPaymentChart = ({ expenses }) => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="font-serif text-lg font-bold text-gray-900">Gelecek Ödemeler</h3>
-                    <p className="text-xs text-gray-500 font-medium">{installmentExpenseCount} Taksitli Harcama</p>
+                    <p className="text-xs text-gray-500 font-medium">
+                        Toplam: <span className="font-bold text-[#D4AF37]">{totalFuturePayment.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 })}</span>
+                        {' • '}{installmentExpenseCount} Taksitli Harcama
+                    </p>
                 </div>
                 <div className="p-2 bg-blue-50 rounded-lg text-blue-500">
                     <Calendar size={20} />
@@ -99,7 +102,7 @@ const MonthlyPaymentChart = ({ expenses }) => {
 
             {/* Desktop View: Bar Chart */}
             {isDesktop && (
-                <div className="w-full">
+                <div className="w-full relative z-10">
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart
                             data={data}
@@ -134,11 +137,12 @@ const MonthlyPaymentChart = ({ expenses }) => {
                                 tickFormatter={(value) => `₺${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`}
                             />
                             <Tooltip
+                                wrapperStyle={{ zIndex: 1000 }}
                                 cursor={{ fill: '#f9fafb' }}
                                 content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
                                         return (
-                                            <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-100 text-sm">
+                                            <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-100 text-sm relative z-50">
                                                 <p className="font-medium text-gray-900">{payload[0].payload.name}</p>
                                                 <p className="text-[#D4AF37] font-bold">
                                                     {payload[0].value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 })}
