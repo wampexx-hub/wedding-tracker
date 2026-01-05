@@ -246,9 +246,12 @@ app.post('/api/auth/login', async (req, res) => {
         const user = result.rows[0];
 
         if (user && await bcrypt.compare(password, user.password)) {
-            const { password: _, is_admin, ...userWithoutPassword } = user;
+            if (user.is_banned) {
+                return res.status(403).json({ success: false, message: 'Hesabınız askıya alınmıştır. Lütfen yönetici ile iletişime geçin.' });
+            }
+            const { password: _, is_admin, is_banned, ...userWithoutPassword } = user;
             // Normalize to camelCase
-            const userForClient = { ...userWithoutPassword, isAdmin: is_admin };
+            const userForClient = { ...userWithoutPassword, isAdmin: is_admin, isBanned: is_banned };
             res.json({ success: true, user: userForClient });
         } else {
             res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
@@ -268,8 +271,11 @@ app.post('/api/login', async (req, res) => {
         const user = result.rows[0];
 
         if (user && await bcrypt.compare(password, user.password)) {
-            const { password: _, is_admin, ...userWithoutPassword } = user;
-            const userForClient = { ...userWithoutPassword, isAdmin: is_admin };
+            if (user.is_banned) {
+                return res.status(403).json({ success: false, message: 'Hesabınız askıya alınmıştır. Lütfen yönetici ile iletişime geçin.' });
+            }
+            const { password: _, is_admin, is_banned, ...userWithoutPassword } = user;
+            const userForClient = { ...userWithoutPassword, isAdmin: is_admin, isBanned: is_banned };
             res.json({ success: true, user: userForClient });
         } else {
             res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
@@ -284,10 +290,17 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/admin/users', async (req, res) => {
     try {
-        const result = await db.query('SELECT username, name, surname, email, is_admin, created_at, google_id, avatar, wedding_date FROM users');
+        const result = await db.query('SELECT username, name, surname, email, phone, city, wedding_date, budget_range, is_admin, is_banned, created_at, google_id, avatar FROM users');
         const users = result.rows.map(user => {
-            const { is_admin, ...rest } = user;
-            return { ...rest, isAdmin: is_admin };
+            const { is_admin, is_banned, created_at, wedding_date, budget_range, ...rest } = user;
+            return {
+                ...rest,
+                isAdmin: is_admin,
+                isBanned: is_banned,
+                createdAt: created_at,
+                weddingDate: wedding_date,
+                budgetRange: budget_range
+            };
         });
         res.json(users);
     } catch (err) {
@@ -371,6 +384,147 @@ app.put('/api/admin/users/:username/role', async (req, res) => {
         } else {
             res.status(404).json({ error: 'User not found' });
         }
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/admin/users/:username/ban', async (req, res) => {
+    const { username } = req.params;
+    const { isBanned } = req.body;
+    if (username === 'admin') return res.status(400).json({ error: 'Cannot ban root admin' });
+
+    try {
+        const result = await db.query('UPDATE users SET is_banned = $1 WHERE username = $2', [isBanned, username]);
+        if (result.rowCount > 0) {
+            res.json({ success: true });
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/admin/notifications', async (req, res) => {
+    const { title, message, targetUser } = req.body;
+
+    try {
+        if (targetUser && targetUser !== 'all') {
+            // Send to specific user
+            await db.query(
+                'INSERT INTO notifications (username, title, message) VALUES ($1, $2, $3)',
+                [targetUser, title, message]
+            );
+        } else {
+            // Broadcast to all users
+            const users = await db.query('SELECT username FROM users');
+            for (const user of users.rows) {
+                await db.query(
+                    'INSERT INTO notifications (username, title, message) VALUES ($1, $2, $3)',
+                    [user.username, title, message]
+                );
+            }
+        }
+
+        res.json({ success: true, message: 'Notification sent and saved to database' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// User Notifications - Get user's notifications
+app.get('/api/notifications', async (req, res) => {
+    const username = req.query.user;
+
+    if (!username) {
+        return res.status(400).json({ error: 'Username required' });
+    }
+
+    try {
+        const result = await db.query(
+            'SELECT * FROM notifications WHERE username = $1 ORDER BY created_at DESC',
+            [username]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Mark notification as read
+app.put('/api/notifications/:id/read', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await db.query(
+            'UPDATE notifications SET read = true WHERE id = $1',
+            [id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+
+// Categories
+app.get('/api/admin/categories', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM categories ORDER BY rank ASC, id ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/admin/categories', async (req, res) => {
+    const { name, type, color, icon } = req.body;
+    try {
+        // Calculate next rank
+        const rankRes = await db.query('SELECT COALESCE(MAX(rank), 0) + 1 as next_rank FROM categories');
+        const nextRank = rankRes.rows[0].next_rank;
+
+        const result = await db.query(
+            'INSERT INTO categories (name, type, color, icon, rank) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [name, type || 'expense', color, icon, nextRank]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        if (err.code === '23505') { // Unique violation
+            return res.status(400).json({ error: 'Category already exists' });
+        }
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/admin/categories/reorder', async (req, res) => {
+    const { categories } = req.body; // Expect array of { id, rank }
+    if (!Array.isArray(categories)) return res.status(400).json({ error: 'Invalid data' });
+
+    try {
+        // Use a transaction for safety
+        await db.query('BEGIN');
+        for (const cat of categories) {
+            await db.query('UPDATE categories SET rank = $1 WHERE id = $2', [cat.rank, cat.id]);
+        }
+        await db.query('COMMIT');
+        res.json({ success: true });
+    } catch (err) {
+        await db.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/admin/categories/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query('DELETE FROM categories WHERE id = $1', [id]);
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }

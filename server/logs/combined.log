@@ -1217,3 +1217,444 @@ memory, and will not scale past a single process.
 2026-01-05T11:51:57: [SOCKET] Emitted 'data:updated' to partner room: dummyb
 2026-01-05T11:51:57: [RATES] Serving cached rates
 2026-01-05T11:51:57: [RATES] Serving cached rates
+2026-01-05T12:41:22: [RATES] Fetching fresh rates...
+2026-01-05T12:41:22: [RATES] Fetching fresh rates...
+2026-01-05T12:41:22: [RATES] Cache updated at 12:41:22 PM
+2026-01-05T12:41:22: [SOCKET] New connection attempt. ID: 6AiICMZuWaE8g5wrAABb, Username: wampex@admin.com
+2026-01-05T12:41:22: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:41:22: [RATES] Cache updated at 12:41:22 PM
+2026-01-05T12:41:28: [RATES] Serving cached rates
+2026-01-05T12:41:28: [SOCKET] New connection attempt. ID: tGpXPyq-gGRFjiZAAABd, Username: wampex@admin.com
+2026-01-05T12:41:28: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:48:42: [SOCKET] User disconnected: wampex@admin.com (tGpXPyq-gGRFjiZAAABd)
+2026-01-05T12:48:43: [RATES] Serving cached rates
+2026-01-05T12:48:43: [SOCKET] New connection attempt. ID: UJPIiRiWE-IY_BxNAABf, Username: wampex@admin.com
+2026-01-05T12:48:43: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:55:11: [SOCKET] User disconnected: wampex@admin.com (UJPIiRiWE-IY_BxNAABf)
+2026-01-05T12:55:12: [RATES] Serving cached rates
+2026-01-05T12:55:12: [SOCKET] New connection attempt. ID: ceE3yrggmS1D24ZWAABh, Username: wampex@admin.com
+2026-01-05T12:55:12: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:55:54: [SOCKET] User disconnected: wampex@admin.com (ceE3yrggmS1D24ZWAABh)
+2026-01-05T12:55:54: [RATES] Serving cached rates
+2026-01-05T12:55:54: [SOCKET] New connection attempt. ID: PDQrARqGTdatsYXDAABj, Username: wampex@admin.com
+2026-01-05T12:55:54: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:57:33: [SOCKET] User disconnected: wampex@admin.com (PDQrARqGTdatsYXDAABj)
+2026-01-05T12:57:34: [SOCKET] New connection attempt. ID: DpK0Og9Ec-GhjC1_AABl, Username: wampex@admin.com
+2026-01-05T12:57:34: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:59:10: [SOCKET] User disconnected: wampex@admin.com (DpK0Og9Ec-GhjC1_AABl)
+2026-01-05T12:59:11: [RATES] Serving cached rates
+2026-01-05T12:59:11: [SOCKET] New connection attempt. ID: S03IcJHORRUR5IdLAABn, Username: wampex@admin.com
+2026-01-05T12:59:11: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:59:32: [SOCKET] User disconnected: wampex@admin.com (S03IcJHORRUR5IdLAABn)
+2026-01-05T12:59:33: [RATES] Serving cached rates
+2026-01-05T12:59:33: [SOCKET] New connection attempt. ID: 2aUHARvvAal13tpdAABp, Username: wampex@admin.com
+2026-01-05T12:59:33: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:59:57: [SOCKET] User disconnected: wampex@admin.com (2aUHARvvAal13tpdAABp)
+2026-01-05T12:59:58: [RATES] Serving cached rates
+2026-01-05T12:59:58: [SOCKET] New connection attempt. ID: 4S8NKPdJxj-ubQ4qAABr, Username: wampex@admin.com
+2026-01-05T12:59:58: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T12:59:59: [SOCKET] User disconnected: wampex@admin.com (6AiICMZuWaE8g5wrAABb)
+2026-01-05T13:00:00: [RATES] Serving cached rates
+2026-01-05T13:00:00: [SOCKET] New connection attempt. ID: UaDNgEbCs45LvzBqAABt, Username: wampex@admin.com
+2026-01-05T13:00:00: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:00:03: [SOCKET] User disconnected: wampex@admin.com (UaDNgEbCs45LvzBqAABt)
+2026-01-05T13:00:03: [RATES] Serving cached rates
+2026-01-05T13:00:04: [SOCKET] New connection attempt. ID: 1tlc3W3z0wE4ar_AAABv, Username: wampex@admin.com
+2026-01-05T13:00:04: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:00:12: [SOCKET] User disconnected: dummyb (NFYFmYt0wiAMIGgGAABZ)
+2026-01-05T13:02:34: [SOCKET] User disconnected: wampex@admin.com (4S8NKPdJxj-ubQ4qAABr)
+2026-01-05T13:02:35: [RATES] Serving cached rates
+2026-01-05T13:02:35: [SOCKET] New connection attempt. ID: JhXSNdqf_86ei6sIAABx, Username: wampex@admin.com
+2026-01-05T13:02:35: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:03:40: [SOCKET] User disconnected: wampex@admin.com (JhXSNdqf_86ei6sIAABx)
+2026-01-05T13:03:40: [RATES] Serving cached rates
+2026-01-05T13:03:41: [SOCKET] New connection attempt. ID: uKM9CJPc_4FjjjDgAABz, Username: wampex@admin.com
+2026-01-05T13:03:41: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:05:29: [SOCKET] User disconnected: wampex@admin.com (uKM9CJPc_4FjjjDgAABz)
+2026-01-05T13:05:30: [RATES] Serving cached rates
+2026-01-05T13:05:30: [SOCKET] New connection attempt. ID: CVojWiAZrP7OewmQAAB1, Username: wampex@admin.com
+2026-01-05T13:05:30: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:06:34: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2026-01-05T13:06:34: [dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-05T13:06:35: Warning: connect.session() MemoryStore is not
+2026-01-05T13:06:35: designed for a production environment, as it will leak
+2026-01-05T13:06:35: memory, and will not scale past a single process.
+2026-01-05T13:06:35: [RATES] Initializing cache...
+2026-01-05T13:06:35: Server running on http://localhost:3001
+2026-01-05T13:06:35: [RATES] Initial cache loaded
+2026-01-05T13:06:36: [SOCKET] New connection attempt. ID: mCIH2puzPD7s7VNqAAAB, Username: dummya
+2026-01-05T13:06:36: [SOCKET] User joined room: dummya
+2026-01-05T13:06:46: [SOCKET] New connection attempt. ID: 6m3I87b3uJY8dT_6AAAD, Username: wampex@admin.com
+2026-01-05T13:06:46: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:06:49: [SOCKET] New connection attempt. ID: Jdev2USJeevWtNHAAAAF, Username: wampex@admin.com
+2026-01-05T13:06:49: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:07:03: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+2026-01-05T13:07:03: [dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-05T13:07:03: Warning: connect.session() MemoryStore is not
+2026-01-05T13:07:03: designed for a production environment, as it will leak
+2026-01-05T13:07:03: memory, and will not scale past a single process.
+2026-01-05T13:07:03: [RATES] Initializing cache...
+2026-01-05T13:07:03: Server running on http://localhost:3001
+2026-01-05T13:07:03: [RATES] Initial cache loaded
+2026-01-05T13:07:03: [SOCKET] New connection attempt. ID: CONvj70KsoHY13wzAAAB, Username: dummya
+2026-01-05T13:07:04: [SOCKET] User joined room: dummya
+2026-01-05T13:07:04: [SOCKET] New connection attempt. ID: Pp7qm3Ln7Q7_USA0AAAD, Username: wampex@admin.com
+2026-01-05T13:07:04: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:07:04: [SOCKET] New connection attempt. ID: g55VFOdx9Q4MOc1eAAAF, Username: wampex@admin.com
+2026-01-05T13:07:04: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:07:23: [dotenv@17.2.3] injecting env (9) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-05T13:07:23: [dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-05T13:07:24: Warning: connect.session() MemoryStore is not
+2026-01-05T13:07:24: designed for a production environment, as it will leak
+2026-01-05T13:07:24: memory, and will not scale past a single process.
+2026-01-05T13:07:24: [RATES] Initializing cache...
+2026-01-05T13:07:24: Server running on http://localhost:3001
+2026-01-05T13:07:24: [RATES] Initial cache loaded
+2026-01-05T13:07:24: [SOCKET] New connection attempt. ID: 068wtUuwngNDmMMDAAAB, Username: wampex@admin.com
+2026-01-05T13:07:24: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:07:24: [SOCKET] New connection attempt. ID: -Y0sttTm7oKce1UjAAAD, Username: dummya
+2026-01-05T13:07:24: [SOCKET] User joined room: dummya
+2026-01-05T13:07:24: [SOCKET] New connection attempt. ID: cpSCrHsNNZj8TmEpAAAF, Username: wampex@admin.com
+2026-01-05T13:07:24: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:08:12: [SOCKET] User disconnected: wampex@admin.com (068wtUuwngNDmMMDAAAB)
+2026-01-05T13:08:12: [RATES] Fetching fresh rates...
+2026-01-05T13:08:12: [SOCKET] New connection attempt. ID: JDwmdA8LIrtUi0prAAAH, Username: wampex@admin.com
+2026-01-05T13:08:12: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:08:13: [RATES] Cache updated at 1:08:13 PM
+2026-01-05T13:08:23: [SOCKET] User disconnected: wampex@admin.com (cpSCrHsNNZj8TmEpAAAF)
+2026-01-05T13:08:24: [RATES] Serving cached rates
+2026-01-05T13:08:24: [SOCKET] New connection attempt. ID: 4Gn9TPxTR2U5F37IAAAJ, Username: wampex@admin.com
+2026-01-05T13:08:24: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:08:27: [SOCKET] User disconnected: wampex@admin.com (4Gn9TPxTR2U5F37IAAAJ)
+2026-01-05T13:08:27: [RATES] Serving cached rates
+2026-01-05T13:08:28: [SOCKET] New connection attempt. ID: _26o-z_PoxvtyGV3AAAL, Username: wampex@admin.com
+2026-01-05T13:08:28: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:08:30: [SOCKET] User disconnected: wampex@admin.com (_26o-z_PoxvtyGV3AAAL)
+2026-01-05T13:08:31: [RATES] Serving cached rates
+2026-01-05T13:08:31: [SOCKET] New connection attempt. ID: GT1zcKlYZ1Q63R82AAAN, Username: wampex@admin.com
+2026-01-05T13:08:31: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:08:38: [SOCKET] User disconnected: wampex@admin.com (GT1zcKlYZ1Q63R82AAAN)
+2026-01-05T13:08:39: [RATES] Serving cached rates
+2026-01-05T13:08:39: [SOCKET] New connection attempt. ID: 7IFLeV-X645sJYWCAAAP, Username: wampex@admin.com
+2026-01-05T13:08:39: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:09:39: [SOCKET] User disconnected: wampex@admin.com (7IFLeV-X645sJYWCAAAP)
+2026-01-05T13:09:40: [RATES] Serving cached rates
+2026-01-05T13:09:40: [SOCKET] New connection attempt. ID: -W8ZAGn0grRU_8c-AAAR, Username: wampex@admin.com
+2026-01-05T13:09:40: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:10:48: [SOCKET] User disconnected: wampex@admin.com (-W8ZAGn0grRU_8c-AAAR)
+2026-01-05T13:10:49: [RATES] Serving cached rates
+2026-01-05T13:10:49: [SOCKET] New connection attempt. ID: Q4IJFs2Zb3T_EzrKAAAT, Username: wampex@admin.com
+2026-01-05T13:10:49: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:11:51: [SOCKET] User disconnected: wampex@admin.com (JDwmdA8LIrtUi0prAAAH)
+2026-01-05T13:11:53: [SOCKET] New connection attempt. ID: z9sER0E63VLL2-HuAAAV, Username: wampex@admin.com
+2026-01-05T13:11:53: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:16:00: [SOCKET] User disconnected: wampex@admin.com (z9sER0E63VLL2-HuAAAV)
+2026-01-05T13:16:03: [SOCKET] User disconnected: wampex@admin.com (Q4IJFs2Zb3T_EzrKAAAT)
+2026-01-05T13:23:12: [RATES] Serving cached rates
+2026-01-05T13:23:12: [SOCKET] New connection attempt. ID: ZWop5uCBQZ0TIFvGAAAX, Username: wampex@admin.com
+2026-01-05T13:23:12: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:23:13: [RATES] Serving cached rates
+2026-01-05T13:23:14: [SOCKET] New connection attempt. ID: TF3HVWKAxF4TtNVTAAAZ, Username: wampex@admin.com
+2026-01-05T13:23:14: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:23:21: [SOCKET] User disconnected: wampex@admin.com (TF3HVWKAxF4TtNVTAAAZ)
+2026-01-05T13:23:21: [RATES] Serving cached rates
+2026-01-05T13:23:21: [SOCKET] New connection attempt. ID: eM3uBdKBvQW2xE00AAAb, Username: wampex@admin.com
+2026-01-05T13:23:21: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:25:08: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2026-01-05T13:25:08: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2026-01-05T13:25:09: Warning: connect.session() MemoryStore is not
+2026-01-05T13:25:09: designed for a production environment, as it will leak
+2026-01-05T13:25:09: memory, and will not scale past a single process.
+2026-01-05T13:25:09: [RATES] Initializing cache...
+2026-01-05T13:25:09: Server running on http://localhost:3001
+2026-01-05T13:25:09: [RATES] Initial cache loaded
+2026-01-05T13:25:13: [SOCKET] New connection attempt. ID: q1OY0mDH6NlVW_SPAAAB, Username: wampex@admin.com
+2026-01-05T13:25:13: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:25:23: [SOCKET] New connection attempt. ID: uLpn5tekj5uaV1qIAAAD, Username: dummya
+2026-01-05T13:25:23: [SOCKET] User joined room: dummya
+2026-01-05T13:25:24: [SOCKET] New connection attempt. ID: SHE5yLgi9g2KlJtXAAAF, Username: wampex@admin.com
+2026-01-05T13:25:24: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:26:19: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+2026-01-05T13:26:19: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+2026-01-05T13:26:20: Warning: connect.session() MemoryStore is not
+2026-01-05T13:26:20: designed for a production environment, as it will leak
+2026-01-05T13:26:20: memory, and will not scale past a single process.
+2026-01-05T13:26:20: [RATES] Initializing cache...
+2026-01-05T13:26:20: Server running on http://localhost:3001
+2026-01-05T13:26:20: [RATES] Initial cache loaded
+2026-01-05T13:26:29: [SOCKET] New connection attempt. ID: OY6TG3Aeivx6sBnKAAAB, Username: wampex@admin.com
+2026-01-05T13:26:29: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:26:29: [SOCKET] New connection attempt. ID: N43FG1_11w3Zz7JMAAAD, Username: wampex@admin.com
+2026-01-05T13:26:29: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:26:34: [SOCKET] New connection attempt. ID: O-L4of_GnRQAKlzMAAAF, Username: dummya
+2026-01-05T13:26:34: [SOCKET] User joined room: dummya
+2026-01-05T13:27:04: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2026-01-05T13:27:04: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2026-01-05T13:27:05: Warning: connect.session() MemoryStore is not
+2026-01-05T13:27:05: designed for a production environment, as it will leak
+2026-01-05T13:27:05: memory, and will not scale past a single process.
+2026-01-05T13:27:05: [RATES] Initializing cache...
+2026-01-05T13:27:05: Server running on http://localhost:3001
+2026-01-05T13:27:05: [RATES] Initial cache loaded
+2026-01-05T13:27:05: [SOCKET] New connection attempt. ID: LxkdAFsOaYizAXxQAAAB, Username: wampex@admin.com
+2026-01-05T13:27:05: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:27:05: [SOCKET] New connection attempt. ID: T0RSGqmUIMFV3C2qAAAD, Username: wampex@admin.com
+2026-01-05T13:27:05: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:27:05: [SOCKET] New connection attempt. ID: DpOSb5yODD3azN1nAAAF, Username: dummya
+2026-01-05T13:27:05: [SOCKET] User joined room: dummya
+2026-01-05T13:28:29: [SOCKET] User disconnected: wampex@admin.com (LxkdAFsOaYizAXxQAAAB)
+2026-01-05T13:28:29: [RATES] Fetching fresh rates...
+2026-01-05T13:28:29: [SOCKET] New connection attempt. ID: V7ClvdFNfOt2XUqrAAAH, Username: wampex@admin.com
+2026-01-05T13:28:29: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:28:30: [RATES] Cache updated at 1:28:30 PM
+2026-01-05T13:28:55: [SOCKET] User disconnected: wampex@admin.com (T0RSGqmUIMFV3C2qAAAD)
+2026-01-05T13:28:56: [RATES] Serving cached rates
+2026-01-05T13:28:56: [SOCKET] New connection attempt. ID: L9zPJ0iex8SgMLmXAAAJ, Username: wampex@admin.com
+2026-01-05T13:28:56: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:35:17: [SOCKET] User disconnected: wampex@admin.com (V7ClvdFNfOt2XUqrAAAH)
+2026-01-05T13:35:18: [RATES] Serving cached rates
+2026-01-05T13:35:18: [SOCKET] New connection attempt. ID: 7EKsGinbaftYbeTdAAAL, Username: wampex@admin.com
+2026-01-05T13:35:18: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:37:37: [SOCKET] User disconnected: wampex@admin.com (7EKsGinbaftYbeTdAAAL)
+2026-01-05T13:37:38: [RATES] Serving cached rates
+2026-01-05T13:37:38: [SOCKET] New connection attempt. ID: 6mpT60XvdUlF9WT3AAAN, Username: wampex@admin.com
+2026-01-05T13:37:38: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:41:03: [SOCKET] User disconnected: wampex@admin.com (6mpT60XvdUlF9WT3AAAN)
+2026-01-05T13:41:04: [RATES] Serving cached rates
+2026-01-05T13:41:04: [SOCKET] New connection attempt. ID: Am7awvrQrWFdv5k-AAAP, Username: wampex@admin.com
+2026-01-05T13:41:04: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:41:30: [SOCKET] User disconnected: wampex@admin.com (L9zPJ0iex8SgMLmXAAAJ)
+2026-01-05T13:41:30: [RATES] Serving cached rates
+2026-01-05T13:41:30: [SOCKET] New connection attempt. ID: rk311WItkAnPtuszAAAR, Username: wampex@admin.com
+2026-01-05T13:41:30: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:44:57: [SOCKET] User disconnected: wampex@admin.com (Am7awvrQrWFdv5k-AAAP)
+2026-01-05T13:44:58: [RATES] Serving cached rates
+2026-01-05T13:44:58: [SOCKET] New connection attempt. ID: PKt1bEUQ4kvscnOjAAAT, Username: wampex@admin.com
+2026-01-05T13:44:58: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:53:31: [SOCKET] User disconnected: dummya (DpOSb5yODD3azN1nAAAF)
+2026-01-05T13:53:31: [SOCKET] User disconnected: wampex@admin.com (PKt1bEUQ4kvscnOjAAAT)
+2026-01-05T13:53:31: [SOCKET] New connection attempt. ID: 5ZiLimsqTyc154WfAAAW, Username: wampex@admin.com
+2026-01-05T13:53:31: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T13:53:31: [SOCKET] New connection attempt. ID: JmCAP_Pi_Uu-0OzcAAAX, Username: dummya
+2026-01-05T13:53:31: [SOCKET] User joined room: dummya
+2026-01-05T13:55:23: [SOCKET] User disconnected: wampex@admin.com (5ZiLimsqTyc154WfAAAW)
+2026-01-05T13:55:24: [RATES] Serving cached rates
+2026-01-05T13:55:24: [SOCKET] New connection attempt. ID: 9Bt0xH2RBaeqGKm9AAAZ, Username: wampex@admin.com
+2026-01-05T13:55:24: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T14:52:20: [SOCKET] User disconnected: wampex@admin.com (rk311WItkAnPtuszAAAR)
+2026-01-05T14:52:21: [RATES] Fetching fresh rates...
+2026-01-05T14:52:22: [SOCKET] New connection attempt. ID: 893e7XBBhG5aCU6xAAAb, Username: wampex@admin.com
+2026-01-05T14:52:22: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T14:52:22: [RATES] Cache updated at 2:52:22 PM
+2026-01-05T14:52:23: [SOCKET] User disconnected: wampex@admin.com (9Bt0xH2RBaeqGKm9AAAZ)
+2026-01-05T14:52:23: [RATES] Serving cached rates
+2026-01-05T14:52:24: [SOCKET] New connection attempt. ID: LnQMGARTgpq9LSsSAAAd, Username: wampex@admin.com
+2026-01-05T14:52:24: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T14:55:02: [SOCKET] New connection attempt. ID: 29KD82H2Wp7fvI6nAAAf, Username: dummyb
+2026-01-05T14:55:02: [SOCKET] User joined room: dummyb
+2026-01-05T14:55:03: [SOCKET] User disconnected: dummyb (29KD82H2Wp7fvI6nAAAf)
+2026-01-05T14:55:12: [SOCKET] User disconnected: dummya (JmCAP_Pi_Uu-0OzcAAAX)
+2026-01-05T15:06:09: [SOCKET] User disconnected: wampex@admin.com (893e7XBBhG5aCU6xAAAb)
+2026-01-05T15:06:10: [RATES] Serving cached rates
+2026-01-05T15:06:10: [SOCKET] New connection attempt. ID: gvrMiTh18uJqYzTIAAAh, Username: wampex@admin.com
+2026-01-05T15:06:10: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:13:22: [SOCKET] User disconnected: wampex@admin.com (LnQMGARTgpq9LSsSAAAd)
+2026-01-05T15:13:22: [SOCKET] User disconnected: wampex@admin.com (gvrMiTh18uJqYzTIAAAh)
+2026-01-05T15:13:22: [SOCKET] New connection attempt. ID: 2Vq-Ra1OIKFxgJ_oAAAl, Username: wampex@admin.com
+2026-01-05T15:13:22: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:13:22: [SOCKET] New connection attempt. ID: UM-FIa8wE9qUwbU2AAAn, Username: wampex@admin.com
+2026-01-05T15:13:22: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:14:32: [SOCKET] User disconnected: wampex@admin.com (2Vq-Ra1OIKFxgJ_oAAAl)
+2026-01-05T15:14:36: [SOCKET] User disconnected: wampex@admin.com (UM-FIa8wE9qUwbU2AAAn)
+2026-01-05T15:14:36: [RATES] Serving cached rates
+2026-01-05T15:14:36: [SOCKET] New connection attempt. ID: evr2_Da9L59aO-omAAAp, Username: wampex@admin.com
+2026-01-05T15:14:36: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:23:43: [SOCKET] User disconnected: wampex@admin.com (evr2_Da9L59aO-omAAAp)
+2026-01-05T15:23:43: [RATES] Fetching fresh rates...
+2026-01-05T15:23:44: [SOCKET] New connection attempt. ID: 9fr_Kx6UthhJCYUaAAAr, Username: wampex@admin.com
+2026-01-05T15:23:44: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:23:44: [RATES] Cache updated at 3:23:44 PM
+2026-01-05T15:27:50: [SOCKET] User disconnected: wampex@admin.com (9fr_Kx6UthhJCYUaAAAr)
+2026-01-05T15:27:53: [SOCKET] New connection attempt. ID: EjQpPgigcxUg5Wq7AAAt, Username: wampex@admin.com
+2026-01-05T15:27:53: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:27:53: [RATES] Serving cached rates
+2026-01-05T15:28:04: [RATES] Serving cached rates
+2026-01-05T15:28:06: [SOCKET] New connection attempt. ID: kRGonrKOSKD08Sy_AAAv, Username: wampex@admin.com
+2026-01-05T15:28:06: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:29:14: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:14: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:14: [RATES] Serving cached rates
+2026-01-05T15:29:14: [RATES] Serving cached rates
+2026-01-05T15:29:16: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:16: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:16: [RATES] Serving cached rates
+2026-01-05T15:29:16: [RATES] Serving cached rates
+2026-01-05T15:29:17: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:17: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:17: [RATES] Serving cached rates
+2026-01-05T15:29:17: [RATES] Serving cached rates
+2026-01-05T15:29:19: [SOCKET] User disconnected: wampex@admin.com (kRGonrKOSKD08Sy_AAAv)
+2026-01-05T15:29:19: [RATES] Serving cached rates
+2026-01-05T15:29:20: [SOCKET] New connection attempt. ID: 5zuG_cIWWJg4k8ycAAAx, Username: wampex@admin.com
+2026-01-05T15:29:20: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:29:22: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:22: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:22: [RATES] Serving cached rates
+2026-01-05T15:29:22: [RATES] Serving cached rates
+2026-01-05T15:29:24: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:24: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:24: [RATES] Serving cached rates
+2026-01-05T15:29:24: [RATES] Serving cached rates
+2026-01-05T15:29:24: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:24: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:24: [RATES] Serving cached rates
+2026-01-05T15:29:24: [RATES] Serving cached rates
+2026-01-05T15:29:25: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:25: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:25: [RATES] Serving cached rates
+2026-01-05T15:29:25: [RATES] Serving cached rates
+2026-01-05T15:29:35: [SOCKET] User disconnected: wampex@admin.com (5zuG_cIWWJg4k8ycAAAx)
+2026-01-05T15:29:36: [RATES] Serving cached rates
+2026-01-05T15:29:36: [SOCKET] New connection attempt. ID: zqafBNV0HtBZWf73AAAz, Username: wampex@admin.com
+2026-01-05T15:29:36: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T15:29:39: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:39: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:39: [RATES] Serving cached rates
+2026-01-05T15:29:39: [RATES] Serving cached rates
+2026-01-05T15:29:40: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:40: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:40: [RATES] Serving cached rates
+2026-01-05T15:29:40: [RATES] Serving cached rates
+2026-01-05T15:29:43: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:43: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:43: [RATES] Serving cached rates
+2026-01-05T15:29:43: [RATES] Serving cached rates
+2026-01-05T15:29:48: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:48: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:48: [RATES] Serving cached rates
+2026-01-05T15:29:48: [RATES] Serving cached rates
+2026-01-05T15:29:52: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:52: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:52: [RATES] Serving cached rates
+2026-01-05T15:29:52: [RATES] Serving cached rates
+2026-01-05T15:29:54: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:29:54: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:29:55: [RATES] Serving cached rates
+2026-01-05T15:29:55: [RATES] Serving cached rates
+2026-01-05T15:30:03: [SOCKET] Notifying updates for user: wampex@admin.com
+2026-01-05T15:30:03: [SOCKET] Emitted 'data:updated' to room: wampex@admin.com
+2026-01-05T15:30:03: [RATES] Serving cached rates
+2026-01-05T15:30:03: [RATES] Serving cached rates
+2026-01-05T18:31:27: [SOCKET] User disconnected: wampex@admin.com (EjQpPgigcxUg5Wq7AAAt)
+2026-01-05T18:31:30: [SOCKET] User disconnected: wampex@admin.com (zqafBNV0HtBZWf73AAAz)
+2026-01-05T19:08:47: [RATES] Fetching fresh rates...
+2026-01-05T19:08:47: [RATES] Fetching fresh rates...
+2026-01-05T19:08:47: [SOCKET] New connection attempt. ID: 0KPBLR2bERwLm7upAAA1, Username: wampex@admin.com
+2026-01-05T19:08:47: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:08:47: [RATES] Cache updated at 7:08:47 PM
+2026-01-05T19:08:48: [RATES] Cache updated at 7:08:48 PM
+2026-01-05T19:08:49: [RATES] Serving cached rates
+2026-01-05T19:08:49: [SOCKET] New connection attempt. ID: YAQ4UWO4UTP4XBqlAAA3, Username: wampex@admin.com
+2026-01-05T19:08:49: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:10:40: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2026-01-05T19:10:42: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2026-01-05T19:10:42: Warning: connect.session() MemoryStore is not
+2026-01-05T19:10:42: designed for a production environment, as it will leak
+2026-01-05T19:10:42: memory, and will not scale past a single process.
+2026-01-05T19:10:42: [RATES] Initializing cache...
+2026-01-05T19:10:42: Server running on http://localhost:3001
+2026-01-05T19:10:42: [RATES] Initial cache loaded
+2026-01-05T19:10:52: [SOCKET] New connection attempt. ID: HnicEFTIAYUdeRMqAAAB, Username: wampex@admin.com
+2026-01-05T19:10:52: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:10:54: [SOCKET] New connection attempt. ID: -vDu95h4Tkf8uuIIAAAD, Username: wampex@admin.com
+2026-01-05T19:10:54: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:11:42: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+2026-01-05T19:11:43: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2026-01-05T19:11:43: Warning: connect.session() MemoryStore is not
+2026-01-05T19:11:43: designed for a production environment, as it will leak
+2026-01-05T19:11:43: memory, and will not scale past a single process.
+2026-01-05T19:11:43: [RATES] Initializing cache...
+2026-01-05T19:11:43: Server running on http://localhost:3001
+2026-01-05T19:11:43: [dotenv@17.2.3] injecting env (9) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-05T19:11:44: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+2026-01-05T19:11:44: Warning: connect.session() MemoryStore is not
+2026-01-05T19:11:44: designed for a production environment, as it will leak
+2026-01-05T19:11:44: memory, and will not scale past a single process.
+2026-01-05T19:11:44: [RATES] Initializing cache...
+2026-01-05T19:11:44: Server running on http://localhost:3001
+2026-01-05T19:11:44: [RATES] Initial cache loaded
+2026-01-05T19:11:55: [SOCKET] New connection attempt. ID: DcH4xrcbIoIh-wurAAAB, Username: wampex@admin.com
+2026-01-05T19:11:55: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:11:56: [SOCKET] New connection attempt. ID: sDSCJDv5IDXnuOeyAAAD, Username: wampex@admin.com
+2026-01-05T19:11:56: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:12:03: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2026-01-05T19:12:04: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2026-01-05T19:12:04: Warning: connect.session() MemoryStore is not
+2026-01-05T19:12:04: designed for a production environment, as it will leak
+2026-01-05T19:12:04: memory, and will not scale past a single process.
+2026-01-05T19:12:04: [RATES] Initializing cache...
+2026-01-05T19:12:04: Server running on http://localhost:3001
+2026-01-05T19:12:04: [RATES] Initial cache loaded
+2026-01-05T19:12:18: [SOCKET] New connection attempt. ID: _3VCx2pHgANSNAoJAAAB, Username: wampex@admin.com
+2026-01-05T19:12:18: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:12:18: [SOCKET] New connection attempt. ID: NiHpUf49LcfuBaxxAAAD, Username: wampex@admin.com
+2026-01-05T19:12:18: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:12:21: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2026-01-05T19:12:21: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+2026-01-05T19:12:21: Warning: connect.session() MemoryStore is not
+2026-01-05T19:12:21: designed for a production environment, as it will leak
+2026-01-05T19:12:21: memory, and will not scale past a single process.
+2026-01-05T19:12:21: [RATES] Initializing cache...
+2026-01-05T19:12:21: Server running on http://localhost:3001
+2026-01-05T19:12:21: [RATES] Initial cache loaded
+2026-01-05T19:12:32: [SOCKET] New connection attempt. ID: gxzo8cJgtXCd5WGHAAAB, Username: wampex@admin.com
+2026-01-05T19:12:32: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:12:34: [SOCKET] New connection attempt. ID: BHeyr4fryqEw7omzAAAD, Username: wampex@admin.com
+2026-01-05T19:12:34: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:13:32: [dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+2026-01-05T19:13:32: [dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-05T19:13:32: Warning: connect.session() MemoryStore is not
+2026-01-05T19:13:32: designed for a production environment, as it will leak
+2026-01-05T19:13:32: memory, and will not scale past a single process.
+2026-01-05T19:13:32: [RATES] Initializing cache...
+2026-01-05T19:13:32: Server running on http://localhost:3001
+2026-01-05T19:13:32: [SOCKET] New connection attempt. ID: RQuqK0xik0nV8kRdAAAB, Username: wampex@admin.com
+2026-01-05T19:13:32: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:13:32: [RATES] Initial cache loaded
+2026-01-05T19:13:33: [SOCKET] New connection attempt. ID: CpqraPPxNbb6dEYrAAAD, Username: wampex@admin.com
+2026-01-05T19:13:33: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:14:22: [dotenv@17.2.3] injecting env (9) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+2026-01-05T19:14:22: [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+2026-01-05T19:14:22: Warning: connect.session() MemoryStore is not
+2026-01-05T19:14:22: designed for a production environment, as it will leak
+2026-01-05T19:14:22: memory, and will not scale past a single process.
+2026-01-05T19:14:22: [RATES] Initializing cache...
+2026-01-05T19:14:22: Server running on http://localhost:3001
+2026-01-05T19:14:22: [RATES] Initial cache loaded
+2026-01-05T19:14:23: [SOCKET] New connection attempt. ID: puUz79ONFu3_ahByAAAB, Username: wampex@admin.com
+2026-01-05T19:14:23: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:14:25: [SOCKET] New connection attempt. ID: XRYmayDPPV9pntUyAAAD, Username: wampex@admin.com
+2026-01-05T19:14:25: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:15:07: [dotenv@17.2.3] injecting env (9) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+2026-01-05T19:15:08: [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2026-01-05T19:15:08: Warning: connect.session() MemoryStore is not
+2026-01-05T19:15:08: designed for a production environment, as it will leak
+2026-01-05T19:15:08: memory, and will not scale past a single process.
+2026-01-05T19:15:08: [RATES] Initializing cache...
+2026-01-05T19:15:08: Server running on http://localhost:3001
+2026-01-05T19:15:08: [RATES] Initial cache loaded
+2026-01-05T19:15:21: [SOCKET] New connection attempt. ID: MgE3c7BMs0mu9bpmAAAB, Username: wampex@admin.com
+2026-01-05T19:15:21: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:15:21: [SOCKET] New connection attempt. ID: 40VmSeCPE_6OVYLpAAAD, Username: wampex@admin.com
+2026-01-05T19:15:21: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:15:45: [SOCKET] User disconnected: wampex@admin.com (MgE3c7BMs0mu9bpmAAAB)
+2026-01-05T19:15:45: [RATES] Fetching fresh rates...
+2026-01-05T19:15:45: [SOCKET] New connection attempt. ID: IuEnEsdMAuXikTsaAAAF, Username: wampex@admin.com
+2026-01-05T19:15:45: [SOCKET] User joined room: wampex@admin.com
+2026-01-05T19:15:45: [RATES] Cache updated at 7:15:45 PM
+2026-01-05T19:16:11: [SOCKET] User disconnected: wampex@admin.com (40VmSeCPE_6OVYLpAAAD)
+2026-01-05T19:16:26: [SOCKET] New connection attempt. ID: hedgYT3111_ukc4DAAAH, Username: test55
+2026-01-05T19:16:26: [SOCKET] User joined room: test55
+2026-01-05T19:16:43: [SOCKET] User disconnected: test55 (hedgYT3111_ukc4DAAAH)
+2026-01-05T19:16:43: [SOCKET] New connection attempt. ID: xOs3Lr0z049_Usx2AAAJ, Username: test55
+2026-01-05T19:16:43: [SOCKET] User joined room: test55

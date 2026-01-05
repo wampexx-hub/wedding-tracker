@@ -14,6 +14,7 @@ import Login from './components/Login';
 import Onboarding from './components/Onboarding';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import UserDetail from './pages/UserDetail';
 import AdminRoute from './components/AdminRoute';
 
 const MainApp = () => {
@@ -95,6 +96,14 @@ const App = () => {
               element={
                 <AdminRoute>
                   <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/users/:username"
+              element={
+                <AdminRoute>
+                  <UserDetail />
                 </AdminRoute>
               }
             />

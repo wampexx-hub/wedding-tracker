@@ -7,6 +7,7 @@ import WeddingService from '../services/WeddingService';
 import { useNavigate } from 'react-router-dom';
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import NotificationPanel from './NotificationPanel';
 
 const Layout = ({ children, activeTab, setActiveTab }) => {
   const { user, logout } = useAuth();
@@ -17,7 +18,40 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch notifications from database
+  const fetchNotifications = async () => {
+    if (user?.username) {
+      try {
+        const response = await fetch(`/api/notifications?user=${user.username}`);
+        const data = await response.json();
+        setNotifications(data);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    }
+  };
+
+  // Fetch notifications on mount
+  useEffect(() => {
+    fetchNotifications();
+  }, [user]);
+
+  // Mark notification as read
+  const markNotificationAsRead = async (id) => {
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+      // Update local state
+      setNotifications(prev => prev.map(n =>
+        n.id === id ? { ...n, read: true } : n
+      ));
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
 
   // Update summary when budget, portfolio, expenses, or refreshTrigger changes
   useEffect(() => {
@@ -60,6 +94,8 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
       alert(data.message || 'Ortaklık sonlandırıldı.');
       window.location.reload(); // Reload to refresh all data effectively and reset state
     };
+
+    // Removed admin_notification Socket.io listener - now using database polling
 
     socket.on('partnership:invited', handleRequest);
     socket.on('partnership:ended', handleEnded);
@@ -397,6 +433,23 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
               </div>
             )}
 
+            {/* Notification Bell Button */}
+            <button
+              onClick={() => {
+                setShowNotificationPanel(true);
+                fetchNotifications(); // Refresh on open
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 group relative"
+            >
+              <Bell size={20} className="group-hover:text-gray-600" />
+              Bildirimler
+              {notifications.filter(n => !n.read).length > 0 && (
+                <span className="absolute right-3 min-w-[20px] h-5 flex items-center justify-center bg-pink-500 text-white text-[10px] font-bold rounded-full px-1.5 animate-pulse shadow-sm">
+                  {notifications.filter(n => !n.read).length}
+                </span>
+              )}
+            </button>
+
             <button
               onClick={() => startDashboardTour(true)}
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 group"
@@ -486,6 +539,22 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
           </div>
         </div>
       </main>
+
+      {/* Notification Panel Overlay */}
+      {showNotificationPanel && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[140]"
+            onClick={() => setShowNotificationPanel(false)}
+          />
+          <NotificationPanel
+            notifications={notifications}
+            onClose={() => setShowNotificationPanel(false)}
+            onMarkAsRead={markNotificationAsRead}
+            onRefresh={fetchNotifications}
+          />
+        </>
+      )}
 
       {/* Floating Add Expense Button - Controlled */}
       <FloatingAddExpense

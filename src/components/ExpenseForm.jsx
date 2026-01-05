@@ -2,15 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { Plus, Calendar, CreditCard, Tag, ShoppingBag, FileText, Save, X, Camera } from 'lucide-react';
 
-const CATEGORIES = ['Düğün', 'Nişan', 'Mobilya', 'Beyaz Eşya', 'Elektronik Eşya', 'Salon', 'Yatak Odası', 'Mutfak', 'Diğer'];
 const SOURCES = ['Nakit', 'Kredi Kartı', 'Kredi', 'Borç'];
 const VENDORS = ['Mağaza', 'İnternet', 'Pazar', 'Hediye', 'Diğer'];
 
 const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
     const { addExpense, updateExpense } = useExpenses();
+    const [categories, setCategories] = useState([]); // Dynamic categories
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+    // Fetch categories on mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch('/api/admin/categories');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCategories(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch categories', error);
+            } finally {
+                setIsLoadingCategories(false);
+            }
+        };
+        fetchCategories();
+    }, []);
+
     const [formData, setFormData] = useState({
         title: '',
-        category: 'Düğün',
+        category: '', // Will default to first category after fetch
         price: '',
         vendor: 'Mağaza',
         source: 'Kredi Kartı',
@@ -20,6 +40,14 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
         status: 'planned',
         notes: ''
     });
+
+    // Set default category when loaded
+    useEffect(() => {
+        if (!formData.category && categories.length > 0 && !initialData) {
+            setFormData(prev => ({ ...prev, category: categories[0].name }));
+        }
+    }, [categories, initialData]);
+
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -76,8 +104,12 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Ensure category is set
+        const finalCategory = formData.category || (categories.length > 0 ? categories[0].name : 'Diğer');
+
         const expense = {
             ...formData,
+            category: finalCategory,
             price: Number(formData.price) || 0,
             installmentCount: formData.isInstallment ? Number(formData.installmentCount) : 1,
             monthlyPayment: formData.isInstallment ? Number(formData.price) / Number(formData.installmentCount) : Number(formData.price)
@@ -97,7 +129,7 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
 
         setFormData({
             title: '',
-            category: 'Düğün',
+            category: categories.length > 0 ? categories[0].name : '',
             price: '',
             vendor: 'Mağaza',
             source: 'Kredi Kartı',
@@ -191,14 +223,19 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                             {/* Category */}
                             <div className="flex items-center justify-between px-4 py-3 bg-white">
                                 <label className="text-sm font-medium text-gray-500 w-1/3">Kategori</label>
-                                <select
-                                    value={formData.category}
-                                    onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                    className="appearance-none text-right text-base font-semibold text-gray-900 bg-transparent border-none focus:ring-0 w-2/3 outline-none cursor-pointer"
-                                    style={{ direction: 'rtl' }}
-                                >
-                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
+                                {isLoadingCategories ? (
+                                    <div className="text-sm text-gray-400">Yükleniyor...</div>
+                                ) : (
+                                    <select
+                                        value={formData.category}
+                                        onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                        className="appearance-none text-right text-base font-semibold text-gray-900 bg-transparent border-none focus:ring-0 w-2/3 outline-none cursor-pointer"
+                                        style={{ direction: 'rtl' }}
+                                    >
+                                        <option value="" disabled>Seçiniz</option>
+                                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                    </select>
+                                )}
                             </div>
 
                             {/* Vendor - Native Select */}
@@ -415,7 +452,8 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                         onChange={e => setFormData({ ...formData, category: e.target.value })}
                                         className="w-full min-h-[48px] px-4 py-3 bg-gray-50 text-gray-900 rounded-xl border-2 border-transparent outline-none transition-all focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 cursor-pointer"
                                     >
-                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        <option value="" disabled>Seçiniz</option>
+                                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                                     </select>
                                 </div>
                             </div>

@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
-    Trash2, LogOut, Users, DollarSign, PieChart, Search, Key, Eye, X,
-    Menu, Home, Settings, ChevronRight, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight, Shield
+    Trash2, LogOut, Users, DollarSign, PieChart, Search, Key, Eye, X, Tag,
+    Menu, Home, Settings, ChevronRight, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight, Shield, Bell
 } from 'lucide-react';
+import AdminCategories from './AdminCategories';
+import AdminNotifications from './AdminNotifications';
+import UserDetail from './UserDetail';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, PieChart as RePieChart, Pie, Cell, Legend
@@ -17,6 +20,10 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterType, setFilterType] = useState('all'); // all, recent, high_budget, ghost
+    const [cityFilter, setCityFilter] = useState('all');
+    const [timeFilter, setTimeFilter] = useState('all');
+    const [budgetFilter, setBudgetFilter] = useState('all');
     const [activeTab, setActiveTab] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -138,12 +145,104 @@ const AdminDashboard = () => {
         navigate('/admin/login');
     };
 
-    const filteredUsers = users.filter(u =>
-        u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (u.surname && u.surname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const handleExport = () => {
+        const headers = ["Kullanıcı Adı", "İsim", "Soyisim", "E-posta", "Kayıt Tarihi", "Admin", "Askıya Alındı"];
+        const csvContent = [
+            headers.join(","),
+            ...users.map(u => [
+                u.username,
+                u.name,
+                u.surname,
+                u.email,
+                new Date(u.createdAt).toLocaleDateString('tr-TR'),
+                u.isAdmin ? "Evet" : "Hayır",
+                u.isBanned ? "Evet" : "Hayır"
+            ].join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "kullanicilar_listesi.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Helper functions for sales filters
+    const getDaysRemaining = (weddingDate) => {
+        if (!weddingDate) return null;
+        const today = new Date();
+        const wedding = new Date(weddingDate);
+        const diffTime = wedding - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
+
+    const formatWeddingDate = (dateStr) => {
+        if (!dateStr) return '-';
+        const date = new Date(dateStr);
+        const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    };
+
+    const getDaysRemainingColor = (days) => {
+        if (days === null) return 'text-gray-400';
+        if (days < 0) return 'text-gray-400';
+        if (days < 30) return 'text-red-600';
+        if (days < 90) return 'text-orange-600';
+        return 'text-green-600';
+    };
+
+    const getDataCompleteness = (user) => {
+        let score = 0;
+        if (user.city) score++;
+        if (user.weddingDate) score++;
+        if (user.budgetRange) score++;
+        if (user.phone) score++;
+        return score;
+    };
+
+    const filteredUsers = users.filter(u => {
+        const matchesSearch = u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (u.surname && u.surname.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        if (!matchesSearch) return false;
+
+        // City filter
+        if (cityFilter !== 'all' && u.city !== cityFilter) return false;
+
+        // Time remaining filter
+        if (timeFilter !== 'all') {
+            const days = getDaysRemaining(u.weddingDate);
+            if (timeFilter === 'urgent' && (days === null || days >= 30)) return false;
+            if (timeFilter === 'soon' && (days === null || days < 30 || days >= 90)) return false;
+            if (timeFilter === 'far' && (days === null || days < 90)) return false;
+            if (timeFilter === 'none' && days !== null) return false;
+        }
+
+        // Budget filter
+        if (budgetFilter !== 'all') {
+            if (budgetFilter === 'high' && (!u.budgetRange || !u.budgetRange.includes('500k'))) return false;
+            if (budgetFilter === 'medium' && (!u.budgetRange || !u.budgetRange.includes('250k-500k'))) return false;
+            if (budgetFilter === 'low' && (!u.budgetRange || u.budgetRange.includes('500k') || u.budgetRange.includes('250k-500k'))) return false;
+            if (budgetFilter === 'none' && u.budgetRange) return false;
+        }
+
+        // Legacy filters
+        if (filterType === 'recent') {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            return new Date(u.createdAt) > oneWeekAgo;
+        }
+
+        return true;
+    });
 
     // Mock data for charts (since we don't have real historical data in this simple backend)
     const userGrowthData = [
@@ -211,6 +310,20 @@ const AdminDashboard = () => {
                         collapsed={!sidebarOpen}
                     />
                     <SidebarItem
+                        icon={<Tag size={20} />}
+                        text="Kategoriler"
+                        active={activeTab === 'categories'}
+                        onClick={() => setActiveTab('categories')}
+                        collapsed={!sidebarOpen}
+                    />
+                    <SidebarItem
+                        icon={<Bell size={20} />}
+                        text="Bildirim Gönder"
+                        active={activeTab === 'notifications'}
+                        onClick={() => setActiveTab('notifications')}
+                        collapsed={!sidebarOpen}
+                    />
+                    <SidebarItem
                         icon={<PieChart size={20} />}
                         text="İstatistikler"
                         active={activeTab === 'stats'}
@@ -251,6 +364,8 @@ const AdminDashboard = () => {
                             {activeTab === 'dashboard' && 'Genel Bakış'}
                             {activeTab === 'users' && 'Kullanıcı Yönetimi'}
                             {activeTab === 'stats' && 'Detaylı İstatistikler'}
+                            {activeTab === 'categories' && 'Kategori Yönetimi'}
+                            {activeTab === 'notifications' && 'Bildirim Merkezi'}
                         </h2>
                         <p className="text-sm text-gray-500">Hoşgeldin, {user.username}</p>
                     </div>
@@ -263,11 +378,12 @@ const AdminDashboard = () => {
                     </div>
                 </header>
 
-                <div className="p-8 max-w-7xl mx-auto">
+                {/* Content */}
+                <div className="p-8 pb-32">
                     {activeTab === 'dashboard' && (
-                        <div className="space-y-8 animate-in fade-in duration-500">
+                        <div className="space-y-6 animate-in fade-in duration-500">
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 <StatCard
                                     title="Toplam Kullanıcı"
                                     value={stats?.totalUsers || 0}
@@ -276,7 +392,7 @@ const AdminDashboard = () => {
                                     trend="+12%"
                                 />
                                 <StatCard
-                                    title="Toplam Harcama"
+                                    title="Toplam İşlem"
                                     value={stats?.totalExpenses || 0}
                                     icon={<PieChart size={24} />}
                                     color="green"
@@ -288,6 +404,13 @@ const AdminDashboard = () => {
                                     icon={<DollarSign size={24} />}
                                     color="purple"
                                     trend="+8%"
+                                />
+                                <StatCard
+                                    title="Ortalama Bütçe"
+                                    value={stats?.totalUsers ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(stats.totalBudgetAmount / stats.totalUsers) : '₺0'}
+                                    icon={<DollarSign size={24} />}
+                                    color="orange"
+                                    trend="+3%"
                                 />
                             </div>
 
@@ -358,11 +481,11 @@ const AdminDashboard = () => {
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {users.slice(0, 5).map((u) => (
-                                                <tr key={u.username} className="hover:bg-gray-50/50 transition-colors">
+                                                <tr key={u.username} onClick={() => { setSelectedUser(u); setActiveTab('user_detail'); }} className="hover:bg-gray-50/50 transition-colors cursor-pointer">
                                                     <td className="px-8 py-4 font-medium text-gray-900">{u.username}</td>
                                                     <td className="px-8 py-4 text-gray-500">{u.email}</td>
                                                     <td className="px-8 py-4 text-gray-500">
-                                                        {new Date(u.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/')}
+                                                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/') : '-'}
                                                     </td>
                                                 </tr>
                                             ))}
@@ -386,11 +509,61 @@ const AdminDashboard = () => {
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
                                 </div>
-                                <div className="flex gap-2">
-                                    <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                                        Filtrele
-                                    </button>
-                                    <button className="px-4 py-2 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition-colors shadow-lg shadow-pink-200">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                                    <div className="flex flex-wrap gap-3 flex-1">
+                                        <select
+                                            value={filterType}
+                                            onChange={(e) => setFilterType(e.target.value)}
+                                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        >
+                                            <option value="all">Tüm Kullanıcılar</option>
+                                            <option value="recent">Son 7 Gün</option>
+                                            {/* <option value="high_budget">Bütçesi Yüksek (>100k)</option> */}
+                                            {/* <option value="ghost">İşlem Yapmayanlar</option> */}
+                                        </select>
+
+                                        {/* City Filter */}
+                                        <select
+                                            value={cityFilter}
+                                            onChange={(e) => setCityFilter(e.target.value)}
+                                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        >
+                                            <option value="all">Tüm Şehirler</option>
+                                            {[...new Set(users.map(u => u.city).filter(Boolean))].sort().map(city => (
+                                                <option key={city} value={city}>{city}</option>
+                                            ))}
+                                        </select>
+
+                                        {/* Time Remaining Filter */}
+                                        <select
+                                            value={timeFilter}
+                                            onChange={(e) => setTimeFilter(e.target.value)}
+                                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        >
+                                            <option value="all">Tüm Tarihler</option>
+                                            <option value="urgent">Acil (&lt; 30 gün)</option>
+                                            <option value="soon">Yakın (30-90 gün)</option>
+                                            <option value="far">Uzak (&gt; 90 gün)</option>
+                                            <option value="none">Tarih Yok</option>
+                                        </select>
+
+                                        {/* Budget Filter */}
+                                        <select
+                                            value={budgetFilter}
+                                            onChange={(e) => setBudgetFilter(e.target.value)}
+                                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        >
+                                            <option value="all">Tüm Bütçeler</option>
+                                            <option value="high">Yüksek (&gt;500k)</option>
+                                            <option value="medium">Orta (250k-500k)</option>
+                                            <option value="low">Düşük (&lt;250k)</option>
+                                            <option value="none">Belirtilmemiş</option>
+                                        </select>
+                                    </div>
+                                    <button
+                                        onClick={handleExport}
+                                        className="px-4 py-2 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition-colors shadow-lg shadow-pink-200"
+                                    >
                                         Dışa Aktar
                                     </button>
                                 </div>
@@ -402,14 +575,19 @@ const AdminDashboard = () => {
                                         <tr className="bg-gray-50/50 border-b border-gray-100">
                                             <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kullanıcı</th>
                                             <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">İletişim</th>
-                                            <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kayıt Tarihi</th>
+                                            <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Şehir</th>
+                                            <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Düğün Tarihi</th>
+                                            <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kalan</th>
+                                            <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bütçe</th>
+                                            <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Veri</th>
+                                            <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kayıt</th>
                                             <th className="px-8 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">İşlemler</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {filteredUsers.length > 0 ? (
                                             filteredUsers.map((u) => (
-                                                <tr key={u.username} className="group hover:bg-blue-50/30 transition-colors duration-200">
+                                                <tr key={u.username} onClick={() => { setSelectedUser(u); setActiveTab('user_detail'); }} className="group hover:bg-blue-50/30 transition-colors duration-200 cursor-pointer">
                                                     <td className="px-8 py-4">
                                                         <div className="flex items-center">
                                                             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center text-pink-600 font-bold mr-4 shadow-sm group-hover:scale-110 transition-transform">
@@ -425,8 +603,39 @@ const AdminDashboard = () => {
                                                         <div className="text-sm text-gray-900">{u.email}</div>
                                                         <div className="text-xs text-gray-500">{u.phone}</div>
                                                     </td>
+                                                    <td className="px-8 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                        {u.city || '-'}
+                                                    </td>
+                                                    <td className="px-8 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                        {formatWeddingDate(u.weddingDate)}
+                                                    </td>
+                                                    <td className="px-8 py-4 whitespace-nowrap text-sm">
+                                                        {getDaysRemaining(u.weddingDate) !== null ? (
+                                                            <span className={`font-medium ${getDaysRemainingColor(getDaysRemaining(u.weddingDate))}`}>
+                                                                {getDaysRemaining(u.weddingDate)} gün
+                                                            </span>
+                                                        ) : '-'}
+                                                    </td>
+                                                    <td className="px-8 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                        {u.budgetRange || '-'}
+                                                    </td>
+                                                    <td className="px-8 py-4 whitespace-nowrap">
+                                                        {(() => {
+                                                            const score = getDataCompleteness(u);
+                                                            return (
+                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${score === 4 ? 'bg-green-100 text-green-700' :
+                                                                        score === 3 ? 'bg-blue-100 text-blue-700' :
+                                                                            score === 2 ? 'bg-yellow-100 text-yellow-700' :
+                                                                                score === 1 ? 'bg-orange-100 text-orange-700' :
+                                                                                    'bg-red-100 text-red-700'
+                                                                    }`}>
+                                                                    {score}/4
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                    </td>
                                                     <td className="px-8 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        {new Date(u.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/')}
+                                                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/') : '-'}
                                                     </td>
                                                     <td className="px-8 py-4 whitespace-nowrap text-right">
                                                         <div className="flex justify-end items-center gap-2">
@@ -550,6 +759,14 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         </div>
+                    )}
+                    {activeTab === 'categories' && <AdminCategories />}
+                    {activeTab === 'notifications' && <AdminNotifications />}
+                    {activeTab === 'user_detail' && selectedUser && (
+                        <UserDetail
+                            username={selectedUser.username}
+                            onBack={() => setActiveTab('users')}
+                        />
                     )}
                 </div>
 

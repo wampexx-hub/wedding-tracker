@@ -104,42 +104,7 @@ const Onboarding = () => {
         }
     };
 
-    const handleSkip = async () => {
-        setLoading(true);
-        try {
-            // Set default values: 1 year from now, Istanbul, mid-range budget
-            const defaultDate = today(getLocalTimeZone()).add({ months: 12 });
-            const dateString = `${defaultDate.year}-${String(defaultDate.month).padStart(2, '0')}-${String(defaultDate.day).padStart(2, '0')}`;
 
-            const response = await fetch('/api/user/complete-profile', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: user.username,
-                    weddingDate: dateString,
-                    city: 'İstanbul',
-                    budgetRange: '250k-500k'
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                updateUser(data.user);
-                // Trigger context refresh
-                if (triggerRefresh) {
-                    await triggerRefresh();
-                }
-                await new Promise(resolve => setTimeout(resolve, 300));
-                navigate('/');
-            }
-        } catch (err) {
-            console.error('Skip error:', err);
-            navigate('/'); // Navigate anyway
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const setQuickDate = (monthsToAdd) => {
         const now = today(getLocalTimeZone());
@@ -304,13 +269,7 @@ const Onboarding = () => {
                 <div className="md:w-7/12 p-5 md:p-12 bg-white/40 flex flex-col justify-start md:justify-center pb-32 md:pb-12 relative">
 
                     {/* Skip Button - Top Right */}
-                    <button
-                        onClick={handleSkip}
-                        disabled={loading}
-                        className="absolute top-4 right-4 text-xs text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-                    >
-                        Şimdilik Atla →
-                    </button>
+
 
                     {error && (
                         <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-4 text-sm border border-red-100 flex items-center gap-2 animate-in slide-in-from-top-2">

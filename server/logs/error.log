@@ -531,3 +531,45 @@ memory, and will not scale past a single process.
 2026-01-04T19:53:15: memory, and will not scale past a single process.
 2026-01-04T23:23:03: Error: ENOENT: no such file or directory, stat '/var/www/wedding-tracker/dist/index.html'
 2026-01-05T11:39:17: Error: ENOENT: no such file or directory, stat '/var/www/wedding-tracker/dist/index.html'
+2026-01-05T13:06:35: Warning: connect.session() MemoryStore is not
+2026-01-05T13:06:35: designed for a production environment, as it will leak
+2026-01-05T13:06:35: memory, and will not scale past a single process.
+2026-01-05T13:07:03: Warning: connect.session() MemoryStore is not
+2026-01-05T13:07:03: designed for a production environment, as it will leak
+2026-01-05T13:07:03: memory, and will not scale past a single process.
+2026-01-05T13:07:24: Warning: connect.session() MemoryStore is not
+2026-01-05T13:07:24: designed for a production environment, as it will leak
+2026-01-05T13:07:24: memory, and will not scale past a single process.
+2026-01-05T13:25:09: Warning: connect.session() MemoryStore is not
+2026-01-05T13:25:09: designed for a production environment, as it will leak
+2026-01-05T13:25:09: memory, and will not scale past a single process.
+2026-01-05T13:26:20: Warning: connect.session() MemoryStore is not
+2026-01-05T13:26:20: designed for a production environment, as it will leak
+2026-01-05T13:26:20: memory, and will not scale past a single process.
+2026-01-05T13:27:05: Warning: connect.session() MemoryStore is not
+2026-01-05T13:27:05: designed for a production environment, as it will leak
+2026-01-05T13:27:05: memory, and will not scale past a single process.
+2026-01-05T19:10:42: Warning: connect.session() MemoryStore is not
+2026-01-05T19:10:42: designed for a production environment, as it will leak
+2026-01-05T19:10:42: memory, and will not scale past a single process.
+2026-01-05T19:11:43: Warning: connect.session() MemoryStore is not
+2026-01-05T19:11:43: designed for a production environment, as it will leak
+2026-01-05T19:11:43: memory, and will not scale past a single process.
+2026-01-05T19:11:44: Warning: connect.session() MemoryStore is not
+2026-01-05T19:11:44: designed for a production environment, as it will leak
+2026-01-05T19:11:44: memory, and will not scale past a single process.
+2026-01-05T19:12:04: Warning: connect.session() MemoryStore is not
+2026-01-05T19:12:04: designed for a production environment, as it will leak
+2026-01-05T19:12:04: memory, and will not scale past a single process.
+2026-01-05T19:12:21: Warning: connect.session() MemoryStore is not
+2026-01-05T19:12:21: designed for a production environment, as it will leak
+2026-01-05T19:12:21: memory, and will not scale past a single process.
+2026-01-05T19:13:32: Warning: connect.session() MemoryStore is not
+2026-01-05T19:13:32: designed for a production environment, as it will leak
+2026-01-05T19:13:32: memory, and will not scale past a single process.
+2026-01-05T19:14:22: Warning: connect.session() MemoryStore is not
+2026-01-05T19:14:22: designed for a production environment, as it will leak
+2026-01-05T19:14:22: memory, and will not scale past a single process.
+2026-01-05T19:15:08: Warning: connect.session() MemoryStore is not
+2026-01-05T19:15:08: designed for a production environment, as it will leak
+2026-01-05T19:15:08: memory, and will not scale past a single process.
