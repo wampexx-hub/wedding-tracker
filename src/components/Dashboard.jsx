@@ -380,7 +380,7 @@ const Dashboard = ({ setActiveTab, setExpenseFilter }) => {
                         <div className="flex flex-col items-end">
                             <span className="text-xs font-medium px-2 py-1 bg-gray-50 rounded-lg text-gray-500">Gerçekleşen</span>
                             {budgetHealth === 'danger' && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 bg-red-100 text-red-800 rounded-full mt-1">Over Budget</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 bg-red-100 text-red-800 rounded-full mt-1">Bütçe Aşıldı</span>
                             )}
                         </div>
                     </div>

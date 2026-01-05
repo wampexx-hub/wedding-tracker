@@ -92,13 +92,6 @@ const MonthlyPaymentChart = ({ expenses }) => {
                     <BarChart
                         data={data}
                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                        onMouseMove={(state) => {
-                            if (state.isTooltipActive) {
-                                setActiveIndex(state.activeTooltipIndex);
-                            } else {
-                                setActiveIndex(null);
-                            }
-                        }}
                         onMouseLeave={() => setActiveIndex(null)}
                     >
                         <defs>
@@ -142,12 +135,14 @@ const MonthlyPaymentChart = ({ expenses }) => {
                             dataKey="amount"
                             radius={[8, 8, 0, 0]}
                             maxBarSize={50}
+                            onMouseEnter={(_, index) => setActiveIndex(index)}
+                            onMouseLeave={() => setActiveIndex(null)}
                         >
                             {data.map((entry, index) => (
                                 <Cell
                                     key={`cell-${index}`}
-                                    fill={activeIndex === null || activeIndex === index ? "url(#barGradient)" : "#e5e7eb"}
-                                    opacity={activeIndex === null || activeIndex === index ? 1 : 0.3}
+                                    fill="url(#barGradient)"
+                                    fillOpacity={activeIndex === null || activeIndex === index ? 1 : 0.3}
                                     style={{ transition: 'all 0.3s ease' }}
                                 />
                             ))}

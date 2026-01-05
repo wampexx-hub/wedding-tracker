@@ -1118,3 +1118,102 @@ memory, and will not scale past a single process.
 2026-01-04T20:07:18: [RATES] Serving cached rates
 2026-01-04T20:07:18: [SOCKET] New connection attempt. ID: td9eUVtlFAux3W_-AAAl, Username: dummyy
 2026-01-04T20:07:18: [SOCKET] User joined room: dummyy
+2026-01-04T20:09:35: [SOCKET] User disconnected: test12 (nfzaI871ehzQ1ybyAAAL)
+2026-01-04T20:11:41: [SOCKET] New connection attempt. ID: CYpIVCNHmz4GynO2AAAn, Username: test12
+2026-01-04T20:11:41: [SOCKET] User joined room: test12
+2026-01-04T20:12:46: [SOCKET] User disconnected: dummyy (td9eUVtlFAux3W_-AAAl)
+2026-01-04T20:12:47: [RATES] Serving cached rates
+2026-01-04T20:12:47: [SOCKET] New connection attempt. ID: wU84r7YFaxnUz66YAAAp, Username: dummyy
+2026-01-04T20:12:47: [SOCKET] User joined room: dummyy
+2026-01-04T20:12:50: [SOCKET] User disconnected: dummyy (wU84r7YFaxnUz66YAAAp)
+2026-01-04T20:12:51: [RATES] Serving cached rates
+2026-01-04T20:12:51: [SOCKET] New connection attempt. ID: -5gL7C0PPcMubrDsAAAr, Username: dummyy
+2026-01-04T20:12:51: [SOCKET] User joined room: dummyy
+2026-01-04T20:16:51: [SOCKET] User disconnected: dummyy (-5gL7C0PPcMubrDsAAAr)
+2026-01-04T20:16:52: [RATES] Serving cached rates
+2026-01-04T20:16:52: [SOCKET] New connection attempt. ID: JGw5naiHKVjSPvbVAAAt, Username: dummyy
+2026-01-04T20:16:52: [SOCKET] User joined room: dummyy
+2026-01-04T20:17:07: [SOCKET] User disconnected: test12 (CYpIVCNHmz4GynO2AAAn)
+2026-01-04T20:17:25: [SOCKET] New connection attempt. ID: Yps8p_NLb4lt3ojCAAAv, Username: test12
+2026-01-04T20:17:25: [SOCKET] User joined room: test12
+2026-01-04T20:17:34: [SOCKET] User disconnected: test12 (Yps8p_NLb4lt3ojCAAAv)
+2026-01-04T20:20:47: [SOCKET] User disconnected: wampex@admin.com (hukzLUApdPq77zyRAAAD)
+2026-01-04T20:20:47: [SOCKET] User disconnected: dummyy (JGw5naiHKVjSPvbVAAAt)
+2026-01-04T20:20:48: [SOCKET] New connection attempt. ID: B3piSqiinqw0DSQRAAA4, Username: dummyy
+2026-01-04T20:20:48: [SOCKET] User joined room: dummyy
+2026-01-04T20:20:48: [SOCKET] New connection attempt. ID: 3CgTsRSgMnpvEjJ1AAA5, Username: wampex@admin.com
+2026-01-04T20:20:48: [SOCKET] User joined room: wampex@admin.com
+2026-01-04T20:22:49: [SOCKET] User disconnected: dummyy (B3piSqiinqw0DSQRAAA4)
+2026-01-04T20:22:50: [RATES] Serving cached rates
+2026-01-04T20:22:50: [SOCKET] New connection attempt. ID: -bejXfOvCk30-2_TAAA7, Username: dummyy
+2026-01-04T20:22:50: [SOCKET] User joined room: dummyy
+2026-01-04T20:22:53: [SOCKET] User disconnected: dummyy (-bejXfOvCk30-2_TAAA7)
+2026-01-04T20:22:53: [RATES] Serving cached rates
+2026-01-04T20:22:53: [SOCKET] New connection attempt. ID: ozEazK_-6NhmFkCPAAA9, Username: dummyy
+2026-01-04T20:22:53: [SOCKET] User joined room: dummyy
+2026-01-04T20:26:39: [SOCKET] User disconnected: dummyy (ozEazK_-6NhmFkCPAAA9)
+2026-01-04T20:26:40: [RATES] Fetching fresh rates...
+2026-01-04T20:26:40: [SOCKET] New connection attempt. ID: WWRjNsY_SQBi5jBGAAA_, Username: dummyy
+2026-01-04T20:26:40: [SOCKET] User joined room: dummyy
+2026-01-04T20:26:40: [RATES] Cache updated at 8:26:40 PM
+2026-01-04T20:28:55: [SOCKET] User disconnected: dummyy (WWRjNsY_SQBi5jBGAAA_)
+2026-01-04T20:28:56: [RATES] Serving cached rates
+2026-01-04T20:28:56: [SOCKET] New connection attempt. ID: fBbRdAPd_v1QDJtBAABB, Username: dummyy
+2026-01-04T20:28:56: [SOCKET] User joined room: dummyy
+2026-01-04T20:32:40: [SOCKET] User disconnected: dummyy (fBbRdAPd_v1QDJtBAABB)
+2026-01-04T20:32:41: [RATES] Serving cached rates
+2026-01-04T20:32:41: [SOCKET] New connection attempt. ID: XR_teriOZZsXPgevAABD, Username: dummyy
+2026-01-04T20:32:41: [SOCKET] User joined room: dummyy
+2026-01-04T20:36:07: [SOCKET] User disconnected: dummyy (XR_teriOZZsXPgevAABD)
+2026-01-04T20:36:08: [RATES] Serving cached rates
+2026-01-04T20:36:08: [SOCKET] New connection attempt. ID: RYregxrqQyK4SF8bAABF, Username: dummyy
+2026-01-04T20:36:08: [SOCKET] User joined room: dummyy
+2026-01-04T20:38:04: [SOCKET] User disconnected: dummyy (RYregxrqQyK4SF8bAABF)
+2026-01-04T20:38:05: [RATES] Serving cached rates
+2026-01-04T20:38:05: [SOCKET] New connection attempt. ID: MIT3IgqOt4zMjXHlAABH, Username: dummyy
+2026-01-04T20:38:05: [SOCKET] User joined room: dummyy
+2026-01-04T20:44:09: [SOCKET] User disconnected: dummyy (MIT3IgqOt4zMjXHlAABH)
+2026-01-04T20:44:10: [RATES] Serving cached rates
+2026-01-04T20:44:10: [SOCKET] New connection attempt. ID: dHlV7fq7byrMMwhwAABJ, Username: dummyy
+2026-01-04T20:44:10: [SOCKET] User joined room: dummyy
+2026-01-04T21:33:15: [SOCKET] User disconnected: dummyy (dHlV7fq7byrMMwhwAABJ)
+2026-01-04T21:33:16: [RATES] Fetching fresh rates...
+2026-01-04T21:33:16: [SOCKET] New connection attempt. ID: xhQfvbC0k6bVlMNBAABL, Username: dummyy
+2026-01-04T21:33:16: [SOCKET] User joined room: dummyy
+2026-01-04T21:33:16: [RATES] Cache updated at 9:33:16 PM
+2026-01-04T21:35:17: [SOCKET] User disconnected: dummyy (xhQfvbC0k6bVlMNBAABL)
+2026-01-04T21:35:18: [RATES] Serving cached rates
+2026-01-04T21:35:18: [SOCKET] New connection attempt. ID: M3IV1csYX6VZj3EzAABN, Username: dummyy
+2026-01-04T21:35:18: [SOCKET] User joined room: dummyy
+2026-01-04T21:37:26: [SOCKET] User disconnected: dummyy (M3IV1csYX6VZj3EzAABN)
+2026-01-04T21:37:26: [RATES] Serving cached rates
+2026-01-04T21:37:27: [SOCKET] New connection attempt. ID: TaGeT3Lxn_ID0aP2AABP, Username: dummyy
+2026-01-04T21:37:27: [SOCKET] User joined room: dummyy
+2026-01-04T21:37:41: [SOCKET] User disconnected: dummyy (TaGeT3Lxn_ID0aP2AABP)
+2026-01-04T21:37:41: [RATES] Serving cached rates
+2026-01-04T21:37:41: [SOCKET] New connection attempt. ID: D8jwPHnjpB_0HI8sAABR, Username: dummyy
+2026-01-04T21:37:41: [SOCKET] User joined room: dummyy
+2026-01-04T21:40:34: [SOCKET] User disconnected: wampex@admin.com (3CgTsRSgMnpvEjJ1AAA5)
+2026-01-04T21:40:35: [SOCKET] New connection attempt. ID: cZn-v2ZFgVjBVtx9AABT, Username: wampex@admin.com
+2026-01-04T21:40:35: [SOCKET] User joined room: wampex@admin.com
+2026-01-04T21:40:37: [SOCKET] User disconnected: dummyy (D8jwPHnjpB_0HI8sAABR)
+2026-01-04T21:40:38: [SOCKET] New connection attempt. ID: fJ0jGzWSXMx_QuMWAABV, Username: dummyy
+2026-01-04T21:40:38: [SOCKET] User joined room: dummyy
+2026-01-04T23:02:37: [SOCKET] User disconnected: wampex@admin.com (cZn-v2ZFgVjBVtx9AABT)
+2026-01-04T23:02:37: [SOCKET] User disconnected: dummyy (fJ0jGzWSXMx_QuMWAABV)
+2026-01-04T23:23:03: Error: ENOENT: no such file or directory, stat '/var/www/wedding-tracker/dist/index.html'
+2026-01-05T11:39:17: Error: ENOENT: no such file or directory, stat '/var/www/wedding-tracker/dist/index.html'
+2026-01-05T11:44:01: [RATES] Fetching fresh rates...
+2026-01-05T11:44:02: [RATES] Cache updated at 11:44:02 AM
+2026-01-05T11:51:03: [RATES] Serving cached rates
+2026-01-05T11:51:03: [SOCKET] New connection attempt. ID: InNTnmDRSNURQY7BAABX, Username: dummya
+2026-01-05T11:51:03: [SOCKET] User joined room: dummya
+2026-01-05T11:51:39: [RATES] Serving cached rates
+2026-01-05T11:51:47: [RATES] Serving cached rates
+2026-01-05T11:51:47: [SOCKET] New connection attempt. ID: NFYFmYt0wiAMIGgGAABZ, Username: dummyb
+2026-01-05T11:51:47: [SOCKET] User joined room: dummyb
+2026-01-05T11:51:57: [SOCKET] Notifying updates for user: dummya
+2026-01-05T11:51:57: [SOCKET] Emitted 'data:updated' to room: dummya
+2026-01-05T11:51:57: [SOCKET] Emitted 'data:updated' to partner room: dummyb
+2026-01-05T11:51:57: [RATES] Serving cached rates
+2026-01-05T11:51:57: [RATES] Serving cached rates
