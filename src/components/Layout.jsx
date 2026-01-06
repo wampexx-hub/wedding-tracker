@@ -615,16 +615,16 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-end p-2 pb-safe z-[90] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         {/* First 2 items: Home & Expenses */}
         <button
-          onClick={() => { setActiveTab('dashboard'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'dashboard' ? 'text-champagne' : 'text-gray-400'}`}
+          onClick={() => { setActiveTab('dashboard'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'auto' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 transition-transform active:scale-95 ${activeTab === 'dashboard' ? 'text-champagne' : 'text-gray-400'}`}
         >
           <LayoutDashboard size={24} />
           <span className="text-[10px] font-medium">Genel Bakış</span>
         </button>
 
         <button
-          onClick={() => { setActiveTab('expenses'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'expenses' ? 'text-champagne' : 'text-gray-400'}`}
+          onClick={() => { setActiveTab('expenses'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'auto' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 transition-transform active:scale-95 ${activeTab === 'expenses' ? 'text-champagne' : 'text-gray-400'}`}
         >
           <List size={24} />
           <span className="text-[10px] font-medium">Harcamalar</span>
@@ -651,16 +651,16 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
 
         {/* Last 2 items: Vendors & Currency */}
         <button
-          onClick={() => { setActiveTab('vendors'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'vendors' ? 'text-champagne' : 'text-gray-400'}`}
+          onClick={() => { setActiveTab('vendors'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'auto' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 transition-transform active:scale-95 ${activeTab === 'vendors' ? 'text-champagne' : 'text-gray-400'}`}
         >
           <Store size={24} />
           <span className="text-[10px] font-medium">Firmalar</span>
         </button>
 
         <button
-          onClick={() => { setActiveTab('currency'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'currency' ? 'text-champagne' : 'text-gray-400'}`}
+          onClick={() => { setActiveTab('currency'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'auto' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 transition-transform active:scale-95 ${activeTab === 'currency' ? 'text-champagne' : 'text-gray-400'}`}
         >
           <Wallet size={24} />
           <span className="text-[10px] font-medium">Varlıklar</span>

@@ -124,76 +124,61 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
 
             <div className="glass-panel p-4 md:p-8 w-full max-w-full overflow-hidden">
                 {/* Header Section - Refactored into 2 Rows */}
-                <div className="flex flex-col gap-6 mb-6 md:mb-8">
+                {/* Header Section - Compact Mobile Design */}
+                <div className="flex flex-col gap-3 md:gap-6 mb-4 md:mb-8">
 
-                    {/* Row 1: Title & Magic Button */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <h2 className="text-xl md:text-2xl font-bold text-gray-800 m-0 truncate">Harcama Listesi</h2>
+                    {/* Row 1: Title & Actions (Magic + Export) */}
+                    <div className="flex items-center justify-between gap-2">
+                        <h2 className="text-lg md:text-2xl font-bold text-gray-800 m-0 truncate">Harcamalar</h2>
 
-                        <button
-                            id="tour-magic-list"
-                            onClick={() => setShowWizardModal(true)}
-                            className="btn-primary w-full sm:w-auto justify-center flex-shrink-0"
-                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', border: 'none' }}
-                        >
-                            <Sparkles size={16} /> Sihirli Liste ✨
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {/* Magic List Button */}
+                            <button
+                                id="tour-magic-list"
+                                onClick={() => setShowWizardModal(true)}
+                                className="btn-primary flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-all active:scale-95"
+                                style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', border: 'none', minWidth: '40px' }}
+                                title="Sihirli Liste"
+                            >
+                                <Sparkles size={18} className="text-white" />
+                                <span className="hidden md:inline text-white">Sihirli Liste ✨</span>
+                            </button>
+
+                            {/* Export Button */}
+                            <button
+                                onClick={handleExport}
+                                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-all active:scale-95 min-w-[40px]"
+                                title="Dışa Aktar"
+                            >
+                                <Download size={18} />
+                                <span className="hidden md:inline">Dışa Aktar</span>
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Row 2: Toolbar (Search, Filter, Export) */}
-                    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 md:gap-4">
+                    {/* Row 2: Search & Filter */}
+                    <div className="flex items-center gap-2 md:gap-4">
                         {/* Search - Flex Grow */}
                         <div className="flex-grow min-w-0">
                             <SearchBar onSearch={setSearchQuery} />
                         </div>
 
-                        <div className="flex gap-3">
-                            {/* Filter */}
-                            <div className="flex-1 sm:flex-none relative min-w-0">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'white', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #eee', height: '42px', width: '100%' }}>
-                                    <Filter size={16} color="var(--text-light)" className="flex-shrink-0" />
-                                    <select
-                                        value={filterCategory}
-                                        onChange={e => setFilterCategory(e.target.value)}
-                                        style={{
-                                            border: 'none',
-                                            outline: 'none',
-                                            background: 'transparent',
-                                            color: 'var(--text-dark)',
-                                            paddingRight: '1.5rem',
-                                            cursor: 'pointer',
-                                            width: '100%',
-                                            minWidth: 0
-                                        }}
-                                    >
-                                        {sortedCategories.map((c, index) => {
-                                            const displayName = c === 'All' ? 'Tüm Kategoriler' : c;
-                                            const Icon = categoryConfig[displayName]?.icon;
-                                            return (
-                                                <option
-                                                    key={c}
-                                                    value={c}
-                                                    style={{
-                                                        borderTop: index === 1 ? '1px solid #e5e7eb' : 'none',
-                                                        paddingTop: index === 1 ? '0.5rem' : '0'
-                                                    }}
-                                                >
-                                                    {displayName}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
+                        {/* Filter */}
+                        <div className="relative min-w-[50px] md:min-w-[200px]">
+                            <div className="flex items-center gap-2 bg-white px-3 py-2.5 rounded-lg border border-gray-200 h-[42px] w-full">
+                                <Filter size={18} className="text-gray-400 shrink-0" />
+                                <select
+                                    value={filterCategory}
+                                    onChange={e => setFilterCategory(e.target.value)}
+                                    className="appearance-none bg-transparent border-none outline-none text-gray-700 w-full cursor-pointer text-sm md:text-base"
+                                >
+                                    {sortedCategories.map((c) => (
+                                        <option key={c} value={c}>
+                                            {c === 'All' ? 'Tümü' : c}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-
-                            {/* Export Button */}
-                            <button
-                                onClick={handleExport}
-                                className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors h-[42px] flex-shrink-0"
-                            >
-                                <Download size={16} />
-                                <span className="hidden sm:inline">Dışa Aktar</span>
-                            </button>
                         </div>
                     </div>
                 </div>
