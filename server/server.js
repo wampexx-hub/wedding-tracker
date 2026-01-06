@@ -71,10 +71,18 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Session Config
+const pgSession = require('connect-pg-simple')(session);
+
+// Session Config
 app.use(session({
+    store: new pgSession({
+        pool: db.pool, // Connection pool
+        tableName: 'session' // Use another table-name than the default "session" one
+    }),
     secret: 'wedding-tracker-secret-key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
 }));
 
 // Passport Config
@@ -247,6 +255,7 @@ app.post('/api/auth/login', async (req, res) => {
 
         if (user && await bcrypt.compare(password, user.password)) {
             if (user.is_banned) {
+                console.warn(`[AUTH] Login attempt blocked for banned user: ${email}`);
                 return res.status(403).json({ success: false, message: 'Hesabınız askıya alınmıştır. Lütfen yönetici ile iletişime geçin.' });
             }
             const { password: _, is_admin, is_banned, ...userWithoutPassword } = user;
@@ -272,6 +281,7 @@ app.post('/api/login', async (req, res) => {
 
         if (user && await bcrypt.compare(password, user.password)) {
             if (user.is_banned) {
+                console.warn(`[AUTH] Login attempt blocked for banned user: ${email}`);
                 return res.status(403).json({ success: false, message: 'Hesabınız askıya alınmıştır. Lütfen yönetici ile iletişime geçin.' });
             }
             const { password: _, is_admin, is_banned, ...userWithoutPassword } = user;
@@ -434,6 +444,120 @@ app.post('/api/admin/notifications', async (req, res) => {
     }
 });
 
+// --- Public Vendor Routes ---
+
+// Get public vendors (for mobile app recommendations)
+app.get('/api/vendors', async (req, res) => {
+    try {
+        const { city, category } = req.query;
+        let query = 'SELECT * FROM vendors WHERE 1=1';
+        let params = [];
+        let paramIndex = 1;
+
+        if (city) {
+            query += ` AND city = $${paramIndex}`;
+            params.push(city);
+            paramIndex++;
+        }
+
+        if (category) {
+            query += ` AND category = $${paramIndex}`;
+            params.push(category);
+            paramIndex++;
+        }
+
+        // Prioritize featured vendors, then high rank
+        query += ' ORDER BY is_featured DESC, rank DESC, created_at DESC';
+
+        const result = await db.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// --- Vendor Management Routes ---
+
+// Get all vendors (with filters)
+app.get('/api/admin/vendors', async (req, res) => {
+    try {
+        const { city, category } = req.query;
+        let query = 'SELECT * FROM vendors WHERE 1=1';
+        let params = [];
+        let paramIndex = 1;
+
+        if (city && city !== 'all') {
+            query += ` AND city = $${paramIndex}`;
+            params.push(city);
+            paramIndex++;
+        }
+
+        if (category && category !== 'all') {
+            query += ` AND category = $${paramIndex}`;
+            params.push(category);
+            paramIndex++;
+        }
+
+        query += ' ORDER BY rank DESC, created_at DESC';
+
+        const result = await db.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Create new vendor
+app.post('/api/admin/vendors', async (req, res) => {
+    try {
+        const { name, category, city, contact_info, image_url, is_featured, rank } = req.body;
+        const result = await db.query(
+            'INSERT INTO vendors (name, category, city, contact_info, image_url, is_featured, rank) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [name, category, city, contact_info || {}, image_url, is_featured || false, rank || 0]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update vendor
+app.put('/api/admin/vendors/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, category, city, contact_info, image_url, is_featured, rank } = req.body;
+        const result = await db.query(
+            'UPDATE vendors SET name = $1, category = $2, city = $3, contact_info = $4, image_url = $5, is_featured = $6, rank = $7 WHERE id = $8 RETURNING *',
+            [name, category, city, contact_info, image_url, is_featured, rank, id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete vendor
+app.delete('/api/admin/vendors/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.query('DELETE FROM vendors WHERE id = $1 RETURNING *', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+        res.json({ success: true, message: 'Vendor deleted' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // User Notifications - Get user's notifications
 app.get('/api/notifications', async (req, res) => {
     const username = req.query.user;
@@ -535,9 +659,35 @@ app.get('/api/admin/stats', async (req, res) => {
         const userCount = await db.query('SELECT COUNT(*) FROM users');
         const expenseCount = await db.query('SELECT COUNT(*) FROM expenses');
         const budgetSum = await db.query('SELECT SUM(amount) FROM budgets');
+        const spendingSum = await db.query('SELECT SUM(price) FROM expenses');
 
-        // Top Category
-        const topCat = await db.query('SELECT category, SUM(price) as total FROM expenses GROUP BY category ORDER BY total DESC LIMIT 1');
+        // Top Category (Pie Chart Data)
+        const categoryStats = await db.query(`
+            SELECT category as name, SUM(price) as value 
+            FROM expenses 
+            WHERE category IS NOT NULL 
+            GROUP BY category 
+            ORDER BY value DESC
+        `);
+
+        // Wedding Timeline (Next 12 Months)
+        const timelineStats = await db.query(`
+            SELECT TO_CHAR(wedding_date, 'YYYY-MM') as name, COUNT(*) as uv 
+            FROM users 
+            WHERE wedding_date >= CURRENT_DATE 
+            GROUP BY 1
+            ORDER BY 1 ASC 
+            LIMIT 12
+        `);
+
+        // City Distribution
+        const cityStats = await db.query(`
+            SELECT city, COUNT(*) as count 
+            FROM users 
+            WHERE city IS NOT NULL AND city != '' 
+            GROUP BY city 
+            ORDER BY count DESC
+        `);
 
         // Top Vendor
         const topVen = await db.query('SELECT vendor, SUM(price) as total FROM expenses GROUP BY vendor ORDER BY total DESC LIMIT 1');
@@ -546,7 +696,10 @@ app.get('/api/admin/stats', async (req, res) => {
             totalUsers: parseInt(userCount.rows[0].count),
             totalExpenses: parseInt(expenseCount.rows[0].count),
             totalBudgetAmount: parseFloat(budgetSum.rows[0].sum || 0),
-            topCategory: topCat.rows[0] ? { name: topCat.rows[0].category, amount: parseFloat(topCat.rows[0].total) } : { name: '-', amount: 0 },
+            totalSpending: parseFloat(spendingSum.rows[0].sum || 0),
+            categoryDistribution: categoryStats.rows.map(row => ({ name: row.name, value: parseFloat(row.value) })),
+            weddingTimeline: timelineStats.rows,
+            cityDistribution: cityStats.rows.map(row => ({ bg: row.city, count: parseInt(row.count) })),
             topVendor: topVen.rows[0] ? { name: topVen.rows[0].vendor, amount: parseFloat(topVen.rows[0].total) } : { name: '-', amount: 0 }
         });
     } catch (err) {
@@ -703,13 +856,17 @@ app.post('/api/expenses/batch', async (req, res) => {
         const { username, expenses } = req.body;
         if (!username || !Array.isArray(expenses)) return res.status(400).json({ error: 'User and expenses array required' });
 
+        // Get user's partnership info
+        const userInfo = await db.query('SELECT partnership_id FROM users WHERE username = $1', [username]);
+        const partnershipId = userInfo.rows[0]?.partnership_id || null;
+
         const newExpenses = [];
         for (const exp of expenses) {
             const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
             await db.query(
-                `INSERT INTO expenses (id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, created_at)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-                [id, username, exp.title, exp.category, exp.price, exp.vendor, exp.source, exp.date, exp.isInstallment, exp.installmentCount, exp.status, exp.notes, exp.monthlyPayment, new Date().toISOString()]
+                `INSERT INTO expenses (id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, created_at, added_by, partnership_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+                [id, username, exp.title, exp.category, exp.price, exp.vendor, exp.source, exp.date, exp.isInstallment, exp.installmentCount, exp.status, exp.notes, exp.monthlyPayment, new Date().toISOString(), username, partnershipId]
             );
             newExpenses.push({ ...exp, id, username });
         }

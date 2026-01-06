@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, PlusCircle, List, Heart, LogOut, Edit3, Calendar, Wallet, CheckCircle, Coins, TrendingUp, HelpCircle, PlayCircle, Users, Bell, X } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, List, Heart, LogOut, Edit3, Calendar, Wallet, CheckCircle, Coins, TrendingUp, HelpCircle, PlayCircle, Users, Bell, X, Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useExpenses } from '../context/ExpenseContext';
 import FloatingAddExpense from './FloatingAddExpense';
@@ -236,9 +236,8 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
   const navItems = [
     { id: 'dashboard', label: 'Genel Bakış', icon: LayoutDashboard },
     { id: 'expenses', label: 'Harcamalar', icon: List },
+    { id: 'vendors', label: 'Firmalar', icon: Store },
     { id: 'currency', label: 'Birikimler', icon: Wallet },
-    { id: 'calendar', label: 'Taksit Takvimi', icon: Calendar },
-    { id: 'partner', label: 'Çift Ayarları', icon: Users },
   ];
 
   const handleBudgetSave = () => {
@@ -450,6 +449,27 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
               )}
             </button>
 
+            {/* Couple Settings Button (Sidebar Bottom) */}
+            <button
+              onClick={() => {
+                setActiveTab('partner');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group
+                ${activeTab === 'partner'
+                  ? 'bg-champagne/10 text-champagne font-medium shadow-sm'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+            >
+              <Users size={20} className={activeTab === 'partner' ? 'text-champagne' : 'group-hover:text-gray-600'} />
+              Çift Ayarları
+              {pendingInvites.length > 0 && (
+                <span className="absolute right-3 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse shadow-sm">
+                  {pendingInvites.length}
+                </span>
+              )}
+            </button>
+
             <button
               onClick={() => startDashboardTour(true)}
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 group"
@@ -505,7 +525,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
             )}
 
             {/* Mobile Header */}
-            <div className="lg:hidden flex justify-between items-center mb-6">
+            <div className="lg:hidden flex justify-between items-center mb-6 sticky top-0 z-50 bg-[#FDFBF7] py-3 -mx-4 px-4 shadow-sm transition-all duration-300">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-champagne to-champagne-dark rounded-lg flex items-center justify-center shadow-md">
                   <Heart className="text-white fill-white" size={16} />
@@ -515,6 +535,33 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
 
               {/* Quick Actions (Mobile Only) */}
               <div className="flex items-center gap-3">
+                {/* Notification Bell (Mobile) */}
+                <button
+                  onClick={() => {
+                    setShowNotificationPanel(true);
+                    fetchNotifications();
+                  }}
+                  className="p-2 text-gray-400 hover:text-yellow-600 transition-colors rounded-lg hover:bg-yellow-50 relative"
+                  title="Bildirimler"
+                >
+                  <Bell size={20} />
+                  {notifications.filter(n => !n.read).length > 0 && (
+                    <span className="absolute top-1.5 right-1.5 min-w-[8px] h-2 bg-pink-500 rounded-full animate-pulse border border-white"></span>
+                  )}
+                </button>
+
+                {/* Partner/Settings Icon */}
+                <button
+                  onClick={() => setActiveTab('partner')}
+                  className="p-2 text-gray-400 hover:text-yellow-600 transition-colors rounded-lg hover:bg-yellow-50 relative"
+                  title="Ayarlar"
+                >
+                  <Users size={20} />
+                  {pendingInvites.length > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse border border-white"></span>
+                  )}
+                </button>
+
                 {/* Restart Tour */}
                 <button
                   onClick={() => startDashboardTour(true)}
@@ -566,33 +613,22 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
 
       {/* Mobile Bottom Nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-end p-2 pb-safe z-[90] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        {/* First 2 items */}
-        {navItems.slice(0, 2).map(item => (
-          <button
-            key={item.id}
-            id={`mobile-nav-${item.id}`}
-            onClick={() => {
-              setActiveTab(item.id);
-              setIsFabOpen(false);
-              document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              setActiveTab(item.id);
-              setIsFabOpen(false);
-              document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`pointer-events-auto flex flex-col items-center gap-1 p-2 rounded-lg transition-colors flex-1
-              ${activeTab === item.id ? 'text-champagne' : 'text-gray-400'}`}
-            style={{ touchAction: 'manipulation' }}
-          >
-            <item.icon size={24} />
-            <span className="text-[10px] font-medium">{item.label}</span>
-            {item.id === 'partner' && pendingInvites.length > 0 && (
-              <span className="absolute top-2 right-4 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-            )}
-          </button>
-        ))}
+        {/* First 2 items: Home & Expenses */}
+        <button
+          onClick={() => { setActiveTab('dashboard'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'dashboard' ? 'text-champagne' : 'text-gray-400'}`}
+        >
+          <LayoutDashboard size={24} />
+          <span className="text-[10px] font-medium">Genel Bakış</span>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab('expenses'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'expenses' ? 'text-champagne' : 'text-gray-400'}`}
+        >
+          <List size={24} />
+          <span className="text-[10px] font-medium">Harcamalar</span>
+        </button>
 
         {/* Center FAB */}
         <button
@@ -613,33 +649,22 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
           <PlusCircle size={28} className="text-white" />
         </button>
 
-        {/* Last 2 items */}
-        {navItems.slice(2).map(item => (
-          <button
-            key={item.id}
-            id={`mobile-nav-${item.id}`}
-            onClick={() => {
-              setActiveTab(item.id);
-              setIsFabOpen(false);
-              document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              setActiveTab(item.id);
-              setIsFabOpen(false);
-              document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`pointer-events-auto flex flex-col items-center gap-1 p-2 rounded-lg transition-colors flex-1
-              ${activeTab === item.id ? 'text-champagne' : 'text-gray-400'}`}
-            style={{ touchAction: 'manipulation' }}
-          >
-            <item.icon size={24} />
-            <span className="text-[10px] font-medium">{item.label}</span>
-            {item.id === 'partner' && pendingInvites.length > 0 && (
-              <span className="absolute top-2 right-4 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-            )}
-          </button>
-        ))}
+        {/* Last 2 items: Vendors & Currency */}
+        <button
+          onClick={() => { setActiveTab('vendors'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'vendors' ? 'text-champagne' : 'text-gray-400'}`}
+        >
+          <Store size={24} />
+          <span className="text-[10px] font-medium">Firmalar</span>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab('currency'); setIsFabOpen(false); document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`flex flex-col items-center gap-1 p-2 rounded-lg flex-1 ${activeTab === 'currency' ? 'text-champagne' : 'text-gray-400'}`}
+        >
+          <Wallet size={24} />
+          <span className="text-[10px] font-medium">Varlıklar</span>
+        </button>
       </div>
     </div >
   );

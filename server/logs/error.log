@@ -573,3 +573,112 @@ memory, and will not scale past a single process.
 2026-01-05T19:15:08: Warning: connect.session() MemoryStore is not
 2026-01-05T19:15:08: designed for a production environment, as it will leak
 2026-01-05T19:15:08: memory, and will not scale past a single process.
+2026-01-05T19:30:15: Warning: connect.session() MemoryStore is not
+2026-01-05T19:30:15: designed for a production environment, as it will leak
+2026-01-05T19:30:15: memory, and will not scale past a single process.
+2026-01-05T19:43:40: Warning: connect.session() MemoryStore is not
+2026-01-05T19:43:40: designed for a production environment, as it will leak
+2026-01-05T19:43:40: memory, and will not scale past a single process.
+2026-01-05T19:58:46: error: null value in column "added_by" of relation "expenses" violates not-null constraint
+2026-01-05T19:58:46:     at /var/www/wedding-tracker/node_modules/pg-pool/index.js:45:11
+2026-01-05T19:58:46:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-01-05T19:58:46:     at async /var/www/wedding-tracker/server/server.js:823:13 {
+2026-01-05T19:58:46:   length: 383,
+2026-01-05T19:58:46:   severity: 'ERROR',
+2026-01-05T19:58:46:   code: '23502',
+2026-01-05T19:58:46:   detail: 'Failing row contains (17676395260073vcmom4p7, wampex@admin.com, Gelinlik ve Aksesuarları, Düğün, 0.00, null, null, 2026-01-05, null, null, planned, null, null, null, 2026-01-05 18:58:46.007, null, null).',
+2026-01-05T19:58:46:   hint: undefined,
+2026-01-05T19:58:46:   position: undefined,
+2026-01-05T19:58:46:   internalPosition: undefined,
+2026-01-05T19:58:46:   internalQuery: undefined,
+2026-01-05T19:58:46:   where: undefined,
+2026-01-05T19:58:46:   schema: 'public',
+2026-01-05T19:58:46:   table: 'expenses',
+2026-01-05T19:58:46:   column: 'added_by',
+2026-01-05T19:58:46:   dataType: undefined,
+2026-01-05T19:58:46:   constraint: undefined,
+2026-01-05T19:58:46:   file: 'execMain.c',
+2026-01-05T19:58:46:   line: '2057',
+2026-01-05T19:58:46:   routine: 'ExecConstraints'
+2026-01-05T19:58:46: }
+2026-01-05T21:47:07: Warning: connect.session() MemoryStore is not
+2026-01-05T21:47:07: designed for a production environment, as it will leak
+2026-01-05T21:47:07: memory, and will not scale past a single process.
+2026-01-05T22:43:15: Error: Connection terminated unexpectedly
+2026-01-05T22:43:15:     at /var/www/wedding-tracker/server/node_modules/pg-pool/index.js:45:11
+2026-01-05T22:43:15:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-01-05T22:43:15:     at async /var/www/wedding-tracker/server/server.js:719:26
+2026-01-05T22:43:15: Error: Connection terminated unexpectedly
+2026-01-05T22:43:15:     at /var/www/wedding-tracker/server/node_modules/pg-pool/index.js:45:11
+2026-01-05T22:43:15:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-01-05T22:43:15:     at async /var/www/wedding-tracker/server/server.js:719:26
+2026-01-05T22:43:16: Error: Connection terminated unexpectedly
+2026-01-05T22:43:16:     at /var/www/wedding-tracker/server/node_modules/pg-pool/index.js:45:11
+2026-01-05T22:43:16:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-01-05T22:43:16:     at async /var/www/wedding-tracker/server/server.js:719:26
+2026-01-05T22:48:11: error: column "users.wedding_date" must appear in the GROUP BY clause or be used in an aggregate function
+2026-01-05T22:48:11:     at /var/www/wedding-tracker/server/node_modules/pg-pool/index.js:45:11
+2026-01-05T22:48:11:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-01-05T22:48:11:     at async /var/www/wedding-tracker/server/server.js:674:31 {
+2026-01-05T22:48:11:   length: 181,
+2026-01-05T22:48:11:   severity: 'ERROR',
+2026-01-05T22:48:11:   code: '42803',
+2026-01-05T22:48:11:   detail: undefined,
+2026-01-05T22:48:11:   hint: undefined,
+2026-01-05T22:48:11:   position: '29',
+2026-01-05T22:48:11:   internalPosition: undefined,
+2026-01-05T22:48:11:   internalQuery: undefined,
+2026-01-05T22:48:11:   where: undefined,
+2026-01-05T22:48:11:   schema: undefined,
+2026-01-05T22:48:11:   table: undefined,
+2026-01-05T22:48:11:   column: undefined,
+2026-01-05T22:48:11:   dataType: undefined,
+2026-01-05T22:48:11:   constraint: undefined,
+2026-01-05T22:48:11:   file: 'parse_agg.c',
+2026-01-05T22:48:11:   line: '1462',
+2026-01-05T22:48:11:   routine: 'check_ungrouped_columns_walker'
+2026-01-05T22:48:11: }
+2026-01-05T22:48:41: error: column "users.wedding_date" must appear in the GROUP BY clause or be used in an aggregate function
+2026-01-05T22:48:41:     at /var/www/wedding-tracker/server/node_modules/pg-pool/index.js:45:11
+2026-01-05T22:48:41:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-01-05T22:48:41:     at async /var/www/wedding-tracker/server/server.js:674:31 {
+2026-01-05T22:48:41:   length: 181,
+2026-01-05T22:48:41:   severity: 'ERROR',
+2026-01-05T22:48:41:   code: '42803',
+2026-01-05T22:48:41:   detail: undefined,
+2026-01-05T22:48:41:   hint: undefined,
+2026-01-05T22:48:41:   position: '29',
+2026-01-05T22:48:41:   internalPosition: undefined,
+2026-01-05T22:48:41:   internalQuery: undefined,
+2026-01-05T22:48:41:   where: undefined,
+2026-01-05T22:48:41:   schema: undefined,
+2026-01-05T22:48:41:   table: undefined,
+2026-01-05T22:48:41:   column: undefined,
+2026-01-05T22:48:41:   dataType: undefined,
+2026-01-05T22:48:41:   constraint: undefined,
+2026-01-05T22:48:41:   file: 'parse_agg.c',
+2026-01-05T22:48:41:   line: '1462',
+2026-01-05T22:48:41:   routine: 'check_ungrouped_columns_walker'
+2026-01-05T22:48:41: }
+2026-01-05T22:48:53: error: column "users.wedding_date" must appear in the GROUP BY clause or be used in an aggregate function
+2026-01-05T22:48:53:     at /var/www/wedding-tracker/server/node_modules/pg-pool/index.js:45:11
+2026-01-05T22:48:53:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-01-05T22:48:53:     at async /var/www/wedding-tracker/server/server.js:674:31 {
+2026-01-05T22:48:53:   length: 181,
+2026-01-05T22:48:53:   severity: 'ERROR',
+2026-01-05T22:48:53:   code: '42803',
+2026-01-05T22:48:53:   detail: undefined,
+2026-01-05T22:48:53:   hint: undefined,
+2026-01-05T22:48:53:   position: '29',
+2026-01-05T22:48:53:   internalPosition: undefined,
+2026-01-05T22:48:53:   internalQuery: undefined,
+2026-01-05T22:48:53:   where: undefined,
+2026-01-05T22:48:53:   schema: undefined,
+2026-01-05T22:48:53:   table: undefined,
+2026-01-05T22:48:53:   column: undefined,
+2026-01-05T22:48:53:   dataType: undefined,
+2026-01-05T22:48:53:   constraint: undefined,
+2026-01-05T22:48:53:   file: 'parse_agg.c',
+2026-01-05T22:48:53:   line: '1462',
+2026-01-05T22:48:53:   routine: 'check_ungrouped_columns_walker'
+2026-01-05T22:48:53: }

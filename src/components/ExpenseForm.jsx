@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
+import { useAuth } from '../context/AuthContext';
+import VendorRecommendations from './VendorRecommendations';
 import { Plus, Calendar, CreditCard, Tag, ShoppingBag, FileText, Save, X, Camera } from 'lucide-react';
 
 const SOURCES = ['Nakit', 'Kredi Kartı', 'Kredi', 'Borç'];
@@ -7,6 +9,7 @@ const VENDORS = ['Mağaza', 'İnternet', 'Pazar', 'Hediye', 'Diğer'];
 
 const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
     const { addExpense, updateExpense } = useExpenses();
+    const { user } = useAuth();
     const [categories, setCategories] = useState([]); // Dynamic categories
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
@@ -237,6 +240,14 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                     </select>
                                 )}
                             </div>
+
+                            {/* Vendor Recommendations */}
+                            {formData.category && (
+                                <VendorRecommendations
+                                    city={user?.city || 'İstanbul'}
+                                    category={formData.category}
+                                />
+                            )}
 
                             {/* Vendor - Native Select */}
                             <div className="flex items-center justify-between px-4 py-3 bg-white">

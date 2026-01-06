@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard';
 import ExpenseForm from './components/ExpenseForm';
 import ExpenseList from './components/ExpenseList';
 import InstallmentCalendar from './components/InstallmentCalendar';
+import VendorsPage from './components/VendorsPage';
 
 import CurrencyTrackerPage from './components/CurrencyTrackerPage';
 import PartnerManagement from './components/PartnerManagement';
@@ -63,6 +64,8 @@ const MainApp = () => {
         );
       case 'expenses':
         return <ExpenseList onEdit={handleEditExpense} initialTab={expenseFilter} />;
+      case 'vendors':
+        return <VendorsPage />;
 
       case 'currency':
         return <CurrencyTrackerPage />;

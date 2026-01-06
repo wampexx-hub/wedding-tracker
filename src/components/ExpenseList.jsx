@@ -1,12 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
+import { useAuth } from '../context/AuthContext';
+import VendorRecommendations from './VendorRecommendations';
 import { Trash2, Edit2, Filter, Calendar, CreditCard, CheckCircle, Clock, FileText, Download, Upload, AlertTriangle, X, Image as ImageIcon, Heart, Snowflake, Tv, UtensilsCrossed, Sofa, MoreHorizontal, Bed, Sparkles } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import SearchBar from './SearchBar';
 import ExpenseCard from './ExpenseCard';
+import InstallmentCalendar from './InstallmentCalendar';
 
 const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
     const { expenses, deleteExpense, addExpense, addBatchExpenses } = useExpenses();
+    const { user } = useAuth();
     const [filterCategory, setFilterCategory] = useState('All');
     const [activeTab, setActiveTab] = useState(initialTab);
     const [searchQuery, setSearchQuery] = useState('');
@@ -196,16 +200,16 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
 
                 {/* Tabs */}
                 <div className="mb-6 md:mb-8 border-b-2 border-gray-100 overflow-x-auto scrollbar-hide">
-                    <div className="flex gap-1 md:gap-2 min-w-full">
+                    <div className="flex gap-2 md:gap-2 min-w-full px-1">
                         <button
                             onClick={() => setActiveTab('purchased')}
-                            className={`flex-1 min-w-0 flex items-center justify-center gap-2 px-2 py-3 md:px-6 md:py-4 transition-all duration-200 border-b-[3px] whitespace-nowrap ${activeTab === 'purchased'
+                            className={`flex-none md:flex-1 flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 transition-all duration-200 border-b-[3px] whitespace-nowrap ${activeTab === 'purchased'
                                 ? 'border-[#D4AF37] text-[#D4AF37] font-semibold bg-gray-50/50'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             <CheckCircle size={18} className={`flex-shrink-0 ${activeTab === 'purchased' ? 'text-[#D4AF37]' : 'text-gray-400'}`} />
-                            <span className="text-sm md:text-base truncate">Alınanlar</span>
+                            <span className="text-sm md:text-base">Alınanlar</span>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold min-w-[24px] text-center flex-shrink-0 ${activeTab === 'purchased'
                                 ? 'bg-[#D4AF37] text-white'
                                 : 'bg-gray-200 text-gray-500'
@@ -216,13 +220,13 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
 
                         <button
                             onClick={() => setActiveTab('planned')}
-                            className={`flex-1 min-w-0 flex items-center justify-center gap-2 px-2 py-3 md:px-6 md:py-4 transition-all duration-200 border-b-[3px] whitespace-nowrap ${activeTab === 'planned'
+                            className={`flex-none md:flex-1 flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 transition-all duration-200 border-b-[3px] whitespace-nowrap ${activeTab === 'planned'
                                 ? 'border-[#D4AF37] text-[#D4AF37] font-semibold bg-gray-50/50'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             <Clock size={18} className={`flex-shrink-0 ${activeTab === 'planned' ? 'text-[#D4AF37]' : 'text-gray-400'}`} />
-                            <span className="text-sm md:text-base truncate">Planlananlar</span>
+                            <span className="text-sm md:text-base">Planlananlar</span>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold min-w-[24px] text-center flex-shrink-0 ${activeTab === 'planned'
                                 ? 'bg-[#D4AF37] text-white'
                                 : 'bg-gray-200 text-gray-500'
@@ -230,111 +234,141 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
                                 {plannedCount}
                             </span>
                         </button>
+
+                        <button
+                            onClick={() => setActiveTab('calendar')}
+                            className={`flex-none md:flex-1 flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 transition-all duration-200 border-b-[3px] whitespace-nowrap ${activeTab === 'calendar'
+                                ? 'border-[#D4AF37] text-[#D4AF37] font-semibold bg-gray-50/50'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                }`}
+                        >
+                            <Calendar size={18} className={`flex-shrink-0 ${activeTab === 'calendar' ? 'text-[#D4AF37]' : 'text-gray-400'}`} />
+                            <span className="text-sm md:text-base">Taksit Takvimi</span>
+                        </button>
                     </div>
                 </div>
 
-                {
-                    filteredExpenses.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-light)' }}>
-                            <p>Henüz harcama eklenmemiş.</p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col bg-white rounded-xl shadow-sm divide-y divide-gray-100 md:bg-transparent md:shadow-none md:divide-y-0 md:grid md:gap-4">
-                            {filteredExpenses.map(expense => (
-                                <div key={expense.id}>
-                                    <ExpenseCard
-                                        expense={expense}
-                                        onEdit={(exp) => onEdit(exp)}
-                                        onDelete={handleDeleteClick}
-                                        onExpand={handleCardClick}
-                                        isExpanded={expandedId === expense.id}
-                                    />
-
-                                    {/* Inline Delete Confirmation - Appears right below the card */}
-                                    {deleteId === expense.id && (
-                                        <div
-                                            className="animate-in slide-in-from-top-2 fade-in duration-300"
-                                            style={{
-                                                marginTop: '0.5rem',
-                                                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
-                                                padding: '1.5rem',
-                                                borderRadius: '12px',
-                                                border: '2px solid #fca5a5',
-                                                boxShadow: '0 4px 6px rgba(239, 68, 68, 0.1)'
-                                            }}
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                                                <div style={{
-                                                    width: '48px',
-                                                    height: '48px',
-                                                    background: '#ef4444',
-                                                    borderRadius: '50%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    flexShrink: 0
-                                                }}>
-                                                    <AlertTriangle size={24} color="white" />
-                                                </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#991b1b', fontSize: '1.1rem', fontWeight: '600' }}>
-                                                        Emin misiniz?
-                                                    </h4>
-                                                    <p style={{ color: '#7f1d1d', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>
-                                                        <strong>{expense.title}</strong> kalemini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
-                                                    </p>
-                                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                                        <button
-                                                            onClick={() => setDeleteId(null)}
-                                                            style={{
-                                                                flex: 1,
-                                                                padding: '0.75rem 1.5rem',
-                                                                borderRadius: '8px',
-                                                                border: '2px solid #dc2626',
-                                                                background: 'white',
-                                                                color: '#dc2626',
-                                                                cursor: 'pointer',
-                                                                fontWeight: '600',
-                                                                fontSize: '0.95rem',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                            onMouseOver={(e) => e.target.style.background = '#fef2f2'}
-                                                            onMouseOut={(e) => e.target.style.background = 'white'}
-                                                        >
-                                                            İptal
-                                                        </button>
-                                                        <button
-                                                            onClick={confirmDelete}
-                                                            style={{
-                                                                flex: 1,
-                                                                padding: '0.75rem 1.5rem',
-                                                                borderRadius: '8px',
-                                                                border: 'none',
-                                                                background: '#dc2626',
-                                                                color: 'white',
-                                                                cursor: 'pointer',
-                                                                fontWeight: '600',
-                                                                fontSize: '0.95rem',
-                                                                transition: 'all 0.2s',
-                                                                boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)'
-                                                            }}
-                                                            onMouseOver={(e) => e.target.style.background = '#b91c1c'}
-                                                            onMouseOut={(e) => e.target.style.background = '#dc2626'}
-                                                        >
-                                                            Evet, Sil
-                                                        </button>
-                                                    </div>
-                                                </div>
+                {activeTab === 'calendar' ? (
+                    <InstallmentCalendar />
+                ) : (
+                    <>
+                        {
+                            filteredExpenses.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-light)' }}>
+                                    {filterCategory !== 'All' ? (
+                                        <div className="flex flex-col items-center">
+                                            <p className="mb-4 text-gray-500">Bu kategoride henüz harcamanız yok.</p>
+                                            <div className="w-full max-w-4xl">
+                                                <VendorRecommendations
+                                                    city={user?.city || 'İstanbul'}
+                                                    category={filterCategory}
+                                                />
+                                                <p className="text-xs text-gray-400 mt-2">Hemen teklif alarak bütçenizi planlamaya başlayın.</p>
                                             </div>
                                         </div>
+                                    ) : (
+                                        <p>Henüz harcama eklenmemiş.</p>
                                     )}
                                 </div>
-                            ))}
-                        </div>
-                    )
-                }
-                {/* Mobile Spacer */}
-                <div className="h-32 w-full flex-shrink-0" aria-hidden="true" />
+                            ) : (
+                                <div className="flex flex-col bg-white rounded-xl shadow-sm divide-y divide-gray-100 md:bg-transparent md:shadow-none md:divide-y-0 md:grid md:gap-4">
+                                    {filteredExpenses.map(expense => (
+                                        <div key={expense.id}>
+                                            <ExpenseCard
+                                                expense={expense}
+                                                onEdit={(exp) => onEdit(exp)}
+                                                onDelete={handleDeleteClick}
+                                                onExpand={handleCardClick}
+                                                isExpanded={expandedId === expense.id}
+                                            />
+
+                                            {/* Inline Delete Confirmation - Appears right below the card */}
+                                            {deleteId === expense.id && (
+                                                <div
+                                                    className="animate-in slide-in-from-top-2 fade-in duration-300"
+                                                    style={{
+                                                        marginTop: '0.5rem',
+                                                        background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                                                        padding: '1.5rem',
+                                                        borderRadius: '12px',
+                                                        border: '2px solid #fca5a5',
+                                                        boxShadow: '0 4px 6px rgba(239, 68, 68, 0.1)'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                                                        <div style={{
+                                                            width: '48px',
+                                                            height: '48px',
+                                                            background: '#ef4444',
+                                                            borderRadius: '50%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            flexShrink: 0
+                                                        }}>
+                                                            <AlertTriangle size={24} color="white" />
+                                                        </div>
+                                                        <div style={{ flex: 1 }}>
+                                                            <h4 style={{ margin: '0 0 0.5rem 0', color: '#991b1b', fontSize: '1.1rem', fontWeight: '600' }}>
+                                                                Emin misiniz?
+                                                            </h4>
+                                                            <p style={{ color: '#7f1d1d', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>
+                                                                <strong>{expense.title}</strong> kalemini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                                                            </p>
+                                                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                                                <button
+                                                                    onClick={() => setDeleteId(null)}
+                                                                    style={{
+                                                                        flex: 1,
+                                                                        padding: '0.75rem 1.5rem',
+                                                                        borderRadius: '8px',
+                                                                        border: '2px solid #dc2626',
+                                                                        background: 'white',
+                                                                        color: '#dc2626',
+                                                                        cursor: 'pointer',
+                                                                        fontWeight: '600',
+                                                                        fontSize: '0.95rem',
+                                                                        transition: 'all 0.2s'
+                                                                    }}
+                                                                    onMouseOver={(e) => e.target.style.background = '#fef2f2'}
+                                                                    onMouseOut={(e) => e.target.style.background = 'white'}
+                                                                >
+                                                                    İptal
+                                                                </button>
+                                                                <button
+                                                                    onClick={confirmDelete}
+                                                                    style={{
+                                                                        flex: 1,
+                                                                        padding: '0.75rem 1.5rem',
+                                                                        borderRadius: '8px',
+                                                                        border: 'none',
+                                                                        background: '#dc2626',
+                                                                        color: 'white',
+                                                                        cursor: 'pointer',
+                                                                        fontWeight: '600',
+                                                                        fontSize: '0.95rem',
+                                                                        transition: 'all 0.2s',
+                                                                        boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)'
+                                                                    }}
+                                                                    onMouseOver={(e) => e.target.style.background = '#b91c1c'}
+                                                                    onMouseOut={(e) => e.target.style.background = '#dc2626'}
+                                                                >
+                                                                    Evet, Sil
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )
+                        }
+                        {/* Mobile Spacer */}
+                        <div className="h-32 w-full flex-shrink-0" aria-hidden="true" />
+                    </>
+                )}
             </div>
 
             {/* Wizard Confirmation Modal - Moved outside glass-panel */}
