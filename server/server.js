@@ -819,7 +819,17 @@ app.get('/api/data', async (req, res) => {
 
 app.post('/api/expenses', upload.single('image'), async (req, res) => {
     try {
-        const expenseData = JSON.parse(req.body.data);
+        let expenseData;
+        if (req.body.data && typeof req.body.data === 'string') {
+            // FormData - parse the JSON string
+            expenseData = JSON.parse(req.body.data);
+        } else if (req.body.title) {
+            // Direct JSON body
+            expenseData = req.body;
+        } else {
+            return res.status(400).json({ error: 'Invalid request format' });
+        }
+
         if (!expenseData.username) return res.status(400).json({ error: 'User required' });
 
         let imageUrl = null;
@@ -831,7 +841,7 @@ app.post('/api/expenses', upload.single('image'), async (req, res) => {
         }
 
         const id = expenseData.id || Date.now().toString();
-        const { username, title, category, price, vendor, source, date, isInstallment, installmentCount, status, notes, monthlyPayment } = expenseData;
+        const { username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment } = expenseData;
 
         // Get user's partnership info
         const userInfo = await db.query('SELECT partnership_id FROM users WHERE username = $1', [username]);
@@ -840,7 +850,7 @@ app.post('/api/expenses', upload.single('image'), async (req, res) => {
         await db.query(
             `INSERT INTO expenses (id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, image_url, created_at, added_by, partnership_id)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-            [id, username, title, category, price, vendor, source, date, isInstallment, installmentCount, status, notes, monthlyPayment, imageUrl, new Date().toISOString(), username, partnershipId]
+            [id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, imageUrl, new Date().toISOString(), username, partnershipId]
         );
 
         await req.notifyUser(username);
