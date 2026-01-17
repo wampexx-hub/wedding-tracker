@@ -179,206 +179,227 @@ export default function ExpenseFormModal({ visible, onClose, onExpenseAdded, exp
             transparent={true}
             onRequestClose={onClose}
         >
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.container}
-            >
-                <View style={styles.backdrop}>
+            <View style={styles.modalBackdrop}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.modalContainer}
+                >
                     <View style={styles.modalContent}>
-                        {/* Header */}
-                        <LinearGradient
-                            colors={['#D4AF37', '#C5A028']}
-                            style={styles.header}
-                        >
-                            <Text style={styles.headerTitle}>
-                                {expense ? 'Harcamayı Düzenle' : 'Yeni Harcama'}
-                            </Text>
-                            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                                <Ionicons name="close" size={24} color="#fff" />
-                            </TouchableOpacity>
-                        </LinearGradient>
-
-                        <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
-                            {/* Status Selection */}
-                            <View style={styles.statusContainer}>
-                                {statuses.map(s => (
-                                    <TouchableOpacity
-                                        key={s.value}
-                                        style={[styles.statusButton, status === s.value && styles.statusButtonActive]}
-                                        onPress={() => setStatus(s.value)}
-                                    >
-                                        <Ionicons
-                                            name={s.icon}
-                                            size={20}
-                                            color={status === s.value ? '#D4AF37' : '#9ca3af'}
-                                        />
-                                        <Text style={[styles.statusText, status === s.value && styles.statusTextActive]}>
-                                            {s.label}
-                                        </Text>
+                        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+                            <View style={styles.content}>
+                                {/* Header */}
+                                <LinearGradient
+                                    colors={['#D4AF37', '#C5A028']}
+                                    style={styles.header}
+                                >
+                                    <Text style={styles.headerTitle}>
+                                        {expense ? 'Harcamayı Düzenle' : 'Yeni Harcama'}
+                                    </Text>
+                                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                                        <Ionicons name="close" size={24} color="#fff" />
                                     </TouchableOpacity>
-                                ))}
-                            </View>
+                                </LinearGradient>
 
-                            {/* Title */}
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Harcama Adı *</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Örn: Gelinlik"
-                                    value={title}
-                                    onChangeText={setTitle}
-                                    placeholderTextColor="#9ca3af"
-                                />
-                            </View>
-
-                            {/* Category */}
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Kategori *</Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                    <View style={styles.categoryContainer}>
-                                        {categories.map(cat => (
+                                <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
+                                    {/* Status Selection */}
+                                    <View style={styles.statusContainer}>
+                                        {statuses.map(s => (
                                             <TouchableOpacity
-                                                key={cat}
-                                                style={[styles.categoryChip, category === cat && styles.categoryChipActive]}
-                                                onPress={() => setCategory(cat)}
+                                                key={s.value}
+                                                style={[styles.statusButton, status === s.value && styles.statusButtonActive]}
+                                                onPress={() => setStatus(s.value)}
                                             >
-                                                <Text style={[styles.categoryText, category === cat && styles.categoryTextActive]}>
-                                                    {cat}
+                                                <Ionicons
+                                                    name={s.icon}
+                                                    size={20}
+                                                    color={status === s.value ? '#D4AF37' : '#9ca3af'}
+                                                />
+                                                <Text style={[styles.statusText, status === s.value && styles.statusTextActive]}>
+                                                    {s.label}
                                                 </Text>
                                             </TouchableOpacity>
                                         ))}
                                     </View>
-                                </ScrollView>
-                            </View>
 
-                            {/* Amount */}
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Tutar *</Text>
-                                <View style={styles.amountInput}>
-                                    <Text style={styles.currencySymbol}>₺</Text>
-                                    <TextInput
-                                        style={styles.amountField}
-                                        placeholder="0"
-                                        value={amount}
-                                        onChangeText={setAmount}
-                                        keyboardType="numeric"
-                                        placeholderTextColor="#9ca3af"
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Vendor */}
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Firma</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Firma adı"
-                                    value={vendor}
-                                    onChangeText={setVendor}
-                                    placeholderTextColor="#9ca3af"
-                                />
-                            </View>
-
-                            {/* Source */}
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Ödeme Yöntemi</Text>
-                                <View style={styles.sourceContainer}>
-                                    {sources.map(s => (
-                                        <TouchableOpacity
-                                            key={s}
-                                            style={[styles.sourceButton, source === s && styles.sourceButtonActive]}
-                                            onPress={() => setSource(s)}
-                                        >
-                                            <Text style={[styles.sourceText, source === s && styles.sourceTextActive]}>
-                                                {s}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-
-                            {/* Installment */}
-                            <View style={styles.inputGroup}>
-                                <View style={styles.switchRow}>
-                                    <View>
-                                        <Text style={styles.label}>Taksitli mi?</Text>
-                                        <Text style={styles.helperText}>Aylık ödeme planı</Text>
-                                    </View>
-                                    <Switch
-                                        value={isInstallment}
-                                        onValueChange={setIsInstallment}
-                                        trackColor={{ false: '#e5e7eb', true: '#fef3c7' }}
-                                        thumbColor={isInstallment ? '#D4AF37' : '#f3f4f6'}
-                                    />
-                                </View>
-                                {isInstallment && (
-                                    <View style={styles.installmentInput}>
-                                        <Text style={styles.installmentLabel}>Taksit Sayısı</Text>
+                                    {/* Title */}
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Harcama Adı *</Text>
                                         <TextInput
-                                            style={styles.installmentField}
-                                            placeholder="12"
-                                            value={installmentCount}
-                                            onChangeText={setInstallmentCount}
-                                            keyboardType="numeric"
+                                            style={styles.input}
+                                            placeholder="Örn: Gelinlik"
+                                            value={title}
+                                            onChangeText={setTitle}
                                             placeholderTextColor="#9ca3af"
                                         />
-                                        <Text style={styles.installmentInfo}>ay</Text>
                                     </View>
-                                )}
-                            </View>
 
-                            {/* Notes */}
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Notlar</Text>
-                                <TextInput
-                                    style={[styles.input, styles.textArea]}
-                                    placeholder="Ek bilgiler..."
-                                    value={notes}
-                                    onChangeText={setNotes}
-                                    multiline
-                                    numberOfLines={3}
-                                    placeholderTextColor="#9ca3af"
-                                />
-                            </View>
+                                    {/* Category */}
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Kategori *</Text>
+                                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                            <View style={styles.categoryContainer}>
+                                                {categories.map(cat => (
+                                                    <TouchableOpacity
+                                                        key={cat}
+                                                        style={[styles.categoryChip, category === cat && styles.categoryChipActive]}
+                                                        onPress={() => setCategory(cat)}
+                                                    >
+                                                        <Text style={[styles.categoryText, category === cat && styles.categoryTextActive]}>
+                                                            {cat}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        </ScrollView>
+                                    </View>
 
-                            <View style={{ height: 100 }} />
+                                    {/* Amount */}
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Tutar *</Text>
+                                        <View style={styles.amountInput}>
+                                            <Text style={styles.currencySymbol}>₺</Text>
+                                            <TextInput
+                                                style={styles.amountField}
+                                                placeholder="0"
+                                                value={amount}
+                                                onChangeText={setAmount}
+                                                keyboardType="numeric"
+                                                placeholderTextColor="#9ca3af"
+                                            />
+                                        </View>
+                                    </View>
+
+                                    {/* Vendor */}
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Firma</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder="Firma adı"
+                                            value={vendor}
+                                            onChangeText={setVendor}
+                                            placeholderTextColor="#9ca3af"
+                                        />
+                                    </View>
+
+                                    {/* Source */}
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Ödeme Yöntemi</Text>
+                                        <View style={styles.sourceContainer}>
+                                            {sources.map(s => (
+                                                <TouchableOpacity
+                                                    key={s}
+                                                    style={[styles.sourceButton, source === s && styles.sourceButtonActive]}
+                                                    onPress={() => setSource(s)}
+                                                >
+                                                    <Text style={[styles.sourceText, source === s && styles.sourceTextActive]}>
+                                                        {s}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+                                    </View>
+
+                                    {/* Installment */}
+                                    <View style={styles.inputGroup}>
+                                        <View style={styles.switchRow}>
+                                            <View>
+                                                <Text style={styles.label}>Taksitli mi?</Text>
+                                                <Text style={styles.helperText}>Aylık ödeme planı</Text>
+                                            </View>
+                                            <Switch
+                                                value={isInstallment}
+                                                onValueChange={setIsInstallment}
+                                                trackColor={{ false: '#e5e7eb', true: '#fef3c7' }}
+                                                thumbColor={isInstallment ? '#D4AF37' : '#f3f4f6'}
+                                            />
+                                        </View>
+                                        {isInstallment && (
+                                            <View style={styles.installmentInput}>
+                                                <Text style={styles.installmentLabel}>Taksit Sayısı</Text>
+                                                <TextInput
+                                                    style={styles.installmentField}
+                                                    placeholder="12"
+                                                    value={installmentCount}
+                                                    onChangeText={setInstallmentCount}
+                                                    keyboardType="numeric"
+                                                    placeholderTextColor="#9ca3af"
+                                                />
+                                                <Text style={styles.installmentInfo}>ay</Text>
+                                            </View>
+                                        )}
+                                    </View>
+
+                                    {/* Notes */}
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Notlar</Text>
+                                        <TextInput
+                                            style={[styles.input, styles.textArea]}
+                                            placeholder="Ek bilgiler..."
+                                            value={notes}
+                                            onChangeText={setNotes}
+                                            multiline
+                                            numberOfLines={3}
+                                            placeholderTextColor="#9ca3af"
+                                        />
+                                    </View>
+
+                                    <View style={{ height: 100 }} />
+                                </ScrollView>
+
+                                {/* Footer */}
+                                <View style={styles.footer}>
+                                    {expense && (
+                                        <TouchableOpacity
+                                            style={styles.deleteButton}
+                                            onPress={handleDelete}
+                                            disabled={isSubmitting}
+                                        >
+                                            <Ionicons name="trash-outline" size={20} color="#dc2626" />
+                                            <Text style={styles.deleteButtonText}>Sil</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                    <TouchableOpacity
+                                        style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+                                        onPress={handleSubmit}
+                                        disabled={isSubmitting}
+                                    >
+                                        <LinearGradient
+                                            colors={isSubmitting ? ['#9ca3af', '#6b7280'] : ['#D4AF37', '#C5A028']}
+                                            style={styles.submitGradient}
+                                        >
+                                            <Text style={styles.submitButtonText}>
+                                                {isSubmitting ? 'Kaydediliyor...' : (expense ? 'Güncelle' : 'Kaydet')}
+                                            </Text>
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                         </ScrollView>
-
-                        {/* Footer */}
-                        <View style={styles.footer}>
-                            {expense && (
-                                <TouchableOpacity
-                                    style={styles.deleteButton}
-                                    onPress={handleDelete}
-                                    disabled={isSubmitting}
-                                >
-                                    <Ionicons name="trash-outline" size={20} color="#dc2626" />
-                                    <Text style={styles.deleteButtonText}>Sil</Text>
-                                </TouchableOpacity>
-                            )}
-                            <TouchableOpacity
-                                style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-                                onPress={handleSubmit}
-                                disabled={isSubmitting}
-                            >
-                                <LinearGradient
-                                    colors={isSubmitting ? ['#9ca3af', '#6b7280'] : ['#D4AF37', '#C5A028']}
-                                    style={styles.submitGradient}
-                                >
-                                    <Text style={styles.submitButtonText}>
-                                        {isSubmitting ? 'Kaydediliyor...' : (expense ? 'Güncelle' : 'Kaydet')}
-                                    </Text>
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        </View>
                     </View>
-                </View>
-            </KeyboardAvoidingView>
+                </KeyboardAvoidingView>
+            </View>
         </Modal>
     );
 }
 
 const styles = StyleSheet.create({
+    modalBackdrop: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-start',
+        paddingTop: 40,
+    },
+    modalContainer: {
+        flex: 1,
+        maxHeight: '85%', // Leave space for tab bar
+    },
+    modalContent: {
+        flex: 1,
+        backgroundColor: '#FDFBF7',
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        overflow: 'hidden',
+    },
     container: {
         flex: 1,
     },

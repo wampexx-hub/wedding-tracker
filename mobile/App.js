@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'rea
 import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ExpenseProvider } from './context/ExpenseContext';
 import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,7 +13,9 @@ import ExpensesScreen from './screens/ExpensesScreen';
 import VendorsScreen from './screens/VendorsScreen';
 import AssetsScreen from './screens/AssetsScreen';
 import LoginScreen from './screens/LoginScreen';
-import ExpenseFormModal from './components/ExpenseFormModal';
+import NotificationsScreen from './screens/NotificationsScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import ExpenseFormBottomSheet from './components/ExpenseFormBottomSheet';
 
 import {
   useFonts,
@@ -26,6 +29,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 // Custom Tab Bar Button for FAB effect with cut-out
 const CustomTabBarButton = ({ children, onPress }) => (
@@ -116,6 +120,7 @@ function MainTabs() {
             shadowRadius: 8,
             elevation: 10,
             position: 'absolute',
+            zIndex: 1000, // Always keep tab bar on top
           },
           tabBarActiveTintColor: '#D4AF37',
           tabBarInactiveTintColor: '#9ca3af',
@@ -130,10 +135,15 @@ function MainTabs() {
           name="Dashboard"
           children={(props) => <DashboardScreen {...props} user={user} onLogout={logout} refreshTrigger={refreshTrigger} />}
           options={{
-            tabBarLabel: 'Özet',
+            tabBarLabel: 'Genel Bakış',
             tabBarIcon: ({ color, focused }) => (
               <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
             )
+          }}
+          listeners={{
+            tabPress: () => {
+              if (isModalVisible) setIsModalVisible(false);
+            }
           }}
         />
         <Tab.Screen
@@ -142,8 +152,13 @@ function MainTabs() {
           options={{
             tabBarLabel: 'Harcamalar',
             tabBarIcon: ({ color, focused }) => (
-              <Ionicons name={focused ? "cash" : "cash-outline"} size={22} color={color} />
+              <Ionicons name={focused ? "receipt" : "receipt-outline"} size={22} color={color} />
             )
+          }}
+          listeners={{
+            tabPress: () => {
+              if (isModalVisible) setIsModalVisible(false);
+            }
           }}
         />
         <Tab.Screen
@@ -151,39 +166,59 @@ function MainTabs() {
           component={View}
           options={{
             tabBarIcon: ({ focused }) => (
-              <Ionicons name="add" size={32} color="#fff" style={{ marginTop: 0 }} />
+              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Ionicons name="add" size={32} color="#fff" />
+              </View>
             ),
             tabBarButton: (props) => (
-              <CustomTabBarButton {...props} onPress={() => setIsModalVisible(true)} />
+              <CustomTabBarButton {...props} onPress={() => {
+                if (isModalVisible) {
+                  setIsModalVisible(false);
+                } else {
+                  setIsModalVisible(true);
+                }
+              }} />
             ),
             tabBarLabel: '',
           }}
         />
         <Tab.Screen
-          name="VendorsTab"
-          children={(props) => <VendorsScreen {...props} />}
+          name="Vendors"
+          children={(props) => <VendorsScreen {...props} user={user} />}
           options={{
-            tabBarLabel: 'Firmalar',
+            tabBarLabel: 'Satıcılar',
             tabBarIcon: ({ color, focused }) => (
-              <Ionicons name={focused ? "business" : "business-outline"} size={22} color={color} />
+              <Ionicons name={focused ? "people" : "people-outline"} size={22} color={color} />
             )
+          }}
+          listeners={{
+            tabPress: () => {
+              if (isModalVisible) setIsModalVisible(false);
+            }
           }}
         />
         <Tab.Screen
           name="Assets"
           children={(props) => <AssetsScreen {...props} user={user} />}
           options={{
-            tabBarLabel: 'Varlıklar',
+            tabBarLabel: 'Birikimler',
             tabBarIcon: ({ color, focused }) => (
               <Ionicons name={focused ? "wallet" : "wallet-outline"} size={22} color={color} />
             )
           }}
+          listeners={{
+            tabPress: () => {
+              if (isModalVisible) setIsModalVisible(false);
+            }
+          }}
         />
       </Tab.Navigator>
 
-      <ExpenseFormModal
+      {/* Bottom Sheet Overlay - Always on top of tabs */}
+      <ExpenseFormBottomSheet
         visible={isModalVisible}
-        onClose={handleExpenseAdded}
+        onClose={() => setIsModalVisible(false)}
+        onExpenseAdded={handleExpenseAdded}
         user={user}
       />
     </>
@@ -219,6 +254,30 @@ export default function App() {
   );
 }
 
+function MainNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MainTabs" component={MainTabs} />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{
+          presentation: 'card', // Changed from modal to card
+          headerShown: false,   // Hide header to show tab bar
+        }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          presentation: 'card', // Changed from modal to card
+          headerShown: false,   // Hide header to show tab bar
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function AuthNavigator() {
   const authContext = useAuth();
 
@@ -244,5 +303,5 @@ function AuthNavigator() {
     );
   }
 
-  return user ? <MainTabs /> : <LoginScreen />;
+  return user ? <MainNavigator /> : <LoginScreen />;
 }

@@ -2,24 +2,26 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Dimensions, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import Svg, { Circle } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import PieChart from 'react-native-chart-kit/dist/PieChart';
 import LineChart from 'react-native-chart-kit/dist/line-chart/LineChart';
-import { normalizeExpense, calculateTotals, formatCurrency, formatDate } from '../utils/dataHelpers';
-import BudgetSetterModal from '../components/BudgetSetterModal';
+import DatePickerModal from '../components/DatePickerModal';
+import { normalizeExpense, calculateTotals } from '../utils/dataHelpers';
+import { Alert } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
     const insets = useSafeAreaInsets();
+    const navigation = useNavigation();
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [budgetModalVisible, setBudgetModalVisible] = useState(false);
+    const [datePickerVisible, setDatePickerVisible] = useState(false);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!user?.username) {
             console.log('❌ No username found');
             setIsLoading(false);
@@ -38,18 +40,14 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
             console.error('❌ Veri yüklenemedi:', error);
         } finally {
             setIsLoading(false);
-            setRefreshing(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         fetchData();
-    }, [refreshTrigger]);
+    }, [fetchData, refreshTrigger]);
 
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchData();
-    };
+
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(amount);
@@ -58,7 +56,6 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#D4AF37" />
             </View>
         );
     }
@@ -69,7 +66,27 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
     const today = new Date();
     const daysDiff = Math.ceil((weddingDate - today) / (1000 * 60 * 60 * 24));
 
-    const { totalSpent, totalPlanned, totalInstallments, purchasedCount, plannedCount } = calculateTotals(data?.expenses || []);
+    const handleUpdateDate = async (newDate) => {
+        setDatePickerVisible(false);
+        try {
+            const response = await fetch(`https://dugunbutcem.com/api/wedding-date`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user.username, date: newDate.toISOString() })
+            });
+
+            if (response.ok) {
+                fetchData();
+                Alert.alert('Başarılı', 'Düğün tarihi güncellendi');
+            } else {
+                throw new Error('Update failed');
+            }
+        } catch {
+            Alert.alert('Hata', 'Tarih güncellenemedi');
+        }
+    };
+
+    const { totalSpent, totalPlanned, totalInstallments } = calculateTotals(data?.expenses || []);
 
     const remainingBudget = budget > 0 ? budget - totalSpent : 0;
     const budgetHealth = budget === 0 ? 'warning' : remainingBudget < 0 ? 'danger' : remainingBudget < budget * 0.2 ? 'warning' : 'safe';
@@ -127,7 +144,6 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="light" />
 
             {/* Mobile Header */}
             <View style={[styles.mobileHeader, { paddingTop: insets.top + 8 }]}>
@@ -141,14 +157,20 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     <Text style={styles.headerTitle}>Düğün Bütçem</Text>
                 </View>
                 <View style={styles.headerRight}>
-                    <TouchableOpacity style={styles.headerButton}>
-                        <Ionicons name="notifications-outline" size={22} color="#111827" />
+                    <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => navigation.navigate('Notifications')}
+                    >
+                        <Ionicons name="notifications-outline" size={24} color="#111827" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerButton}>
-                        <Ionicons name="people-outline" size={22} color="#111827" />
+                    <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => navigation.navigate('Settings')}
+                    >
+                        <Ionicons name="settings-outline" size={24} color="#111827" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={onLogout} style={styles.headerButton}>
-                        <Ionicons name="log-out-outline" size={22} color="#111827" />
+                        <Ionicons name="log-out-outline" size={24} color="#ef4444" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -156,7 +178,6 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#D4AF37" />}
             >
                 {/* Hero Card */}
                 <LinearGradient
@@ -165,17 +186,14 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     end={{ x: 1, y: 1 }}
                     style={styles.heroCard}
                 >
-                    <View style={styles.heroBlurRight} />
-                    <View style={styles.heroBlurLeft} />
 
                     <View style={styles.heroContent}>
                         <Text style={styles.heroGreeting}>Merhaba, {user?.name || user?.username} 👋</Text>
 
                         <View style={styles.heroStatsRow}>
                             {/* Countdown Circle */}
-                            <View style={styles.countdownContainer}>
+                            <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={styles.countdownContainer}>
                                 <Svg width="64" height="64" viewBox="0 0 64 64" style={{ transform: [{ rotate: '-90deg' }] }}>
-                                    <Circle cx="32" cy="32" r={radius} stroke="#333" strokeWidth="3" fill="none" />
                                     <Circle
                                         cx="32" cy="32"
                                         r={radius}
@@ -191,36 +209,27 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                                     <Text style={styles.countdownValue}>{daysDiff}</Text>
                                     <Text style={styles.countdownLabel}>Gün</Text>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
 
-                            <View style={styles.heroDivider} />
 
                             {/* Budget Info */}
                             <View style={styles.heroBudgetInfo}>
-                                <Text style={styles.heroLabel}>KALAN BÜTÇE</Text>
+                                <Text style={styles.heroLabel}>TOPLAM BÜTÇE</Text>
                                 <Text style={styles.heroValue}>
-                                    {formatCurrency(remainingBudget)}
+                                    {formatCurrency(budget)}
                                 </Text>
                                 <Text style={[
                                     styles.heroPercentage,
                                     budgetHealth === 'danger' && styles.budgetDanger,
                                     budgetHealth === 'safe' && styles.budgetSafe,
                                 ]}>
-                                    {budgetHealth === 'danger' ? 'Bütçe Aşıldı' : budget > 0 ? `%${Math.round((remainingBudget / budget) * 100)} Mevcut` : '%0 Mevcut'}
+                                    {budgetHealth === 'danger' ? 'Bütçe Aşıldı' : `%${Math.round((remainingBudget / budget) * 100)} Kullanılabilir`}
                                 </Text>
                             </View>
                         </View>
 
                         <Text style={styles.heroMessage}>{getMessage()}</Text>
-                        {budget === 0 && (
-                            <TouchableOpacity
-                                style={styles.setBudgetButton}
-                                onPress={() => setBudgetModalVisible(true)}
-                            >
-                                <Ionicons name="wallet" size={18} color="#fff" />
-                                <Text style={styles.setBudgetButtonText}>Bütçe Ayarla</Text>
-                            </TouchableOpacity>
-                        )}
+
                     </View>
                 </LinearGradient>
 
@@ -229,7 +238,7 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     <View style={[styles.statCard, budgetHealth === 'danger' && styles.statCardDanger]}>
                         <View style={styles.statHeader}>
                             <View style={[styles.statIcon, budgetHealth === 'danger' ? styles.statIconDanger : styles.statIconPink]}>
-                                <Ionicons name="cash-outline" size={20} color={budgetHealth === 'danger' ? '#dc2626' : '#ec4899'} />
+                                <Ionicons name="cart" size={24} color={budgetHealth === 'danger' ? '#dc2626' : '#ec4899'} />
                             </View>
                             <View style={styles.statBadge}>
                                 <Text style={styles.statBadgeText}>Gerçekleşen</Text>
@@ -243,7 +252,7 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     <View style={styles.statCard}>
                         <View style={styles.statHeader}>
                             <View style={[styles.statIcon, styles.statIconYellow]}>
-                                <Ionicons name="time-outline" size={20} color="#eab308" />
+                                <Ionicons name="time" size={24} color="#f59e0b" />
                             </View>
                             <View style={styles.statBadge}>
                                 <Text style={styles.statBadgeText}>Planlanan</Text>
@@ -257,7 +266,7 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     <View style={styles.statCard}>
                         <View style={styles.statHeader}>
                             <View style={[styles.statIcon, styles.statIconBlue]}>
-                                <Ionicons name="calendar-outline" size={20} color="#3b82f6" />
+                                <Ionicons name="calendar" size={24} color="#3b82f6" />
                             </View>
                             <View style={styles.statBadge}>
                                 <Text style={styles.statBadgeText}>Aylık</Text>
@@ -271,7 +280,7 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     <View style={styles.statCard}>
                         <View style={styles.statHeader}>
                             <View style={[styles.statIcon, styles.statIconGreen]}>
-                                <Ionicons name="wallet-outline" size={20} color="#10b981" />
+                                <Ionicons name="wallet" size={24} color="#10b981" />
                             </View>
                             <View style={styles.statBadge}>
                                 <Text style={styles.statBadgeText}>Varlıklar</Text>
@@ -316,7 +325,7 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Harcama Özeti</Text>
                         <TouchableOpacity>
-                            <Ionicons name="bar-chart-outline" size={20} color="#D4AF37" />
+                            <Ionicons name="ellipsis-horizontal" size={20} color="#9ca3af" />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.chartCard}>
@@ -357,7 +366,7 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                             <TouchableOpacity key={idx} style={styles.transactionItem}>
                                 <View style={styles.transactionLeft}>
                                     <View style={styles.transactionIcon}>
-                                        <Ionicons name="pricetag-outline" size={18} color="#D4AF37" />
+                                        <Ionicons name={exp.status === 'planned' ? 'time-outline' : 'cart-outline'} size={20} color="#d97706" />
                                     </View>
                                     <View>
                                         <Text style={styles.transactionTitle}>{exp.name}</Text>
@@ -388,14 +397,12 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                                     styles.progressFill,
                                     {
                                         width: `${Math.min((totalSpent / budget) * 100, 100)}%`,
-                                        backgroundColor: budgetHealth === 'danger' ? '#dc2626' : '#D4AF37'
                                     }
                                 ]}
                             />
                         </View>
                         {budgetHealth === 'danger' && (
                             <View style={styles.alertBox}>
-                                <Ionicons name="warning-outline" size={16} color="#dc2626" />
                                 <Text style={styles.alertText}>
                                     Dikkat! Harcama bütçenizi aştı. Kalemlerinizi gözden geçirin.
                                 </Text>
@@ -428,7 +435,6 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Partner Harcama Dağılımı</Text>
-                            <Ionicons name="people" size={20} color="#D4AF37" />
                         </View>
                         <View style={styles.partnerCard}>
                             <View style={styles.partnerRow}>
@@ -449,19 +455,14 @@ export default function DashboardScreen({ user, onLogout, refreshTrigger }) {
                 )}
 
                 {/* Bottom Padding for Tab Bar */}
-                <View style={{ height: 100 }} />
             </ScrollView>
 
-            {/* Budget Setter Modal */}
-            <BudgetSetterModal
-                visible={budgetModalVisible}
-                onClose={() => setBudgetModalVisible(false)}
-                onBudgetSet={(newBudget) => {
-                    setBudgetModalVisible(false);
-                    fetchData();
-                }}
-                currentBudget={budget}
-                user={user}
+
+            <DatePickerModal
+                visible={datePickerVisible}
+                onClose={() => setDatePickerVisible(false)}
+                onDateSelect={handleUpdateDate}
+                initialDate={weddingDate}
             />
         </View>
     );
@@ -522,6 +523,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 20,
+        paddingBottom: 100,
     },
     // Hero Card
     heroCard: {
@@ -631,22 +633,6 @@ const styles = StyleSheet.create({
         color: 'rgba(255,255,255,0.9)',
         textAlign: 'center',
         marginTop: 12,
-    },
-    setBudgetButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        backgroundColor: '#D4AF37',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 12,
-        marginTop: 16,
-        alignSelf: 'center',
-    },
-    setBudgetButtonText: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#fff',
     },
     // Stats Grid
     statsGrid: {

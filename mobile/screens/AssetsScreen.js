@@ -1,663 +1,423 @@
 import { StatusBar } from 'expo-status-bar';
-import { Alert } from 'react-native';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import { Alert, StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, Modal, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { normalizeAsset, formatCurrency } from '../utils/dataHelpers';
 
-export default function AssetsScreen({ route }) {
+// Asset Types Configuration
+const ASSET_TYPES = [
+    { id: 'TRY_CASH', label: 'Türk Lirası', icon: 'cash', symbol: '₺' },
+    { id: 'USD', label: 'Amerikan Doları', icon: 'logo-usd', symbol: '$' },
+    { id: 'EUR', label: 'Euro', icon: 'logo-euro', symbol: '€' },
+    { id: 'GBP', label: 'İngiliz Sterlini', icon: 'logo-yen', symbol: '£' }, // Yen icon used as placeholder for generic currency if pound unavailable
+    { id: 'GRAM', label: 'Gram Altın', icon: 'diamond', symbol: 'Gr' },
+    { id: 'CEYREK', label: 'Çeyrek Altın', icon: 'diamond', symbol: 'Çeyrek' },
+    { id: 'YARIM', label: 'Yarım Altın', icon: 'diamond', symbol: 'Yarım' },
+    { id: 'TAM', label: 'Tam Altın', icon: 'diamond', symbol: 'Tam' },
+];
+
+export default function AssetsScreen({ route, user: userProp }) {
     const insets = useSafeAreaInsets();
     const [assets, setAssets] = useState([]);
-    const [currencyRates, setCurrencyRates] = useState({ USD: 0, EUR: 0, GBP: 0 });
-    const [lastUpdate, setLastUpdate] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [rates, setRates] = useState({});
     const [refreshing, setRefreshing] = useState(false);
-    const [includeForeignInBudget, setIncludeForeignInBudget] = useState(true);
 
-    // Add asset form state
-    const [selectedAssetType, setSelectedAssetType] = useState('TRY_CASH');
-    const [assetAmount, setAssetAmount] = useState('');
-    const [assetNote, setAssetNote] = useState('');
+    // User Settings
+    const [budgetIncluded, setBudgetIncluded] = useState(true);
 
-    const user = route.params?.user || { username: 'dummyy' };
+    // Form State
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedType, setSelectedType] = useState(ASSET_TYPES[0]);
+    const [amount, setAmount] = useState('');
+    const [note, setNote] = useState('');
 
-    useEffect(() => {
-        fetchAssets();
-        fetchCurrencyRates();
-        const interval = setInterval(fetchCurrencyRates, 60000); // Update every minute
-        return () => clearInterval(interval);
-    }, []);
+    const user = userProp || route.params?.user || { username: 'dummyy' };
+    const username = user.username;
 
-    const fetchAssets = async () => {
+    const fetchUserSettings = useCallback(async () => {
         try {
-            const response = await fetch(`https://dugunbutcem.com/api/data?user=${user.username}`);
+            const response = await fetch(`https://dugunbutcem.com/api/portfolio/${username}`);
+            if (response.ok) {
+                const data = await response.json();
+                setBudgetIncluded(data.budgetIncluded ?? true);
+            }
+        } catch (e) {
+            console.error('Settings fetch error:', e);
+        }
+    }, [username]);
+
+    const fetchAssets = useCallback(async () => {
+        try {
+            const response = await fetch(`https://dugunbutcem.com/api/data?user=${username}`);
             const data = await response.json();
             const normalized = (data.portfolio || []).map(normalizeAsset).filter(Boolean);
             setAssets(normalized);
         } catch (error) {
             console.error('Assets fetch error:', error);
-        } finally {
-            setIsLoading(false);
-            setRefreshing(false);
         }
-    };
+    }, [username]);
 
-    const fetchCurrencyRates = async () => {
+    const fetchRates = useCallback(async () => {
         try {
-            const response = await fetch('https://api.exchangerate-api.com/v4/latest/TRY');
+            const response = await fetch('https://dugunbutcem.com/api/rates');
             const data = await response.json();
 
-            setCurrencyRates({
-                USD: (1 / data.rates.USD).toFixed(2),
-                EUR: (1 / data.rates.EUR).toFixed(2),
-                GBP: (1 / data.rates.GBP).toFixed(2)
+            setRates({
+                USD: data.USD || 0,
+                EUR: data.EUR || 0,
+                GBP: data.GBP || 0,
+                GRAM: data.GRAM_GOLD || data.GRAM || 0,
+                CEYREK: data.CEYREK || 0,
+                YARIM: data.YARIM || 0,
+                TAM: data.TAM || 0
             });
-
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            setLastUpdate(`${hours}:${minutes}`);
         } catch (error) {
-            console.error('Currency fetch error:', error);
+            console.error('Rates fetch error:', error);
+        }
+    }, []);
+
+    const fetchData = useCallback(async () => {
+        setRefreshing(true);
+        await Promise.all([fetchAssets(), fetchRates(), fetchUserSettings()]);
+        setRefreshing(false);
+    }, [fetchAssets, fetchRates, fetchUserSettings]);
+
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchRates, 60000);
+        return () => clearInterval(interval);
+    }, [fetchData, fetchRates]);
+
+    const toggleBudgetInclusion = async () => {
+        const newValue = !budgetIncluded;
+        setBudgetIncluded(newValue); // Optimistic update
+        try {
+            await fetch(`https://dugunbutcem.com/api/portfolio/${user.username}/settings`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ budgetIncluded: newValue })
+            });
+        } catch (error) {
+            console.error('Toggle error:', error);
+            setBudgetIncluded(!newValue); // Revert on fail
         }
     };
 
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchAssets();
-        fetchCurrencyRates();
-    };
-
-    // Determine if asset type is portfolio (foreign currency or gold)
-    const isPortfolioType = (type) => {
-        return ['USD', 'EUR', 'GBP', 'GRAM', 'CEYREK', 'YARIM', 'TAM'].includes(type);
-    };
-
-    // Add new asset
     const handleAddAsset = async () => {
-        if (!assetAmount || Number(assetAmount) <= 0) {
+        // Validate and parse amount properly
+        const parsedAmount = amount && amount.trim() !== '' ? parseFloat(amount) : 0;
+
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
             Alert.alert('Hata', 'Lütfen geçerli bir miktar girin');
             return;
         }
 
         try {
-            const isPortfolio = isPortfolioType(selectedAssetType);
-            const endpoint = isPortfolio 
-                ? `https://dugunbutcem.com/api/portfolio/${user.username}`
-                : 'https://dugunbutcem.com/api/assets';
+            const endpoint = selectedType.id === 'TRY_CASH'
+                ? 'https://dugunbutcem.com/api/assets'
+                : `https://dugunbutcem.com/api/portfolio/${user.username}`;
 
-            const payload = isPortfolio
-                ? { type: selectedAssetType, amount: Number(assetAmount), note: assetNote }
-                : { 
+            const payload = selectedType.id === 'TRY_CASH'
+                ? {
                     username: user.username,
-                    asset: { 
-                        category: 'Nakit', 
-                        name: selectedAssetType, 
-                        amount: Number(assetAmount), 
-                        value: Number(assetAmount), 
-                        date: new Date().toISOString() 
+                    asset: {
+                        category: 'Nakit',
+                        name: 'Nakit',
+                        amount: parsedAmount, // Use parsed float
+                        value: parsedAmount,  // Use parsed float
+                        date: new Date().toISOString()
                     }
+                }
+                : {
+                    username: user.username,
+                    type: selectedType.id,
+                    amount: parsedAmount, // Use parsed float
+                    note: note
                 };
+
+            console.log('🔍 Asset API Request:', {
+                endpoint,
+                method: 'POST',
+                payload,
+                amountType: typeof parsedAmount,
+                amountValue: parsedAmount
+            });
 
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(isPortfolio ? { username: user.username, ...payload } : payload)
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error('Server error');
+            console.log('📡 Asset API Response:', {
+                status: response.status,
+                ok: response.ok
+            });
 
-            // Reset form
-            setAssetAmount('');
-            setAssetNote('');
-            
-            // Refresh assets
-            fetchAssets();
-            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ API Error:', errorText);
+                throw new Error(`Server error: ${errorText}`);
+            }
+
+            setModalVisible(false);
+            setAmount('');
+            setNote('');
+
+            // Immediate state refresh
+            await fetchData();
+
             Alert.alert('Başarılı', 'Varlık eklendi');
-        } catch (error) {
-            console.error('Add asset error:', error);
-            Alert.alert('Hata', 'Varlık eklenemedi');
+
+        } catch (e) {
+            console.error('💥 Exception:', e);
+            Alert.alert('Hata', `Varlık eklenemedi: ${e.message}`);
         }
     };
 
-    // Delete asset
-    const handleDeleteAsset = async (assetId, isPortfolio) => {
-        Alert.alert(
-            'Varlığı Sil',
-            'Bu varlığı silmek istediğinizden emin misiniz?',
-            [
-                { text: 'İptal', style: 'cancel' },
-                {
-                    text: 'Sil',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            const endpoint = isPortfolio
-                                ? `https://dugunbutcem.com/api/portfolio/${user.username}/${assetId}`
-                                : `https://dugunbutcem.com/api/assets/${assetId}?username=${user.username}`;
+    const handleDelete = async (asset) => {
+        Alert.alert('Sil', 'Bu varlığı silmek istediğinize emin misiniz?', [
+            { text: 'İptal', style: 'cancel' },
+            {
+                text: 'Sil',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        const isPortfolio = asset.type !== 'TRY_CASH' && asset.type !== 'Nakit';
+                        const endpoint = isPortfolio
+                            ? `https://dugunbutcem.com/api/portfolio/${user.username}/${asset.id}`
+                            : `https://dugunbutcem.com/api/assets/${asset.id}?username=${user.username}`;
 
-                            const response = await fetch(endpoint, { method: 'DELETE' });
-                            
-                            if (!response.ok) throw new Error('Server error');
-                            
-                            fetchAssets();
-                            Alert.alert('Başarılı', 'Varlık silindi');
-                        } catch (error) {
-                            console.error('Delete asset error:', error);
-                            Alert.alert('Hata', 'Varlık silinemedi');
-                        }
+                        await fetch(endpoint, { method: 'DELETE' });
+                        fetchData();
+                    } catch {
+                        Alert.alert('Hata', 'Silinemedi');
                     }
                 }
-            ]
-        );
-    };
-
-    // Calculate total assets value
-    const calculateTotalAssets = () => {
-        let total = 0;
-        assets.forEach(asset => {
-            if (asset.type === 'TRY_CASH') {
-                total += asset.amount;
-            } else if (includeForeignInBudget) {
-                // Convert foreign currencies to TRY
-                if (asset.type === 'USD') total += asset.amount * Number(currencyRates.USD);
-                else if (asset.type === 'EUR') total += asset.amount * Number(currencyRates.EUR);
-                else if (asset.type === 'GBP') total += asset.amount * Number(currencyRates.GBP);
-                // Gold conversions (simplified - would need real gold prices)
-                else if (asset.type === 'GRAM') total += asset.amount * 3000; // Approximate
-                else if (asset.type === 'CEYREK') total += asset.amount * 6000;
-                else if (asset.type === 'YARIM') total += asset.amount * 12000;
-                else if (asset.type === 'TAM') total += asset.amount * 24000;
             }
-        });
-        return total;
+        ]);
     };
 
-    const totalAssets = calculateTotalAssets();
+    const calculateTotal = () => {
+        return assets.reduce((total, asset) => {
+            if (asset.type === 'TRY_CASH' || asset.type === 'Nakit') {
+                return total + asset.amount;
+            } else if (budgetIncluded) {
+                const rate = rates[asset.type] || 0;
+                return total + (asset.amount * rate);
+            }
+            return total;
+        }, 0);
+    };
 
-    // Group assets by type
-    const cashAssets = assets.filter(a => a.type === 'TRY_CASH');
-    const foreignAssets = assets.filter(a => ['USD', 'EUR', 'GBP'].includes(a.type));
-    const goldAssets = assets.filter(a => ['GRAM', 'CEYREK', 'YARIM', 'TAM'].includes(a.type));
+    // Grand total - always shows all assets regardless of toggle
+    const calculateGrandTotal = () => {
+        return assets.reduce((total, asset) => {
+            if (asset.type === 'TRY_CASH' || asset.type === 'Nakit') {
+                return total + asset.amount;
+            } else {
+                const rate = rates[asset.type] || 0;
+                return total + (asset.amount * rate);
+            }
+        }, 0);
+    };
 
-    if (isLoading) {
+    const renderAssetItem = ({ item }) => {
+        const isCash = item.type === 'TRY_CASH' || item.type === 'Nakit';
+        const rate = rates[item.type] || 1;
+        const valueTRY = item.amount * (isCash ? 1 : rate);
+        const typeConfig = ASSET_TYPES.find(t => t.id === item.type) || { label: item.type, icon: 'cash', symbol: '' };
+
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#D4AF37" />
+            <View style={styles.assetItem}>
+                <View style={styles.assetIcon}>
+                    <Ionicons name={typeConfig.icon} size={24} color="#D4AF37" />
+                </View>
+                <View style={styles.assetInfo}>
+                    <Text style={styles.assetName}>{typeConfig.label}</Text>
+                    <Text style={styles.assetSub}>{item.note || formatDate(item.addedAt)}</Text>
+                </View>
+                <View style={styles.assetValueContainer}>
+                    <Text style={styles.assetValueTRY}>{formatCurrency(valueTRY)}</Text>
+                    {!isCash && (
+                        <Text style={styles.assetAmountOriginal}>{item.amount} {typeConfig.symbol}</Text>
+                    )}
+                </View>
+                <TouchableOpacity onPress={() => handleDelete(item)} style={styles.deleteButton}>
+                    <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                </TouchableOpacity>
             </View>
         );
-    }
+    };
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('tr-TR');
+    };
 
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
 
             {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-                <View style={styles.headerLeft}>
-                    <LinearGradient
-                        colors={['#D4AF37', '#C5A028']}
-                        style={styles.headerLogo}
-                    >
-                        <Text style={styles.headerLogoIcon}>❤️</Text>
-                    </LinearGradient>
-                    <Text style={styles.headerTitle}>Varlıklar</Text>
-                </View>
+            <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+                <Text style={styles.headerTitle}>Birikimlerim</Text>
+                <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+                    <Ionicons name="add" size={24} color="#fff" />
+                </TouchableOpacity>
             </View>
 
             <ScrollView
-                style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#D4AF37" />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchData} />}
             >
-                {/* Total Assets Card */}
-                <LinearGradient
-                    colors={['#0f172a', '#000000']}
-                    style={styles.totalCard}
-                >
-                    <View style={styles.totalHeader}>
-                        <Text style={styles.totalLabel}>Toplam Varlık</Text>
-                        <TouchableOpacity>
-                            <Ionicons name="trending-up" size={20} color="#10b981" />
+                {/* Total Budget Card */}
+                <LinearGradient colors={['#0f172a', '#1e293b']} style={styles.totalCard}>
+                    <Text style={styles.totalLabel}>Portföy Değeri</Text>
+                    <Text style={styles.totalAmount}>{formatCurrency(calculateGrandTotal())}</Text>
+                    <Text style={styles.totalSubtext}>Güncel kurlarla TL karşılığı</Text>
+
+                    <View style={styles.budgetToggleRow}>
+                        <Text style={styles.toggleLabel}>Döviz/Altın Bütçeye Dahil</Text>
+                        <TouchableOpacity onPress={toggleBudgetInclusion}>
+                            <Ionicons
+                                name={budgetIncluded ? "toggle" : "toggle-outline"}
+                                size={28}
+                                color={budgetIncluded ? "#10b981" : "#9ca3af"}
+                            />
                         </TouchableOpacity>
                     </View>
-                    <Text style={styles.totalAmount}>{formatCurrency(totalAssets)}</Text>
-                    {lastUpdate && (
-                        <Text style={styles.lastUpdate}>SON GÜNCELLEME {lastUpdate}</Text>
-                    )}
                 </LinearGradient>
 
-                {/* Currency Rates Ticker */}
-                <View style={styles.ratesTicker}>
-                    <View style={styles.rateItem}>
-                        <Ionicons name="logo-usd" size={16} color="#3b82f6" />
-                        <Text style={styles.rateLabel}>USD</Text>
-                        <Text style={styles.rateValue}>: {currencyRates.USD}₺</Text>
-                    </View>
-                    <View style={styles.rateItem}>
-                        <Ionicons name="cash" size={16} color="#10b981" />
-                        <Text style={styles.rateLabel}>EUR</Text>
-                        <Text style={styles.rateValue}>: {currencyRates.EUR}₺</Text>
-                    </View>
-                    <View style={styles.rateItem}>
-                        <Ionicons name="cash" size={16} color="#6366f1" />
-                        <Text style={styles.rateLabel}>GBP</Text>
-                        <Text style={styles.rateValue}>: {currencyRates.GBP}₺</Text>
-                    </View>
-                </View>
-
-                {/* Budget Toggle */}
-                <View style={styles.budgetToggle}>
-                    <TouchableOpacity
-                        style={[styles.toggleButton, includeForeignInBudget && styles.toggleButtonActive]}
-                        onPress={() => setIncludeForeignInBudget(!includeForeignInBudget)}
-                    >
-                        <Ionicons
-                            name={includeForeignInBudget ? "checkmark-circle" : "ellipse-outline"}
-                            size={20}
-                            color={includeForeignInBudget ? "#D4AF37" : "#9ca3af"}
-                        />
-                        <Text style={[styles.toggleText, includeForeignInBudget && styles.toggleTextActive]}>
-                            Bütçeye Dahil
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Add New Asset */}
-                <View style={styles.addAssetSection}>
-                    <View style={styles.addAssetRow}>
-                        <TouchableOpacity style={styles.currencySelector}>
-                            <Ionicons name="cash" size={20} color="#10b981" />
-                            <Ionicons name="chevron-down" size={16} color="#9ca3af" />
-                        </TouchableOpacity>
-                        <TextInput
-                            style={styles.amountInput}
-                            value={assetAmount}
-                            onChangeText={setAssetAmount}
-                            placeholder="0"
-                            keyboardType="numeric"
-                            placeholderTextColor="#d1d5db"
-                        />
-                        <TouchableOpacity style={styles.addButton}>
-                            <Ionicons name="add-circle" size={32} color="#D4AF37" />
-                        </TouchableOpacity>
-                    </View>
-                    <TextInput
-                        style={styles.noteInput}
-                        value={assetNote}
-                        onChangeText={setAssetNote}
-                        placeholder="Not ekle (Opsiyonel)..."
-                        placeholderTextColor="#9ca3af"
-                    />
-                </View>
-
-                {/* Nakit Varlıklar */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Nakit Varlıklar</Text>
-                    {cashAssets.length === 0 ? (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyText}>Nakit varlık bulunmuyor</Text>
+                {/* Rates Ticker */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ticker}>
+                    {Object.entries(rates).map(([key, val]) => (
+                        <View key={key} style={styles.rateChip}>
+                            <Text style={styles.rateKey}>{key}</Text>
+                            <Text style={styles.rateVal}>{formatCurrency(val, { showDecimals: true }).replace('₺', '')}</Text>
                         </View>
-                    ) : (
-                        cashAssets.map(asset => (
-                            <AssetItem key={asset.id} asset={asset} symbol="₺" onDelete={() => handleDeleteAsset(asset.id, false)} />
-                        ))
+                    ))}
+                </ScrollView>
+
+                {/* Assets List */}
+                <View style={styles.listContainer}>
+                    {assets.map(item => (
+                        <View key={item.id} style={styles.cardWrapper}>
+                            {renderAssetItem({ item })}
+                        </View>
+                    ))}
+                    {assets.length === 0 && (
+                        <Text style={styles.emptyText}>Henüz varlık eklenmemiş.</Text>
                     )}
                 </View>
-
-                {/* Döviz Varlıkları */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Döviz Varlıkları</Text>
-                    {foreignAssets.length === 0 ? (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyText}>Döviz varlığı bulunmuyor</Text>
-                        </View>
-                    ) : (
-                        foreignAssets.map(asset => (
-                            <AssetItem key={asset.id} asset={asset} rate={currencyRates[asset.type]} onDelete={() => handleDeleteAsset(asset.id, true)} />
-                        ))
-                    )}
-                </View>
-
-                {/* Altın Varlıkları */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Altın Varlıkları</Text>
-                    {goldAssets.length === 0 ? (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyText}>Altın varlığı bulunmuyor</Text>
-                        </View>
-                    ) : (
-                        goldAssets.map(asset => (
-                            <AssetItem key={asset.id} asset={asset} onDelete={() => handleDeleteAsset(asset.id, true)} />
-                        ))
-                    )}
-                </View>
-
-                {/* Bottom padding */}
-                <View style={{ height: 100 }} />
             </ScrollView>
-        </View>
-    );
-}
 
-// Asset Item Component
-function AssetItem({ asset, symbol, rate, onDelete }) {
-    const getAssetIcon = (type) => {
-        switch (type) {
-            case 'TRY_CASH': return 'cash';
-            case 'USD': return 'logo-usd';
-            case 'EUR': return 'cash';
-            case 'GBP': return 'cash';
-            case 'GRAM':
-            case 'CEYREK':
-            case 'YARIM':
-            case 'TAM':
-                return 'diamond';
-            default: return 'wallet';
-        }
-    };
+            {/* Add Asset Modal */}
+            <Modal visible={modalVisible} animationType="slide" transparent>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Birikim Ekle</Text>
+                            <TouchableOpacity onPress={() => setModalVisible(false)}>
+                                <Ionicons name="close" size={24} color="#333" />
+                            </TouchableOpacity>
+                        </View>
 
-    const getAssetLabel = (type) => {
-        const labels = {
-            'TRY_CASH': 'Türk Lirası',
-            'USD': 'Amerikan Doları',
-            'EUR': 'Euro',
-            'GBP': 'İngiliz Sterlini',
-            'GRAM': 'Gram Altın',
-            'CEYREK': 'Çeyrek Altın',
-            'YARIM': 'Yarım Altın',
-            'TAM': 'Tam Altın'
-        };
-        return labels[type] || type;
-    };
+                        {/* Type Selector */}
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeSelector}>
+                            {ASSET_TYPES.map(type => (
+                                <TouchableOpacity
+                                    key={type.id}
+                                    style={[styles.typeChip, selectedType.id === type.id && styles.typeChipActive]}
+                                    onPress={() => setSelectedType(type)}
+                                >
+                                    <Text style={[styles.typeText, selectedType.id === type.id && styles.typeTextActive]}>{type.label}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
 
-    return (
-        <View style={styles.assetItem}>
-            <View style={styles.assetLeft}>
-                <View style={styles.assetIcon}>
-                    <Ionicons name={getAssetIcon(asset.type)} size={20} color="#D4AF37" />
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Miktar ({selectedType.symbol})</Text>
+                            <TextInput
+                                style={styles.input}
+                                keyboardType="numeric"
+                                value={amount}
+                                onChangeText={setAmount}
+                                placeholder="0.00"
+                            />
+                        </View>
+
+                        {selectedType.id !== 'TRY_CASH' && (
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Not (Opsiyonel)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={note}
+                                    onChangeText={setNote}
+                                    placeholder="Örn: Yastık altı"
+                                />
+                            </View>
+                        )}
+
+                        <TouchableOpacity style={styles.saveButton} onPress={handleAddAsset}>
+                            <Text style={styles.saveButtonText}>Kaydet</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <View style={styles.assetInfo}>
-                    <Text style={styles.assetLabel}>{getAssetLabel(asset.type)}</Text>
-                    {asset.note && (
-                        <Text style={styles.assetNote}>{asset.note}</Text>
-                    )}
-                </View>
-            </View>
-            {onDelete && (
-                <TouchableOpacity onPress={onDelete} style={styles.assetDeleteButton}>
-                    <Ionicons name="trash-outline" size={18} color="#dc2626" />
-                </TouchableOpacity>
-            )}
-            <View style={styles.assetRight}>
-                <Text style={styles.assetAmount}>
-                    {asset.amount.toFixed(2)} {symbol || asset.type}
-                </Text>
-                {rate && (
-                    <Text style={styles.assetTryValue}>
-                        ≈ {formatCurrency(asset.amount * Number(rate))}
-                    </Text>
-                )}
-            </View>
+            </Modal>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FDFBF7',
-    },
-    loadingContainer: {
-        flex: 1,
-        backgroundColor: '#FDFBF7',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    // Header
+    container: { flex: 1, backgroundColor: '#FDFBF7' },
     header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingBottom: 12,
-        backgroundColor: '#FDFBF7',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f3f4f6',
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingHorizontal: 20, paddingBottom: 15, backgroundColor: '#fff',
+        borderBottomWidth: 1, borderBottomColor: '#f3f4f6'
     },
-    headerLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    headerLogo: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    headerLogoIcon: {
-        fontSize: 16,
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#111827',
-    },
-    // Scroll
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        padding: 16,
-    },
-    // Total Card
-    totalCard: {
-        padding: 20,
-        borderRadius: 16,
-        marginBottom: 16,
-    },
-    totalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    totalLabel: {
-        fontSize: 14,
-        color: '#9ca3af',
-    },
-    totalAmount: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 8,
-    },
-    lastUpdate: {
-        fontSize: 11,
-        color: '#6b7280',
-    },
-    // Currency Rates
-    ratesTicker: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 12,
-        marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 1,
-    },
-    rateItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    rateLabel: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#111827',
-    },
-    rateValue: {
-        fontSize: 12,
-        color: '#6b7280',
-    },
-    // Budget Toggle
-    budgetToggle: {
-        marginBottom: 16,
-    },
-    toggleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        backgroundColor: '#f9fafb',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderRadius: 12,
-    },
-    toggleButtonActive: {
-        backgroundColor: '#fef3c7',
-    },
-    toggleText: {
-        fontSize: 14,
-        color: '#6b7280',
-        fontWeight: '500',
-    },
-    toggleTextActive: {
-        color: '#D4AF37',
-        fontWeight: '600',
-    },
-    // Add Asset
-    addAssetSection: {
-        backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 1,
-    },
-    addAssetRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-        marginBottom: 12,
-    },
-    currencySelector: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        backgroundColor: '#f9fafb',
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 8,
-    },
-    amountInput: {
-        flex: 1,
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#111827',
-        textAlign: 'center',
-    },
-    addButton: {
-        padding: 4,
-    },
-    noteInput: {
-        backgroundColor: '#f9fafb',
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 8,
-        fontSize: 14,
-        color: '#111827',
-    },
-    // Section
-    section: {
-        marginBottom: 24,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#111827',
-        marginBottom: 12,
-    },
-    // Asset Item
-    assetItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 12,
-        marginBottom: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 1,
-    },
-    assetLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        flex: 1,
-    },
-    assetIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#fef3c7',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    assetInfo: {
-        flex: 1,
-    },
-    assetLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#111827',
-        marginBottom: 2,
-    },
-    assetNote: {
-        fontSize: 12,
-        color: '#9ca3af',
-    },
-    assetRight: {
-        alignItems: 'flex-end',
-    },
-    assetAmount: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#111827',
-        marginBottom: 2,
-    },
-    assetTryValue: {
-        fontSize: 12,
-        color: '#9ca3af',
-    },
-    // Empty State
-    emptyState: {
-        backgroundColor: '#f9fafb',
-        padding: 20,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    emptyText: {
-        fontSize: 14,
-        color: '#9ca3af',
-    },
-    assetDeleteButton: {
-        padding: 8,
-        marginLeft: 8,
-    },
+    headerTitle: { fontFamily: 'PlayfairDisplay-Bold', fontSize: 24, color: '#111827' },
+    addButton: { backgroundColor: '#D4AF37', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+    scrollContent: { padding: 20 },
+    totalCard: { padding: 20, borderRadius: 20, marginBottom: 20 },
+    totalLabel: { color: '#94a3b8', fontFamily: 'Lato-Regular', fontSize: 14 },
+    totalAmount: { color: '#fff', fontFamily: 'Lato-Bold', fontSize: 32, marginVertical: 8 },
+    totalSubtext: { color: '#cbd5e1', fontSize: 12, marginBottom: 8 },
+    budgetToggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 12 },
+    toggleLabel: { color: '#cbd5e1', fontSize: 14 },
+    ticker: { maxHeight: 40, marginBottom: 20 },
+    rateChip: { backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, marginRight: 10, borderWidth: 1, borderColor: '#e2e8f0', flexDirection: 'row', gap: 6 },
+    rateKey: { fontWeight: 'bold', color: '#64748b' },
+    rateVal: { color: '#0f172a' },
+    listContainer: { gap: 12 },
+    emptyText: { textAlign: 'center', color: '#9ca3af', marginTop: 40 },
+    cardWrapper: { backgroundColor: '#fff', borderRadius: 16, padding: 4, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10 },
+    assetItem: { flexDirection: 'row', alignItems: 'center', padding: 12 },
+    assetIcon: { width: 48, height: 48, backgroundColor: '#fffbeb', borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+    assetInfo: { flex: 1 },
+    assetName: { fontFamily: 'Lato-Bold', fontSize: 16, color: '#1e293b' },
+    assetSub: { fontSize: 12, color: '#64748b' },
+    assetValueContainer: { alignItems: 'flex-end', marginRight: 12 },
+    assetValueTRY: { fontFamily: 'Lato-Bold', fontSize: 16, color: '#111827' },
+    assetAmountOriginal: { fontSize: 12, color: '#64748b' },
+    deleteButton: { padding: 8 },
+
+    // Modal
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+    modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, minHeight: 400 },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24 },
+    modalTitle: { fontSize: 20, fontFamily: 'PlayfairDisplay-Bold' },
+    typeSelector: { flexDirection: 'row', marginBottom: 24, maxHeight: 50 },
+    typeChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f3f4f6', marginRight: 8, height: 36 },
+    typeChipActive: { backgroundColor: '#D4AF37' },
+    typeText: { color: '#4b5563' },
+    typeTextActive: { color: '#fff', fontWeight: 'bold' },
+    inputGroup: { marginBottom: 20 },
+    label: { marginBottom: 8, color: '#374151', fontWeight: '500' },
+    input: { borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 12, padding: 16, fontSize: 16 },
+    saveButton: { backgroundColor: '#D4AF37', padding: 16, borderRadius: 16, alignItems: 'center', marginTop: 10 },
+    saveButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

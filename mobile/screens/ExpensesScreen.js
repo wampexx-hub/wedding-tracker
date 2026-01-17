@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { normalizeExpense, formatCurrency, formatDate, getCategoryColor } from '../utils/dataHelpers';
 import ExpenseFormModal from '../components/ExpenseFormModal';
 
-export default function ExpensesScreen({ route }) {
+export default function ExpensesScreen({ route, user: userProp, refreshTrigger }) {
     const insets = useSafeAreaInsets();
     const [expenses, setExpenses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -20,15 +20,20 @@ export default function ExpensesScreen({ route }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
 
-    const user = route.params?.user || { username: 'dummyy' };
+    // Use the user prop passed from App.js, fallback to route params if needed (though App.js passes it as prop)
+    const user = userProp || route.params?.user || { username: 'dummyy' };
 
     useEffect(() => {
         fetchExpenses();
-    }, []);
+    }, [refreshTrigger]);
 
     const fetchExpenses = async () => {
         try {
-            const response = await fetch(`https://dugunbutcem.com/api/data?user=${user.username}`);
+            console.log('ExpensesScreen: Current User Prop:', user);
+            const apiUrl = `https://dugunbutcem.com/api/data?user=${user.username}`;
+            console.log('ExpensesScreen: Fetching URL:', apiUrl);
+
+            const response = await fetch(apiUrl);
             const data = await response.json();
             const normalized = (data.expenses || []).map(normalizeExpense).filter(Boolean);
             setExpenses(normalized);

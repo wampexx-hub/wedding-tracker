@@ -23,11 +23,7 @@ export const AuthProvider = ({ children }) => {
                         await mobileStorage.removeItem('wedding_app_user');
                     }
                 } else {
-                    // TEST USER - For development/testing
-                    console.log('No saved user - using test user wampex');
-                    const testUser = { username: 'wampex', email: 'wampex@test.com', name: 'Test User' };
-                    setUser(testUser);
-                    await mobileStorage.setItem('wedding_app_user', JSON.stringify(testUser));
+                    setUser(null);
                 }
             } catch (e) {
                 console.error('Storage error:', e);
@@ -56,7 +52,7 @@ export const AuthProvider = ({ children }) => {
                 Alert.alert('Giriş Başarısız', data.message);
                 return { success: false, message: data.message };
             }
-        } catch (error) {
+        } catch {
             Alert.alert('Hata', 'Sunucu hatası.');
             return { success: false, message: 'Sunucu hatası.' };
         }
@@ -80,7 +76,7 @@ export const AuthProvider = ({ children }) => {
                 Alert.alert('Kayıt Başarısız', data.message);
                 return { success: false, message: data.message };
             }
-        } catch (error) {
+        } catch {
             Alert.alert('Hata', 'Sunucu hatası.');
             return { success: false, message: 'Sunucu hatası.' };
         }

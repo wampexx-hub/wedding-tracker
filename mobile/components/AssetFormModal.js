@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Modal,
     View,
@@ -9,6 +9,9 @@ import {
     StyleSheet,
     Alert,
     ActivityIndicator,
+    Animated,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 
 const ASSET_TYPES = [
@@ -24,10 +27,24 @@ const ASSET_TYPES = [
 
 export default function AssetFormModal({ visible, onClose, initialData, user }) {
     const [isLoading, setIsLoading] = useState(false);
+    const [slideAnim] = useState(new Animated.Value(-500));
     const [formData, setFormData] = useState({
         type: initialData?.type || 'TRY_CASH',
         amount: initialData?.amount?.toString() || '',
     });
+
+    useEffect(() => {
+        if (visible) {
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                useNativeDriver: true,
+                tension: 65,
+                friction: 11,
+            }).start();
+        } else {
+            slideAnim.setValue(-500);
+        }
+    }, [visible]);
 
     const handleSubmit = async () => {
         if (!formData.amount) {
@@ -69,78 +86,92 @@ export default function AssetFormModal({ visible, onClose, initialData, user }) 
     const selectedType = ASSET_TYPES.find(t => t.value === formData.type);
 
     return (
-        <Modal visible={visible} animationType="slide" onRequestClose={() => onClose(false)}>
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => onClose(false)} style={styles.closeButton}>
-                        <Text style={styles.closeText}>✕</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>
-                        {initialData ? 'Varlığı Düzenle' : 'Yeni Varlık'}
-                    </Text>
-                    <View style={styles.closeButton} />
-                </View>
-
-                <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Varlık Tipi</Text>
-                        <View style={styles.typeGrid}>
-                            {ASSET_TYPES.map(type => (
-                                <TouchableOpacity
-                                    key={type.value}
-                                    style={[
-                                        styles.typeButton,
-                                        formData.type === type.value && styles.typeButtonActive,
-                                    ]}
-                                    onPress={() => setFormData({ ...formData, type: type.value })}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.typeText,
-                                            formData.type === type.value && styles.typeTextActive,
-                                        ]}
-                                    >
-                                        {type.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
-
-                    <View style={styles.formGroup}>
-                        <Text style={styles.label}>Miktar ({selectedType?.unit})</Text>
-                        <TextInput
-                            style={styles.amountInput}
-                            value={formData.amount}
-                            onChangeText={text => setFormData({ ...formData, amount: text })}
-                            placeholder="0"
-                            placeholderTextColor="#d1d5db"
-                            keyboardType="decimal-pad"
-                        />
-                    </View>
-                </ScrollView>
-
-                <View style={styles.footer}>
-                    <TouchableOpacity
-                        style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
-                        onPress={handleSubmit}
-                        disabled={isLoading}
+        <Modal visible={visible} animationType="none" transparent={true} onRequestClose={() => onClose(false)}>
+            <View style={styles.backdrop}>
+                <Animated.View style={[
+                    styles.container,
+                    { transform: [{ translateY: slideAnim }] }
+                ]}>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={{ flex: 1 }}
                     >
-                        {isLoading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.submitText}>
-                                {initialData ? 'Kaydet' : 'Varlığı Ekle'}
+                        <View style={styles.header}>
+                            <TouchableOpacity onPress={() => onClose(false)} style={styles.closeButton}>
+                                <Text style={styles.closeText}>✕</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.headerTitle}>
+                                {initialData ? 'Varlığı Düzenle' : 'Yeni Varlık'}
                             </Text>
-                        )}
-                    </TouchableOpacity>
-                </View>
+                            <View style={styles.closeButton} />
+                        </View>
+
+                        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+                            <View style={styles.formGroup}>
+                                <Text style={styles.label}>Varlık Tipi</Text>
+                                <View style={styles.typeGrid}>
+                                    {ASSET_TYPES.map(type => (
+                                        <TouchableOpacity
+                                            key={type.value}
+                                            style={[
+                                                styles.typeButton,
+                                                formData.type === type.value && styles.typeButtonActive,
+                                            ]}
+                                            onPress={() => setFormData({ ...formData, type: type.value })}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.typeText,
+                                                    formData.type === type.value && styles.typeTextActive,
+                                                ]}
+                                            >
+                                                {type.label}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+
+                            <View style={styles.formGroup}>
+                                <Text style={styles.label}>Miktar ({selectedType?.unit})</Text>
+                                <TextInput
+                                    style={styles.amountInput}
+                                    value={formData.amount}
+                                    onChangeText={text => setFormData({ ...formData, amount: text })}
+                                    placeholder="0"
+                                    placeholderTextColor="#d1d5db"
+                                    keyboardType="decimal-pad"
+                                />
+                            </View>
+                        </ScrollView>
+
+                        <View style={styles.footer}>
+                            <TouchableOpacity
+                                style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
+                                onPress={handleSubmit}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator color="#fff" />
+                                ) : (
+                                    <Text style={styles.submitText}>
+                                        {initialData ? 'Kaydet' : 'Varlığı Ekle'}
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
+                </Animated.View>
             </View>
         </Modal>
     );
 }
 
 const styles = StyleSheet.create({
+    backdrop: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
     container: {
         flex: 1,
         backgroundColor: '#FDFBF7',

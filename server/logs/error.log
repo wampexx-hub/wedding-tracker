@@ -682,3 +682,192 @@ memory, and will not scale past a single process.
 2026-01-05T22:48:53:   line: '1462',
 2026-01-05T22:48:53:   routine: 'check_ungrouped_columns_walker'
 2026-01-05T22:48:53: }
+2026-01-06T13:46:46: SyntaxError: "undefined" is not valid JSON
+2026-01-06T13:46:46:     at JSON.parse (<anonymous>)
+2026-01-06T13:46:46:     at /var/www/wedding-tracker/server/server.js:822:34
+2026-01-06T13:46:46:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-06T13:46:46:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-06T13:46:46:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-06T13:46:46:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-06T13:46:46:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-06T13:46:46:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-06T13:46:46:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-06T13:46:46:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-06T14:19:09: SyntaxError: "undefined" is not valid JSON
+2026-01-06T14:19:09:     at JSON.parse (<anonymous>)
+2026-01-06T14:19:09:     at /var/www/wedding-tracker/server/server.js:822:34
+2026-01-06T14:19:09:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-06T14:19:09:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-06T14:19:09:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-06T14:19:09:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-06T14:19:09:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-06T14:19:09:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-06T14:19:09:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-06T14:19:09:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-06T20:15:59: [RATES] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 6432
+2026-01-06T20:15:59:     at JSON.parse (<anonymous>)
+2026-01-06T20:15:59:     at IncomingMessage.<anonymous> (/var/www/wedding-tracker/server/server.js:1649:39)
+2026-01-06T20:15:59:     at IncomingMessage.emit (node:events:536:35)
+2026-01-06T20:15:59:     at endReadableNT (node:internal/streams/readable:1698:12)
+2026-01-06T20:15:59:     at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+2026-01-06T20:16:01: [RATES] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 6432
+2026-01-06T20:16:01:     at JSON.parse (<anonymous>)
+2026-01-06T20:16:01:     at IncomingMessage.<anonymous> (/var/www/wedding-tracker/server/server.js:1649:39)
+2026-01-06T20:16:01:     at IncomingMessage.emit (node:events:536:35)
+2026-01-06T20:16:01:     at endReadableNT (node:internal/streams/readable:1698:12)
+2026-01-06T20:16:01:     at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+2026-01-06T20:16:01: [RATES] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 6432
+2026-01-06T20:16:01:     at JSON.parse (<anonymous>)
+2026-01-06T20:16:01:     at IncomingMessage.<anonymous> (/var/www/wedding-tracker/server/server.js:1649:39)
+2026-01-06T20:16:01:     at IncomingMessage.emit (node:events:536:35)
+2026-01-06T20:16:01:     at endReadableNT (node:internal/streams/readable:1698:12)
+2026-01-06T20:16:01:     at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+2026-01-07T09:44:14: SyntaxError: "undefined" is not valid JSON
+2026-01-07T09:44:14:     at JSON.parse (<anonymous>)
+2026-01-07T09:44:14:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-07T09:44:14:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T09:44:14:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T09:44:14:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T09:44:14:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T09:44:14:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T09:44:14:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T09:44:14:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T09:44:14:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-07T09:44:24: SyntaxError: "undefined" is not valid JSON
+2026-01-07T09:44:24:     at JSON.parse (<anonymous>)
+2026-01-07T09:44:24:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-07T09:44:24:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T09:44:24:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T09:44:24:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T09:44:24:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T09:44:24:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T09:44:24:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T09:44:24:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T09:44:24:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-07T10:01:07: SyntaxError: "undefined" is not valid JSON
+2026-01-07T10:01:07:     at JSON.parse (<anonymous>)
+2026-01-07T10:01:07:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-07T10:01:07:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T10:01:07:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T10:01:07:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T10:01:07:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T10:01:07:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T10:01:07:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T10:01:07:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T10:01:07:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-07T10:01:17: SyntaxError: "undefined" is not valid JSON
+2026-01-07T10:01:17:     at JSON.parse (<anonymous>)
+2026-01-07T10:01:17:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-07T10:01:17:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T10:01:17:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T10:01:17:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T10:01:17:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T10:01:17:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T10:01:17:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T10:01:17:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T10:01:17:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-07T19:31:09: [RATES] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 6451
+2026-01-07T19:31:09:     at JSON.parse (<anonymous>)
+2026-01-07T19:31:09:     at IncomingMessage.<anonymous> (/var/www/wedding-tracker/server/server.js:1649:39)
+2026-01-07T19:31:09:     at IncomingMessage.emit (node:events:536:35)
+2026-01-07T19:31:09:     at endReadableNT (node:internal/streams/readable:1698:12)
+2026-01-07T19:31:09:     at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+2026-01-07T19:38:43: SyntaxError: "undefined" is not valid JSON
+2026-01-07T19:38:43:     at JSON.parse (<anonymous>)
+2026-01-07T19:38:43:     at /var/www/wedding-tracker/server/server.js:822:34
+2026-01-07T19:38:43:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T19:38:43:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T19:38:43:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T19:38:43:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T19:38:43:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T19:38:43:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T19:38:43:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T19:38:43:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-07T19:39:58: SyntaxError: "undefined" is not valid JSON
+2026-01-07T19:39:58:     at JSON.parse (<anonymous>)
+2026-01-07T19:39:58:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-07T19:39:58:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T19:39:58:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T19:39:58:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T19:39:58:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T19:39:58:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T19:39:58:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T19:39:58:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T19:39:58:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-07T20:11:15: SyntaxError: "undefined" is not valid JSON
+2026-01-07T20:11:15:     at JSON.parse (<anonymous>)
+2026-01-07T20:11:15:     at /var/www/wedding-tracker/server/server.js:822:34
+2026-01-07T20:11:15:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T20:11:15:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T20:11:15:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T20:11:15:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T20:11:15:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T20:11:15:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T20:11:15:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T20:11:15:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-07T20:13:18: SyntaxError: "undefined" is not valid JSON
+2026-01-07T20:13:18:     at JSON.parse (<anonymous>)
+2026-01-07T20:13:18:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-07T20:13:18:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T20:13:18:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T20:13:18:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-07T20:13:18:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T20:13:18:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-07T20:13:18:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-07T20:13:18:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-07T20:13:18:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-17T13:47:01: SyntaxError: "undefined" is not valid JSON
+2026-01-17T13:47:01:     at JSON.parse (<anonymous>)
+2026-01-17T13:47:01:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-17T13:47:01:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:47:01:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:47:01:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-17T13:47:01:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:47:01:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:47:01:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-17T13:47:01:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:47:01:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-17T13:47:06: SyntaxError: "undefined" is not valid JSON
+2026-01-17T13:47:06:     at JSON.parse (<anonymous>)
+2026-01-17T13:47:06:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-17T13:47:06:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:47:06:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:47:06:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-17T13:47:06:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:47:06:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:47:06:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-17T13:47:06:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:47:06:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-17T13:49:36: SyntaxError: "undefined" is not valid JSON
+2026-01-17T13:49:36:     at JSON.parse (<anonymous>)
+2026-01-17T13:49:36:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-17T13:49:36:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:49:36:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:49:36:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-17T13:49:36:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:49:36:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:49:36:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-17T13:49:36:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:49:36:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-17T13:50:30: SyntaxError: "undefined" is not valid JSON
+2026-01-17T13:50:30:     at JSON.parse (<anonymous>)
+2026-01-17T13:50:30:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-17T13:50:30:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:50:30:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:50:30:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-17T13:50:30:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:50:30:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:50:30:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-17T13:50:30:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:50:30:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15
+2026-01-17T13:51:07: SyntaxError: "undefined" is not valid JSON
+2026-01-17T13:51:07:     at JSON.parse (<anonymous>)
+2026-01-17T13:51:07:     at /var/www/wedding-tracker/server/server.js:895:34
+2026-01-17T13:51:07:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:51:07:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:51:07:     at multerMiddleware (/var/www/wedding-tracker/server/node_modules/multer/lib/make-middleware.js:19:41)
+2026-01-17T13:51:07:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:51:07:     at next (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:149:13)
+2026-01-17T13:51:07:     at Route.dispatch (/var/www/wedding-tracker/server/node_modules/express/lib/router/route.js:119:3)
+2026-01-17T13:51:07:     at Layer.handle [as handle_request] (/var/www/wedding-tracker/server/node_modules/express/lib/router/layer.js:95:5)
+2026-01-17T13:51:07:     at /var/www/wedding-tracker/server/node_modules/express/lib/router/index.js:284:15

@@ -1,7 +1,12 @@
+const config = {
+    apiUrl: ''
+};
+
+export const setApiUrl = (url) => { config.apiUrl = url; };
 
 const WeddingService = {
-    // Base URL from environment or empty for relative path
-    API_URL: import.meta.env.VITE_API_BASE_URL || '',
+    // Base URL from environment or configuration
+    get API_URL() { return config.apiUrl; },
 
     // Simulate API delay
     delay: (ms) => new Promise(resolve => setTimeout(resolve, ms)),

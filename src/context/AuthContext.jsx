@@ -1,30 +1,33 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { webStorage } from '../utils/storage';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children, storage = webStorage }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const savedUser = localStorage.getItem('wedding_app_user');
-        if (savedUser) {
+        const loadUser = async () => {
             try {
-                const parsedUser = JSON.parse(savedUser);
-                // Validate user object has at least a username or email
-                if (parsedUser && (parsedUser.username || parsedUser.email)) {
-                    setUser(parsedUser);
-                } else {
-                    localStorage.removeItem('wedding_app_user');
+                const savedUser = await storage.getItem('wedding_app_user');
+                if (savedUser) {
+                    const parsedUser = JSON.parse(savedUser);
+                    if (parsedUser && (parsedUser.username || parsedUser.email)) {
+                        setUser(parsedUser);
+                    } else {
+                        await storage.removeItem('wedding_app_user');
+                    }
                 }
             } catch (e) {
-                localStorage.removeItem('wedding_app_user');
+                await storage.removeItem('wedding_app_user');
             }
-        }
-        setLoading(false);
-    }, []);
+            setLoading(false);
+        };
+        loadUser();
+    }, [storage]);
 
     const login = async (email, password) => {
         try {
@@ -38,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
             if (data.success) {
                 setUser(data.user);
-                localStorage.setItem('wedding_app_user', JSON.stringify(data.user));
+                await storage.setItem('wedding_app_user', JSON.stringify(data.user));
                 return { success: true };
             } else {
                 return { success: false, message: data.message };
@@ -60,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 
             if (data.success) {
                 setUser(data.user);
-                localStorage.setItem('wedding_app_user', JSON.stringify(data.user));
+                await storage.setItem('wedding_app_user', JSON.stringify(data.user));
                 return { success: true };
             } else {
                 return { success: false, message: data.message };
@@ -70,15 +73,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
         setUser(null);
-        localStorage.removeItem('wedding_app_user');
+        await storage.removeItem('wedding_app_user');
     };
 
-    const updateUser = (userData) => {
+    const updateUser = async (userData) => {
         const newUser = { ...user, ...userData };
         setUser(newUser);
-        localStorage.setItem('wedding_app_user', JSON.stringify(newUser));
+        await storage.setItem('wedding_app_user', JSON.stringify(newUser));
     };
 
     return (

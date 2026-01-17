@@ -15,7 +15,16 @@ const ExpenseContext = createContext();
 
 export const useExpenses = () => useContext(ExpenseContext);
 
-export const ExpenseProvider = ({ children }) => {
+// Default Web Implementation
+const defaultWebConfirm = (message, onConfirm) => {
+    if (window.confirm(message)) onConfirm();
+};
+
+export const ExpenseProvider = ({
+    children,
+    socketUrl = typeof window !== 'undefined' ? window.location.origin : '',
+    confirmDialog = defaultWebConfirm
+}) => {
     const { user } = useAuth();
     const queryClient = useQueryClient();
 
@@ -23,11 +32,11 @@ export const ExpenseProvider = ({ children }) => {
 
     // --- SOCKET.IO INTEGRATION ---
     useEffect(() => {
-        if (!user) return;
+        if (!user || !socketUrl) return;
 
-        console.log('Connecting to socket at:', window.location.origin);
+        console.log('Connecting to socket at:', socketUrl);
 
-        const newSocket = io(window.location.origin, {
+        const newSocket = io(socketUrl, {
             query: { username: user.username },
             transports: ['websocket', 'polling']
         });
@@ -129,9 +138,9 @@ export const ExpenseProvider = ({ children }) => {
     const updateExpense = (id, data) => updateExpenseMutation.mutate({ id, expenseData: data });
     const addBatchExpenses = (list) => batchExpensesMutation.mutate({ username: user.username, expenses: list });
     const clearAllExpenses = () => {
-        if (window.confirm('TÜM harcamalarınızı silmek istediğinize emin misiniz?')) {
+        confirmDialog('TÜM harcamalarınızı silmek istediğinize emin misiniz?', () => {
             clearAllExpensesMutation.mutate({ username: user.username });
-        }
+        });
     };
     const toggleBudgetInclude = (included) => toggleBudgetMutation.mutate({ username: user.username, included });
 
