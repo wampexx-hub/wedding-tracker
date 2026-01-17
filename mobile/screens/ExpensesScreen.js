@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { normalizeExpense, formatCurrency, formatDate, getCategoryColor } from '../utils/dataHelpers';
-import ExpenseFormModal from '../components/ExpenseFormModal';
+import ExpenseFormBottomSheet from '../components/ExpenseFormBottomSheet';
 
 export default function ExpensesScreen({ route, user: userProp, refreshTrigger }) {
     const insets = useSafeAreaInsets();
@@ -276,8 +276,8 @@ export default function ExpensesScreen({ route, user: userProp, refreshTrigger }
                 {/* Bottom padding */}
                 <View style={{ height: 100 }} />
             </ScrollView>
-            {/* Expense Form Modal */}
-            <ExpenseFormModal
+            {/* Expense Form Bottom Sheet */}
+            <ExpenseFormBottomSheet
                 visible={modalVisible}
                 onClose={handleModalClose}
                 expense={selectedExpense}

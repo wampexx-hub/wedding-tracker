@@ -892,7 +892,18 @@ app.get('/api/images/:filename', (req, res) => {
 app.put('/api/expenses/:id', upload.single('image'), async (req, res) => {
     try {
         const { id } = req.params;
-        const expenseData = JSON.parse(req.body.data);
+
+        // Support both JSON and FormData
+        let expenseData;
+        if (req.body.data && typeof req.body.data === 'string') {
+            // FormData - parse the JSON string
+            expenseData = JSON.parse(req.body.data);
+        } else if (req.body.title) {
+            // Direct JSON body
+            expenseData = req.body;
+        } else {
+            return res.status(400).json({ error: 'Invalid request format' });
+        }
 
         // Get existing image
         const existing = await db.query('SELECT image_url FROM expenses WHERE id = $1', [id]);
@@ -907,12 +918,12 @@ app.put('/api/expenses/:id', upload.single('image'), async (req, res) => {
             imageUrl = `/uploads/${filename}`;
         }
 
-        const { title, category, price, vendor, source, date, isInstallment, installmentCount, status, notes, monthlyPayment } = expenseData;
+        const { title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment } = expenseData;
 
         await db.query(
             `UPDATE expenses SET title=$1, category=$2, price=$3, vendor=$4, source=$5, date=$6, is_installment=$7, installment_count=$8, status=$9, notes=$10, monthly_payment=$11, image_url=$12
              WHERE id=$13`,
-            [title, category, price, vendor, source, date, isInstallment, installmentCount, status, notes, monthlyPayment, imageUrl, id]
+            [title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, imageUrl, id]
         );
 
         await req.notifyUser(expenseData.username); // Assuming expenseData has username, usually it does. If not, fetch it? 
