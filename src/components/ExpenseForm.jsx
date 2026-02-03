@@ -202,6 +202,7 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                 required={isPurchased}
                                 type="number"
                                 step="0.01"
+                                inputMode="decimal"
                                 value={formData.price}
                                 onChange={e => setFormData({ ...formData, price: e.target.value })}
                                 placeholder="0₺"
@@ -431,6 +432,7 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                         required={isPurchased}
                                         type="number"
                                         step="0.01"
+                                        inputMode="decimal"
                                         value={formData.price}
                                         onChange={e => setFormData({ ...formData, price: e.target.value })}
                                         placeholder="0"
