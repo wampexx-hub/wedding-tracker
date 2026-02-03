@@ -17,6 +17,9 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
     const [deleteId, setDeleteId] = useState(null);
     const [expandedId, setExpandedId] = useState(null);
     const [showWizardModal, setShowWizardModal] = useState(false);
+    // Bulk operations state
+    const [selectedExpenses, setSelectedExpenses] = useState([]);
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
 
     // Sync activeTab with initialTab when it changes
     React.useEffect(() => {
@@ -24,6 +27,47 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
             setActiveTab(initialTab);
         }
     }, [initialTab]);
+
+    // Bulk operations functions
+    const toggleSelectionMode = () => {
+        setIsSelectionMode(!isSelectionMode);
+        setSelectedExpenses([]);
+    };
+
+    const toggleExpenseSelection = (expenseId) => {
+        setSelectedExpenses(prev => 
+            prev.includes(expenseId) 
+                ? prev.filter(id => id !== expenseId)
+                : [...prev, expenseId]
+        );
+    };
+
+    const selectAllExpenses = () => {
+        setSelectedExpenses(filteredExpenses.map(e => e.id));
+    };
+
+    const clearSelection = () => {
+        setSelectedExpenses([]);
+    };
+
+    const bulkDeleteExpenses = async () => {
+        if (selectedExpenses.length === 0) return;
+        
+        const confirmMessage = `${selectedExpenses.length} harcamayı silmek istediğinize emin misiniz?`;
+        if (window.confirm(confirmMessage)) {
+            try {
+                // Delete each selected expense
+                for (const expenseId of selectedExpenses) {
+                    await deleteExpense(expenseId);
+                }
+                setSelectedExpenses([]);
+                setIsSelectionMode(false);
+            } catch (error) {
+                console.error('Bulk delete error:', error);
+                alert('Bazı harcamalar silinirken hata oluştu.');
+            }
+        }
+    };
 
     const filteredExpenses = expenses.filter(e => {
         const categoryMatch = filterCategory === 'All' || e.category === filterCategory;
@@ -132,6 +176,22 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
                         <h2 className="text-lg md:text-2xl font-bold text-gray-800 m-0 truncate">Harcamalar</h2>
 
                         <div className="flex items-center gap-2">
+                            {/* Selection Toggle Button */}
+                            <button
+                                onClick={toggleSelectionMode}
+                                className={`flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-all active:scale-95 ${
+                                    isSelectionMode 
+                                        ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                }`}
+                                title={isSelectionMode ? "Seçimi İptal Et" : "Toplu Seç"}
+                            >
+                                <CheckCircle size={18} />
+                                <span className="hidden md:inline">
+                                    {isSelectionMode ? "İptal Et" : "Toplu Seç"}
+                                </span>
+                            </button>
+                            
                             {/* Magic List Button */}
                             <button
                                 id="tour-magic-list"
@@ -181,6 +241,41 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
                             </div>
                         </div>
                     </div>
+                    
+                    {/* Bulk Actions Bar */}
+                    {isSelectionMode && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm text-blue-800 font-medium">
+                                    {selectedExpenses.length === 0 
+                                        ? "Silinecek harcamaları seçin" 
+                                        : `${selectedExpenses.length} harcama seçildi`
+                                    }
+                                </span>
+                                
+                                {filteredExpenses.length > 0 && (
+                                    <button
+                                        onClick={selectedExpenses.length === filteredExpenses.length ? clearSelection : selectAllExpenses}
+                                        className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                    >
+                                        {selectedExpenses.length === filteredExpenses.length ? "Seçimi Temizle" : "Tümünü Seç"}
+                                    </button>
+                                )}
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                {selectedExpenses.length > 0 && (
+                                    <button
+                                        onClick={bulkDeleteExpenses}
+                                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+                                    >
+                                        <Trash2 size={16} />
+                                        Sil ({selectedExpenses.length})
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Tabs */}
@@ -265,6 +360,9 @@ const ExpenseList = ({ onEdit, initialTab = 'purchased' }) => {
                                                 onDelete={handleDeleteClick}
                                                 onExpand={handleCardClick}
                                                 isExpanded={expandedId === expense.id}
+                                                isSelectionMode={isSelectionMode}
+                                                isSelected={selectedExpenses.includes(expense.id)}
+                                                onToggleSelection={toggleExpenseSelection}
                                             />
 
                                             {/* Inline Delete Confirmation - Appears right below the card */}

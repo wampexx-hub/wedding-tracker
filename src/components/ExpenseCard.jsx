@@ -3,7 +3,7 @@ import { Trash2, Edit2, Calendar, CreditCard, CheckCircle, Clock, Image as Image
 import { useAuth } from '../context/AuthContext';
 import { useExpenses } from '../context/ExpenseContext';
 
-const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded }) => {
+const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded, isSelectionMode, isSelected, onToggleSelection }) => {
     const { user } = useAuth();
     const { usersMap } = useExpenses();
 
@@ -63,6 +63,19 @@ const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded }) => {
                 {/* Mobile Compact Row */}
                 <div className="flex md:hidden justify-between items-center w-full">
                     <div className="flex gap-3 items-center overflow-hidden flex-1">
+                        {/* Selection checkbox (Mobile) */}
+                        {isSelectionMode && (
+                            <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                    e.stopPropagation();
+                                    onToggleSelection(expense.id);
+                                }}
+                                className="w-5 h-5 text-champagne rounded border-gray-300 focus:ring-champagne"
+                            />
+                        )}
+                        
                         {/* Smaller Icon */}
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-base font-bold ${expense.status === 'purchased' ? 'bg-green-50 text-green-500' : 'bg-champagne/10 text-champagne'}`}>
                             {expense.status === 'purchased' ? <CheckCircle size={16} /> : <Clock size={16} />}
@@ -94,6 +107,19 @@ const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded }) => {
 
                 {/* Desktop Left: Details */}
                 <div className="hidden md:flex gap-4 items-center w-full md:w-auto">
+                    {/* Selection checkbox (Desktop) */}
+                    {isSelectionMode && (
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                                e.stopPropagation();
+                                onToggleSelection(expense.id);
+                            }}
+                            className="w-5 h-5 text-champagne rounded border-gray-300 focus:ring-champagne"
+                        />
+                    )}
+                    
                     {/* Status Icon (Desktop) */}
                     <div className="relative">
                         <div className={`hidden md:flex w-12 h-12 rounded-xl items-center justify-center flex-shrink-0 text-xl font-bold ${expense.status === 'purchased' ? 'bg-green-50 text-green-500' : 'bg-champagne/10 text-champagne'}`}>
