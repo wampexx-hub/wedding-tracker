@@ -261,10 +261,6 @@ app.post('/api/auth/login', async (req, res) => {
             const { password: _, is_admin, is_banned, ...userWithoutPassword } = user;
             // Normalize to camelCase
             const userForClient = { ...userWithoutPassword, isAdmin: is_admin, isBanned: is_banned };
-            
-            // Store user in session
-            req.session.user = userForClient;
-            
             res.json({ success: true, user: userForClient });
         } else {
             res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
@@ -290,10 +286,6 @@ app.post('/api/login', async (req, res) => {
             }
             const { password: _, is_admin, is_banned, ...userWithoutPassword } = user;
             const userForClient = { ...userWithoutPassword, isAdmin: is_admin, isBanned: is_banned };
-            
-            // Store user in session
-            req.session.user = userForClient;
-            
             res.json({ success: true, user: userForClient });
         } else {
             res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
@@ -302,40 +294,6 @@ app.post('/api/login', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
     }
-});
-
-// Validate session endpoint
-app.get('/api/auth/validate', async (req, res) => {
-    try {
-        if (req.session.user) {
-            // Double-check user still exists and is not banned
-            const result = await db.query('SELECT is_banned FROM users WHERE username = $1', [req.session.user.username]);
-            const user = result.rows[0];
-            
-            if (!user || user.is_banned) {
-                req.session.destroy();
-                return res.status(401).json({ success: false, message: 'Oturum geçersiz.' });
-            }
-            
-            res.json({ success: true, user: req.session.user });
-        } else {
-            res.status(401).json({ success: false, message: 'Oturum bulunamadı.' });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Logout endpoint
-app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Logout error:', err);
-            return res.status(500).json({ error: 'Logout failed' });
-        }
-        res.json({ success: true, message: 'Başarıyla çıkış yapıldı.' });
-    });
 });
 
 // --- Admin Routes ---

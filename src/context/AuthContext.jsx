@@ -16,9 +16,44 @@ export const AuthProvider = ({ children, storage = webStorage }) => {
                 if (savedUser) {
                     const parsedUser = JSON.parse(savedUser);
                     if (parsedUser && (parsedUser.username || parsedUser.email)) {
-                        setUser(parsedUser);
+                        // Validate with server session
+                        try {
+                            const response = await fetch('/api/auth/validate');
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.success) {
+                                    setUser(data.user);
+                                } else {
+                                    // Server session invalid, clear localStorage
+                                    await storage.removeItem('wedding_app_user');
+                                    setUser(null);
+                                }
+                            } else {
+                                // Server session invalid, clear localStorage
+                                await storage.removeItem('wedding_app_user');
+                                setUser(null);
+                            }
+                        } catch (serverError) {
+                            // Server unreachable, use localStorage (offline mode)
+                            console.warn('Server validation failed, using cached user:', serverError);
+                            setUser(parsedUser);
+                        }
                     } else {
                         await storage.removeItem('wedding_app_user');
+                    }
+                } else {
+                    // No localStorage, check if server session exists
+                    try {
+                        const response = await fetch('/api/auth/validate');
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success) {
+                                setUser(data.user);
+                                await storage.setItem('wedding_app_user', JSON.stringify(data.user));
+                            }
+                        }
+                    } catch (serverError) {
+                        // Ignore server errors during validation
                     }
                 }
             } catch (e) {
@@ -74,6 +109,14 @@ export const AuthProvider = ({ children, storage = webStorage }) => {
     };
 
     const logout = async () => {
+        try {
+            // Call server logout to destroy session
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (error) {
+            // Continue with local logout even if server fails
+            console.warn('Server logout failed:', error);
+        }
+        
         setUser(null);
         await storage.removeItem('wedding_app_user');
     };
