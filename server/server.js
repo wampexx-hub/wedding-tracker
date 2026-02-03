@@ -883,7 +883,12 @@ app.post('/api/expenses', upload.single('image'), async (req, res) => {
         }
 
         const id = expenseData.id || Date.now().toString();
-        const { username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment } = expenseData;
+        const { username, title, category, price, vendor, source, date, status, notes } = expenseData;
+        
+        // Handle both camelCase (client) and snake_case (legacy) field names
+        const is_installment = expenseData.isInstallment ?? expenseData.is_installment ?? false;
+        const installment_count = expenseData.installmentCount ?? expenseData.installment_count ?? 1;
+        const monthly_payment = expenseData.monthlyPayment ?? expenseData.monthly_payment ?? price;
 
         // Get user's partnership info
         const userInfo = await db.query('SELECT partnership_id FROM users WHERE username = $1', [username]);
@@ -915,10 +920,15 @@ app.post('/api/expenses/batch', async (req, res) => {
         const newExpenses = [];
         for (const exp of expenses) {
             const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+            // Handle both camelCase and snake_case field names for batch
+            const is_installment = exp.isInstallment ?? exp.is_installment ?? false;
+            const installment_count = exp.installmentCount ?? exp.installment_count ?? 1;
+            const monthly_payment = exp.monthlyPayment ?? exp.monthly_payment ?? exp.price;
+            
             await db.query(
                 `INSERT INTO expenses (id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, created_at, added_by, partnership_id)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-                [id, username, exp.title, exp.category, exp.price, exp.vendor, exp.source, exp.date, exp.isInstallment, exp.installmentCount, exp.status, exp.notes, exp.monthlyPayment, new Date().toISOString(), username, partnershipId]
+                [id, username, exp.title, exp.category, exp.price, exp.vendor, exp.source, exp.date, is_installment, installment_count, exp.status, exp.notes, monthly_payment, new Date().toISOString(), username, partnershipId]
             );
             newExpenses.push({ ...exp, id, username });
         }
