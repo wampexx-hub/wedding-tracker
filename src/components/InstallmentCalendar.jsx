@@ -234,6 +234,76 @@ const InstallmentCalendar = () => {
                     </div>
                 </div>
 
+                {/* Upcoming Payments Section */}
+                {installments.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Calendar size={20} className="text-[#D4AF37]" />
+                            Gelecek Ödemeler
+                        </h3>
+                        <div className="space-y-3">
+                            {(() => {
+                                // Calculate upcoming payments for next 3 months
+                                const upcomingPayments = [];
+                                for (let monthOffset = 0; monthOffset <= 2; monthOffset++) {
+                                    const targetDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+                                    const monthName = targetDate.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+                                    let monthTotal = 0;
+                                    const monthExpenses = [];
+
+                                    installments.forEach(expense => {
+                                        const startDate = new Date(expense.date);
+                                        const monthDiff = (targetDate.getFullYear() - startDate.getFullYear()) * 12 + (targetDate.getMonth() - startDate.getMonth());
+                                        const baseStep = Math.min(Math.max(monthDiff + 1, 1), expense.installmentCount);
+                                        const extraPayments = paymentState[expense.id] || 0;
+                                        const currentStep = Math.min(baseStep + extraPayments, expense.installmentCount);
+                                        const isCompleted = currentStep >= expense.installmentCount;
+
+                                        // Check if this expense has a payment this month
+                                        if (!isCompleted && monthDiff >= 0 && monthDiff < expense.installmentCount) {
+                                            monthTotal += Number(expense.monthlyPayment) || 0;
+                                            monthExpenses.push({
+                                                title: expense.title,
+                                                amount: Number(expense.monthlyPayment) || 0,
+                                                step: baseStep,
+                                                total: expense.installmentCount
+                                            });
+                                        }
+                                    });
+
+                                    if (monthExpenses.length > 0) {
+                                        upcomingPayments.push({ monthName, monthTotal, expenses: monthExpenses, isCurrentMonth: monthOffset === 0 });
+                                    }
+                                }
+                                return upcomingPayments.length === 0 ? (
+                                    <p className="text-gray-500 text-sm">Önümüzdeki 3 ay içinde ödeme bulunmuyor.</p>
+                                ) : (
+                                    upcomingPayments.map((month, idx) => (
+                                        <div key={idx} className={`rounded-xl p-4 ${month.isCurrentMonth ? 'bg-[#D4AF37]/10 border border-[#D4AF37]/30' : 'bg-gray-50'}`}>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className={`font-semibold capitalize ${month.isCurrentMonth ? 'text-[#D4AF37]' : 'text-gray-700'}`}>
+                                                    {month.isCurrentMonth && '📅 '}{month.monthName}
+                                                </span>
+                                                <span className={`font-bold ${month.isCurrentMonth ? 'text-[#D4AF37]' : 'text-gray-900'}`}>
+                                                    {month.monthTotal.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺
+                                                </span>
+                                            </div>
+                                            <div className="space-y-1">
+                                                {month.expenses.map((exp, i) => (
+                                                    <div key={i} className="flex justify-between text-sm text-gray-600">
+                                                        <span className="truncate max-w-[60%]">{exp.title}</span>
+                                                        <span>{exp.amount.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺ ({exp.step}/{exp.total})</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))
+                                );
+                            })()}
+                        </div>
+                    </div>
+                )}
+
                 {/* Content */}
                 {installments.length === 0 ? (
                     <div className="bg-white p-12 rounded-3xl text-center border border-gray-100 shadow-sm mt-6">
