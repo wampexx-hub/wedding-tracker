@@ -9,6 +9,7 @@ const Login = () => {
     const [isRegistering, setIsRegistering] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(true); // Default to true for better UX
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -39,7 +40,7 @@ const Login = () => {
         setIsLoading(true);
 
         if (email.trim() && password.trim()) {
-            const result = await login(email.trim(), password.trim());
+            const result = await login(email.trim(), password.trim(), rememberMe);
             if (result.success) {
                 navigate('/');
             } else {
@@ -168,10 +169,12 @@ const Login = () => {
                                     id="remember-me"
                                     name="remember-me"
                                     type="checkbox"
-                                    className="h-4 w-4 text-champagne focus:ring-champagne border-gray-300 rounded"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    className="h-4 w-4 text-champagne focus:ring-champagne border-gray-300 rounded cursor-pointer"
                                 />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-500">
-                                    Beni hatırla
+                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-500 cursor-pointer">
+                                    Beni hatırla (30 gün)
                                 </label>
                             </div>
 

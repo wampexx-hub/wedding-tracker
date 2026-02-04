@@ -50,13 +50,21 @@ const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded, isSelect
     return (
         <div
             className={`transition-all duration-200 cursor-pointer group p-3 md:p-5 md:rounded-xl md:border-2 md:bg-white
-                ${installmentCompleted
-                    ? 'md:border-transparent md:bg-gradient-to-r md:from-[#D4AF37]/10 md:to-[#f4d03f]/10 md:shadow-md bg-yellow-50/30'
-                    : isExpanded
-                        ? 'md:border-champagne md:shadow-md bg-gray-50'
-                        : 'md:border-transparent md:hover:shadow-sm'
+                ${isSelectionMode && isSelected
+                    ? 'md:border-champagne md:bg-champagne/5 bg-champagne/5'
+                    : installmentCompleted
+                        ? 'md:border-transparent md:bg-gradient-to-r md:from-[#D4AF37]/10 md:to-[#f4d03f]/10 md:shadow-md bg-yellow-50/30'
+                        : isExpanded
+                            ? 'md:border-champagne md:shadow-md bg-gray-50'
+                            : 'md:border-transparent md:hover:shadow-sm'
                 }`}
-            onClick={() => onExpand(expense.id)}
+            onClick={() => {
+                if (isSelectionMode) {
+                    onToggleSelection(expense.id);
+                } else {
+                    onExpand(expense.id);
+                }
+            }}
         >
             <div className="flex flex-col md:flex-row justify-between items-start gap-4">
 
@@ -144,6 +152,11 @@ const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded, isSelect
                             <span className="flex items-center gap-1">
                                 <Calendar size={14} /> {new Date(expense.date).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/')}
                             </span>
+                            {expense.status === 'planned' && expense.expectedDate && (
+                                <span className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2 py-0.5 rounded text-xs">
+                                    <Clock size={12} /> Planlanan: {new Date(expense.expectedDate).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '/')}
+                                </span>
+                            )}
                             <span className="flex items-center gap-1">
                                 <CreditCard size={14} /> {expense.source}
                             </span>
@@ -153,6 +166,11 @@ const ExpenseCard = ({ expense, onEdit, onDelete, onExpand, isExpanded, isSelect
                             {expense.vendor && (
                                 <span className="bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded text-xs">
                                     {expense.vendor}
+                                </span>
+                            )}
+                            {expense.cashAmount > 0 && (
+                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs">
+                                    Nakit: {expense.cashAmount.toLocaleString('tr-TR')}₺
                                 </span>
                             )}
                         </div>

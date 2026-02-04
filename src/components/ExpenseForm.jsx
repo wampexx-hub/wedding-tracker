@@ -41,7 +41,10 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
         isInstallment: false,
         installmentCount: 1,
         status: 'planned',
-        notes: ''
+        notes: '',
+        expectedDate: '', // Expected payment date for planned expenses
+        hasSplitPayment: false, // For partial cash + installment
+        cashAmount: '' // Cash portion for split payment
     });
 
     // Set default category when loaded
@@ -63,7 +66,10 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                 price: initialData.price.toString(),
                 installmentCount: initialData.installmentCount || 1,
                 notes: initialData.notes || '',
-                status: initialData.status || 'planned'
+                status: initialData.status || 'planned',
+                expectedDate: initialData.expectedDate || '',
+                hasSplitPayment: (initialData.cashAmount && initialData.cashAmount > 0) || false,
+                cashAmount: initialData.cashAmount ? initialData.cashAmount.toString() : ''
             });
             if (initialData.imageUrl) {
                 setImagePreview(`/api/images/${initialData.imageUrl.split('/').pop()}?t=${Date.now()}`);
@@ -110,12 +116,21 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
         // Ensure category is set
         const finalCategory = formData.category || (categories.length > 0 ? categories[0].name : 'Diğer');
 
+        // Calculate monthly payment considering split payment
+        const totalPrice = Number(formData.price) || 0;
+        const cashAmount = formData.hasSplitPayment ? (Number(formData.cashAmount) || 0) : 0;
+        const installmentAmount = totalPrice - cashAmount;
+        const installmentCount = formData.isInstallment ? Number(formData.installmentCount) : 1;
+        const monthlyPayment = formData.isInstallment && installmentCount > 0 ? installmentAmount / installmentCount : installmentAmount;
+
         const expense = {
             ...formData,
             category: finalCategory,
-            price: Number(formData.price) || 0,
-            installmentCount: formData.isInstallment ? Number(formData.installmentCount) : 1,
-            monthlyPayment: formData.isInstallment ? Number(formData.price) / Number(formData.installmentCount) : Number(formData.price)
+            price: totalPrice,
+            installmentCount: formData.isInstallment ? installmentCount : 1,
+            monthlyPayment: monthlyPayment,
+            expectedDate: formData.status === 'planned' ? formData.expectedDate : null,
+            cashAmount: cashAmount
         };
 
         const data = new FormData();
@@ -140,7 +155,10 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
             isInstallment: false,
             installmentCount: 1,
             status: 'planned',
-            notes: ''
+            notes: '',
+            expectedDate: '',
+            hasSplitPayment: false,
+            cashAmount: ''
         });
         setImage(null);
         setImagePreview(null);
@@ -263,6 +281,19 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                 </select>
                             </div>
 
+                            {/* Expected Date for Planned Expenses */}
+                            {!isPurchased && (
+                                <div className="flex items-center justify-between px-4 py-3 bg-white">
+                                    <label className="text-sm font-medium text-gray-500 w-1/3">Planlanan Tarih</label>
+                                    <input
+                                        type="date"
+                                        value={formData.expectedDate}
+                                        onChange={e => setFormData({ ...formData, expectedDate: e.target.value })}
+                                        className="text-right text-base font-semibold text-gray-900 bg-transparent border-none focus:ring-0 w-2/3 outline-none"
+                                    />
+                                </div>
+                            )}
+
                             {/* Conditional: Payment Source & Date (Only if Purchased) */}
                             {isPurchased && (
                                 <>
@@ -289,6 +320,34 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                         />
                                     </div>
 
+                                    {/* Split Payment Toggle */}
+                                    <div className="flex items-center justify-between px-4 py-3 bg-white">
+                                        <label className="text-sm font-medium text-gray-500">Kısmi Nakit Ödeme</label>
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.hasSplitPayment}
+                                            onChange={e => setFormData({ ...formData, hasSplitPayment: e.target.checked, isInstallment: e.target.checked ? true : formData.isInstallment })}
+                                            className="w-5 h-5 rounded cursor-pointer"
+                                            style={{ accentColor: '#D4AF37' }}
+                                        />
+                                    </div>
+
+                                    {/* Cash Amount (when split payment) */}
+                                    {formData.hasSplitPayment && (
+                                        <div className="flex items-center justify-between px-4 py-3 bg-white">
+                                            <label className="text-sm font-medium text-gray-500 w-1/3">Nakit Tutar (₺)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                inputMode="decimal"
+                                                value={formData.cashAmount}
+                                                onChange={e => setFormData({ ...formData, cashAmount: e.target.value })}
+                                                placeholder="0"
+                                                className="text-right text-base font-semibold text-gray-900 bg-transparent border-none focus:ring-0 w-2/3 outline-none"
+                                            />
+                                        </div>
+                                    )}
+
                                     {/* Installment Toggle */}
                                     <div className="flex items-center justify-between px-4 py-3 bg-white">
                                         <label className="text-sm font-medium text-gray-500">Taksitli</label>
@@ -303,17 +362,29 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
 
                                     {/* Installment Count (Conditional) */}
                                     {formData.isInstallment && (
-                                        <div className="flex items-center justify-between px-4 py-3 bg-white">
-                                            <label className="text-sm font-medium text-gray-500 w-1/3">Taksit Sayısı</label>
-                                            <input
-                                                type="number"
-                                                min="2"
-                                                max="36"
-                                                value={formData.installmentCount}
-                                                onChange={e => setFormData({ ...formData, installmentCount: e.target.value })}
-                                                className="text-right text-base font-semibold text-gray-900 bg-transparent border-none focus:ring-0 w-2/3 outline-none"
-                                            />
-                                        </div>
+                                        <>
+                                            <div className="flex items-center justify-between px-4 py-3 bg-white">
+                                                <label className="text-sm font-medium text-gray-500 w-1/3">Taksit Sayısı</label>
+                                                <input
+                                                    type="number"
+                                                    min="2"
+                                                    max="36"
+                                                    value={formData.installmentCount}
+                                                    onChange={e => setFormData({ ...formData, installmentCount: e.target.value })}
+                                                    className="text-right text-base font-semibold text-gray-900 bg-transparent border-none focus:ring-0 w-2/3 outline-none"
+                                                />
+                                            </div>
+                                            {/* Monthly payment preview */}
+                                            {formData.price && formData.installmentCount > 1 && (
+                                                <div className="px-4 py-2 bg-blue-50 text-blue-700 text-xs">
+                                                    {formData.hasSplitPayment && formData.cashAmount ? (
+                                                        <>Nakit: {Number(formData.cashAmount).toLocaleString('tr-TR')}₺ + Aylık Taksit: {((Number(formData.price) - Number(formData.cashAmount)) / Number(formData.installmentCount)).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺</>
+                                                    ) : (
+                                                        <>Aylık: {(Number(formData.price) / Number(formData.installmentCount)).toLocaleString('tr-TR', { maximumFractionDigits: 0 })}₺</>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </>
                             )}
@@ -482,6 +553,20 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                 </select>
                             </div>
 
+                            {/* Expected Date for Planned Expenses */}
+                            {!isPurchased && (
+                                <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">Planlanan Ödeme Tarihi</label>
+                                    <input
+                                        type="date"
+                                        value={formData.expectedDate}
+                                        onChange={e => setFormData({ ...formData, expectedDate: e.target.value })}
+                                        className="w-full min-h-[48px] px-4 py-3 bg-gray-50 text-gray-900 rounded-xl border-2 border-transparent outline-none transition-all focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Bu harcamayı ne zaman yapmayı planlıyorsunuz?</p>
+                                </div>
+                            )}
+
                             {/* Conditional Fields - Only show when Purchased */}
                             {isPurchased && (
                                 <>
@@ -496,6 +581,39 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                             >
                                                 {SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
+
+                                            {/* Split Payment Checkbox */}
+                                            <label
+                                                className="flex items-center gap-3 mt-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
+                                                style={{ minHeight: '48px' }}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.hasSplitPayment}
+                                                    onChange={e => setFormData({ ...formData, hasSplitPayment: e.target.checked, isInstallment: e.target.checked ? true : formData.isInstallment })}
+                                                    className="w-5 h-5 rounded cursor-pointer"
+                                                    style={{ accentColor: '#D4AF37' }}
+                                                />
+                                                <span className="text-sm text-gray-700 flex-1 font-medium">Kısmi nakit ödeme (Nakit + Taksit)</span>
+                                            </label>
+
+                                            {/* Cash Amount for Split Payment */}
+                                            {formData.hasSplitPayment && (
+                                                <div className="mt-3">
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        inputMode="decimal"
+                                                        placeholder="Nakit ödenen tutar (₺)"
+                                                        value={formData.cashAmount}
+                                                        onChange={e => setFormData({ ...formData, cashAmount: e.target.value })}
+                                                        className="w-full min-h-[44px] px-4 py-2 bg-gray-50 text-gray-900 rounded-xl border-2 border-transparent outline-none transition-all focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
+                                                    />
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        Taksitli kısım: {formData.price && formData.cashAmount ? (Number(formData.price) - Number(formData.cashAmount)).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0'}
+                                                    </p>
+                                                </div>
+                                            )}
 
                                             {/* Touch-Optimized Installment Checkbox */}
                                             <label
@@ -524,9 +642,15 @@ const ExpenseForm = ({ onSuccess, initialData, onCancel, isModal }) => {
                                                         className="w-full min-h-[44px] px-4 py-2 bg-gray-50 text-gray-900 rounded-xl border-2 border-transparent outline-none transition-all focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                                                     />
                                                     <p className="text-xs text-gray-600 px-1">
-                                                        Aylık: <strong className="text-[#D4AF37]">
-                                                            {formData.price && formData.installmentCount ? (Number(formData.price) / Number(formData.installmentCount)).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0'}
-                                                        </strong>
+                                                        {formData.hasSplitPayment && formData.cashAmount ? (
+                                                            <>Nakit: <strong className="text-green-600">{Number(formData.cashAmount).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</strong> + Aylık: <strong className="text-[#D4AF37]">
+                                                                {formData.price && formData.installmentCount ? ((Number(formData.price) - Number(formData.cashAmount)) / Number(formData.installmentCount)).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0'}
+                                                            </strong></>
+                                                        ) : (
+                                                            <>Aylık: <strong className="text-[#D4AF37]">
+                                                                {formData.price && formData.installmentCount ? (Number(formData.price) / Number(formData.installmentCount)).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0'}
+                                                            </strong></>
+                                                        )}
                                                     </p>
                                                 </div>
                                             )}

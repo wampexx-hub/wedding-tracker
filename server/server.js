@@ -248,7 +248,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, rememberMe = true } = req.body;
     try {
         const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
         const user = result.rows[0];
@@ -261,10 +261,19 @@ app.post('/api/auth/login', async (req, res) => {
             const { password: _, is_admin, is_banned, ...userWithoutPassword } = user;
             // Normalize to camelCase
             const userForClient = { ...userWithoutPassword, isAdmin: is_admin, isBanned: is_banned };
-            
+
             // Store user in session
             req.session.user = userForClient;
-            
+
+            // Set session/cookie duration based on rememberMe
+            if (rememberMe) {
+                // 30 days for "remember me"
+                req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+            } else {
+                // Session cookie (expires when browser closes) - 24 hours as fallback
+                req.session.cookie.maxAge = 24 * 60 * 60 * 1000;
+            }
+
             res.json({ success: true, user: userForClient });
         } else {
             res.status(401).json({ success: false, message: 'Hatalı kullanıcı adı veya şifre.' });
@@ -835,9 +844,11 @@ app.get('/api/data', async (req, res) => {
             expenses: expenses.rows.map(e => ({
                 ...e,
                 isInstallment: e.is_installment,
-                installmentCount: e.installment_count,
-                monthlyPayment: parseFloat(e.monthly_payment),
-                price: parseFloat(e.price)
+                installmentCount: e.installment_count || 1,
+                monthlyPayment: e.monthly_payment ? parseFloat(e.monthly_payment) : (e.is_installment && e.installment_count > 1 ? parseFloat(e.price) / e.installment_count : parseFloat(e.price)),
+                price: parseFloat(e.price),
+                expectedDate: e.expected_date,
+                cashAmount: e.cash_amount ? parseFloat(e.cash_amount) : 0
             })),
             budget: budget.rows[0] ? parseFloat(budget.rows[0].amount) : 0,
             weddingDate: userRec.rows[0]?.wedding_date || null,
@@ -884,20 +895,22 @@ app.post('/api/expenses', upload.single('image'), async (req, res) => {
 
         const id = expenseData.id || Date.now().toString();
         const { username, title, category, price, vendor, source, date, status, notes } = expenseData;
-        
+
         // Handle both camelCase (client) and snake_case (legacy) field names
         const is_installment = expenseData.isInstallment ?? expenseData.is_installment ?? false;
         const installment_count = expenseData.installmentCount ?? expenseData.installment_count ?? 1;
         const monthly_payment = expenseData.monthlyPayment ?? expenseData.monthly_payment ?? price;
+        const expected_date = expenseData.expectedDate ?? expenseData.expected_date ?? null;
+        const cash_amount = expenseData.cashAmount ?? expenseData.cash_amount ?? 0;
 
         // Get user's partnership info
         const userInfo = await db.query('SELECT partnership_id FROM users WHERE username = $1', [username]);
         const partnershipId = userInfo.rows[0]?.partnership_id || null;
 
         await db.query(
-            `INSERT INTO expenses (id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, image_url, created_at, added_by, partnership_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-            [id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, imageUrl, new Date().toISOString(), username, partnershipId]
+            `INSERT INTO expenses (id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, image_url, created_at, added_by, partnership_id, expected_date, cash_amount)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+            [id, username, title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, imageUrl, new Date().toISOString(), username, partnershipId, expected_date, cash_amount]
         );
 
         await req.notifyUser(username);
@@ -981,11 +994,13 @@ app.put('/api/expenses/:id', upload.single('image'), async (req, res) => {
         }
 
         const { title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment } = expenseData;
+        const expected_date = expenseData.expectedDate ?? expenseData.expected_date ?? null;
+        const cash_amount = expenseData.cashAmount ?? expenseData.cash_amount ?? 0;
 
         await db.query(
-            `UPDATE expenses SET title=$1, category=$2, price=$3, vendor=$4, source=$5, date=$6, is_installment=$7, installment_count=$8, status=$9, notes=$10, monthly_payment=$11, image_url=$12
+            `UPDATE expenses SET title=$1, category=$2, price=$3, vendor=$4, source=$5, date=$6, is_installment=$7, installment_count=$8, status=$9, notes=$10, monthly_payment=$11, image_url=$12, expected_date=$14, cash_amount=$15
              WHERE id=$13`,
-            [title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, imageUrl, id]
+            [title, category, price, vendor, source, date, is_installment, installment_count, status, notes, monthly_payment, imageUrl, id, expected_date, cash_amount]
         );
 
         await req.notifyUser(expenseData.username); // Assuming expenseData has username, usually it does. If not, fetch it? 
@@ -1779,6 +1794,28 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
-server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Database migrations
+const runMigrations = async () => {
+    try {
+        // Add expected_date column for planned expenses
+        await db.query(`
+            ALTER TABLE expenses ADD COLUMN IF NOT EXISTS expected_date DATE
+        `).catch(() => console.log('expected_date column may already exist'));
+
+        // Add cash_amount column for split payments (partial cash + installment)
+        await db.query(`
+            ALTER TABLE expenses ADD COLUMN IF NOT EXISTS cash_amount NUMERIC(12,2) DEFAULT 0
+        `).catch(() => console.log('cash_amount column may already exist'));
+
+        console.log('[DB] Migrations completed successfully');
+    } catch (err) {
+        console.error('[DB] Migration error:', err);
+    }
+};
+
+// Run migrations then start server
+runMigrations().then(() => {
+    server.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
 });

@@ -64,12 +64,12 @@ export const AuthProvider = ({ children, storage = webStorage }) => {
         loadUser();
     }, [storage]);
 
-    const login = async (email, password) => {
+    const login = async (email, password, rememberMe = true) => {
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password, rememberMe })
             });
 
             const data = await response.json();
@@ -77,6 +77,12 @@ export const AuthProvider = ({ children, storage = webStorage }) => {
             if (data.success) {
                 setUser(data.user);
                 await storage.setItem('wedding_app_user', JSON.stringify(data.user));
+                // Store remember preference
+                if (rememberMe) {
+                    await storage.setItem('wedding_app_remember', 'true');
+                } else {
+                    await storage.removeItem('wedding_app_remember');
+                }
                 return { success: true };
             } else {
                 return { success: false, message: data.message };
