@@ -134,8 +134,8 @@ export const ExpenseProvider = ({
     const addAsset = (data) => addAssetMutation.mutate({ username: user.username, asset: data });
     const deleteAsset = (id) => deleteAssetMutation.mutate({ username: user.username, assetId: id });
     const updateAsset = (id, data) => updateAssetMutation.mutate({ username: user.username, assetId: id, asset: data });
-    const deleteExpense = (id) => deleteExpenseMutation.mutate(id);
-    const updateExpense = (id, data) => updateExpenseMutation.mutate({ id, expenseData: data });
+    const deleteExpense = (id) => deleteExpenseMutation.mutate({ id, username: user.username });
+    const updateExpense = (id, data) => updateExpenseMutation.mutate({ id, username: user.username, expenseData: data });
     const addBatchExpenses = (list) => batchExpensesMutation.mutate({ username: user.username, expenses: list });
     const clearAllExpenses = () => {
         confirmDialog('TÜM harcamalarınızı silmek istediğinize emin misiniz?', () => {

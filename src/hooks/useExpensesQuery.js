@@ -124,18 +124,12 @@ export const useUpdateAsset = () => {
     });
 };
 
-// --- MISSING MUTATIONS ---
-
 export const useDeleteExpense = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => fetch(`/api/expenses/${id}`, { method: 'DELETE' }),
+        mutationFn: ({ id, username }) => fetch(`/api/expenses/${id}`, { method: 'DELETE' }),
         onSuccess: (_, variables) => {
-            // Invalidate dashboard to refresh expenses and budget
-            // We don't have username in variables (it's just id), 
-            // but we can invalidate all dashboard queries or modify mutation to accept username
-            // Better: Allow passing username or invalidate all 'dashboard'
-            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard', variables.username] });
         }
     });
 };
@@ -143,7 +137,7 @@ export const useDeleteExpense = () => {
 export const useUpdateExpense = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, expenseData }) => {
+        mutationFn: ({ id, username, expenseData }) => {
             let body;
             let headers = {};
 
@@ -160,8 +154,8 @@ export const useUpdateExpense = () => {
                 body
             }).then(res => res.json());
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['dashboard', variables.username] });
         }
     });
 };
